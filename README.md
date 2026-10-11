@@ -13,7 +13,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 ![Dependencies](https://img.shields.io/badge/dependencies-none-34d399.svg)
 ![Built with](https://img.shields.io/badge/built%20with-vanilla%20JS-f7df1e.svg)
 
-https://vibedj-ceva.vercel.app/
+[https://vibedj-ceva.vercel.app/](https://vibedj-one.vercel.app/)
 </div>
 
 ---
