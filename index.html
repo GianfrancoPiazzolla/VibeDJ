@@ -1510,6 +1510,9 @@ class Deck{
     }
     const s=AC.createBufferSource();
     s.buffer=this.buffer;
+    s.preservesPitch=false;
+    s.mozPreservesPitch=false;
+    s.webkitPreservesPitch=false;
     this.rate=this.currentRate();
     s.playbackRate.value=this.rate;
     if(this.loop.on){
@@ -2401,7 +2404,7 @@ const SV={
   },
   drawGrid(g,dk,pos,y0,h,W,other){
     if(!dk.buffer||!dk.beats)return;
-    const vs=this.viewSec,spx=vs/W,t0=pos-vs/2,bs=dk.beats;
+    const vs=this.viewSec*(dk.rate||1),spx=vs/W,t0=pos-vs/2,bs=dk.beats;
     let lo=0,hi=bs.length-1;
     while(lo<hi){const m=(lo+hi)>>1;if(bs[m]<t0)lo=m+1;else hi=m;}
     g.save();
@@ -2441,7 +2444,7 @@ const SV={
       g.fillText('Deck '+dk.L+': load a track',W/2,cy);
       return;
     }
-    const vs=this.viewSec,pos=dk.pNow,spx=vs/W,t0=pos-vs/2;
+    const vs=this.viewSec*(dk.rate||1),pos=dk.pNow,spx=vs/W,t0=pos-vs/2;
     dk.ensureCols(W);
     dk.fillCols(t0,vs,W);
     dk.paintCols(g,W,h,cy);
@@ -2497,7 +2500,7 @@ const SV={
     cv.addEventListener('pointermove',e=>{
       if(!drag)return;
       const r=cv.getBoundingClientRect();
-      dk.seek(p0-(e.clientX-r.left-x0)*(this.viewSec/r.width));
+      dk.seek(p0-(e.clientX-r.left-x0)*(this.viewSec*(dk.rate||1)/r.width));
     });
     const end=()=>{drag=false;};
     cv.addEventListener('pointerup',end);
