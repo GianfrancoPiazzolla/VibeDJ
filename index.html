@@ -75,16 +75,17 @@ border-radius:14px;padding:6px;box-shadow:0 10px 30px #00000055}
 .br-t{font-size:10px;letter-spacing:.14em;color:#8b95a7;font-weight:800;flex:none}
 .br-path{flex:1;min-width:120px;font:600 11px ui-monospace,Menlo,monospace;color:var(--accent);
 white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.br-list{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:9px;background:#0d1015}
-.br-head{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 45px 58px 35px 28px 28px;column-gap:8px;
-padding:2px 8px 4px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--dim);text-align:left}
+.br-list{flex:1;min-height:0;overflow:auto;scrollbar-gutter:stable;border:1px solid var(--line);border-radius:9px;background:#0d1015}
+.br-head{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 46px 45px 58px 35px 28px 28px;column-gap:8px;
+padding:2px 8px 4px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--dim);text-align:left;
+overflow-y:auto;scrollbar-gutter:stable}
 .br-head span{text-align:left}
-.br-head span:nth-child(7){grid-column:7/9}
+.br-head span:nth-child(8){grid-column:8/10}
 .br-row .br-name{text-align:left}
 .br-row .br-meta{text-align:right}
 .br-bpm,.br-key,.br-energy{text-align:center}
 .br-name,.br-tag,.br-meta{white-space:nowrap}
-.br-row{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 45px 58px 35px 28px 28px;column-gap:8px;
+.br-row{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 46px 45px 58px 35px 28px 28px;column-gap:8px;
 align-items:center;padding:3px 8px;border-bottom:1px solid #1a1f28;cursor:default;text-align:left}
 .br-row .br-name{text-align:left}
 .br-row .br-meta{text-align:right}
@@ -98,6 +99,7 @@ align-items:center;padding:3px 8px;border-bottom:1px solid #1a1f28;cursor:defaul
 .br-meta{font:600 10px ui-monospace,Menlo,monospace;color:var(--dim);text-align:right}
 .br-bpm,.br-key{font:700 10.5px ui-monospace,Menlo,monospace;color:#c7d1e0;text-align:center}
 .br-key{color:var(--accent)}
+.br-time{font:700 10.5px ui-monospace,Menlo,monospace;color:#c7d1e0;text-align:center;white-space:nowrap}
 .br-energy{font:800 9.5px ui-monospace,Menlo,monospace;text-align:center;border-radius:5px;padding:2px 0;color:#0b0d11}
 .br-energy.lv1{background:#3b82f6}
 .br-energy.lv2{background:#22c55e}
@@ -293,7 +295,7 @@ box-shadow:0 4px 16px #3b82f659}
 <button class="btn sm" id="brPick">SELECT FOLDER</button>
 <button class="btn sm" id="brRefresh">REFRESH</button>
 </div>
-<div class="br-head"><span>FMT</span><span>| FILE NAME</span><span>| SIZE</span><span>| BPM</span><span>| KEY</span><span>| NRG</span><span>&nbsp;&nbsp;< DECK ></span></div>
+<div class="br-head"><span>FMT</span><span>| FILE NAME</span><span>| SIZE</span><span>| TIME</span><span>| BPM</span><span>| KEY</span><span>| NRG</span><span>&nbsp;&nbsp;< DECK ></span></div>
 <div class="br-list" id="brList">
 <div class="br-empty">Pick a folder to browse your audio files. Double-click loads the first free deck, the A / B buttons pick the deck, or drag a row onto a deck.</div>
 </div>
@@ -2615,6 +2617,7 @@ const BR={
       r.className='br-row';
       r.dataset.id=id;
       r.innerHTML='<span class="br-tag"></span><span class="br-name"></span><span class="br-meta"></span>'+
+        '<span class="br-time">--</span>'+
         '<span class="br-bpm">--</span><span class="br-key">--</span><span class="br-energy">--</span>'+
         '<button class="btn br-load a" title="Load onto deck A">A</button>'+
         '<button class="btn br-load b" title="Load onto deck B">B</button>';
@@ -2674,6 +2677,7 @@ const BR={
     const m=this.meta.get(id);
     if(!m)return false;
     r.querySelector('.br-bpm').textContent=m.bpm?m.bpm.toFixed(1):'--';
+    r.querySelector('.br-time').textContent=m.dur?fmtTime(m.dur):'--';
     r.querySelector('.br-key').textContent=m.key||'--';
     const e=r.querySelector('.br-energy');
     if(m.energy){e.className='br-energy lv'+m.energy;e.textContent=m.energy;e.title='Energy '+m.energy+'/5';}
@@ -2695,9 +2699,9 @@ const BR={
         const buf=await decodeAB(await j.file.arrayBuffer());
         const mono=mixdown(buf);
         const res=await Meta.run(mono,buf.sampleRate);
-        this.meta.set(j.id,{bpm:(res&&res.bpm)||0,key:detectKey(buf),energy:energyOf(buf)});
+        this.meta.set(j.id,{bpm:(res&&res.bpm)||0,key:detectKey(buf),energy:energyOf(buf),dur:buf.duration});
       }catch(err){
-        this.meta.set(j.id,{bpm:0,key:'',energy:0});
+        this.meta.set(j.id,{bpm:0,key:'',energy:0,dur:0});
       }
       this.queued.delete(j.id);
       this.refreshRow(j.id);
