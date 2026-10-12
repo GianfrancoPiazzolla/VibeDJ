@@ -160,6 +160,8 @@ font-weight:800;font-size:11px;cursor:pointer}
 .bl-row i{width:9px;height:9px;border-radius:2px;background:#0a0c10;border:1px solid #2a303c;display:block}
 #beatLedA i.on{background:var(--a);border-color:var(--a);box-shadow:0 0 7px var(--a)}
 #beatLedB i.on{background:var(--b);border-color:var(--b);box-shadow:0 0 7px var(--b)}
+#beatLedA i:first-child.on{filter:brightness(1.75);box-shadow:0 0 12px var(--a),0 0 4px var(--a)}
+#beatLedB i:first-child.on{filter:brightness(1.75);box-shadow:0 0 12px var(--b),0 0 4px var(--b)}
 .mx-chans{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}
 .chan{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:5px 4px;
 display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -2155,7 +2157,7 @@ $('#recBtn').addEventListener('click',()=>mixer.toggleRecord());
 const beatLedEls={A:[...document.querySelectorAll('#beatLedA i')],B:[...document.querySelectorAll('#beatLedB i')]};
 const beatLedState={A:-1,B:-1};
 function beatLedIndex(dk){
-  if(!dk||!dk.playing||!dk.buffer||!dk.bpm||!dk.beats||!dk.beats.length)return -1;
+  if(!dk||!dk.buffer||!dk.bpm||!dk.beats||!dk.beats.length)return -1;
   const bs=dk.beats,p=dk.pNow;
   let lo=0,hi=bs.length-1,idx=-1;
   while(lo<=hi){const m=(lo+hi)>>1;if(bs[m]<=p){idx=m;lo=m+1;}else{hi=m-1;}}
