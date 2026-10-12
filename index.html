@@ -76,15 +76,15 @@ border-radius:14px;padding:6px;box-shadow:0 10px 30px #00000055}
 .br-path{flex:1;min-width:120px;font:600 11px ui-monospace,Menlo,monospace;color:var(--accent);
 white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .br-list{flex:1;min-height:0;overflow:auto;border:1px solid var(--line);border-radius:9px;background:#0d1015}
-.br-head{display:grid;grid-template-columns:24px minmax(0,1fr) auto 46px 50px 35px 47px 28px;column-gap:8px;
+.br-head{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 45px 58px 35px 28px 28px;column-gap:8px;
 padding:2px 8px 4px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--dim);text-align:left}
-.br-head span:nth-child(3){text-align:right}
-.br-head span:nth-child(n+4){text-align:center}
+.br-head span{text-align:left}
+.br-head span:nth-child(7){grid-column:7/9}
 .br-row .br-name{text-align:left}
 .br-row .br-meta{text-align:right}
 .br-bpm,.br-key,.br-energy{text-align:center}
 .br-name,.br-tag,.br-meta{white-space:nowrap}
-.br-row{display:grid;grid-template-columns:24px minmax(0,1fr) auto 45px 58px 35px 25px 30px;column-gap:8px;
+.br-row{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 45px 58px 35px 28px 28px;column-gap:8px;
 align-items:center;padding:3px 8px;border-bottom:1px solid #1a1f28;cursor:default;text-align:left}
 .br-row .br-name{text-align:left}
 .br-row .br-meta{text-align:right}
@@ -288,12 +288,12 @@ box-shadow:0 4px 16px #3b82f659}
 <div class="modal-head"><h2>Library</h2><button class="btn" id="libClose">CLOSE</button></div>
 <div class="modal-body">
 <div class="browse-head">
-<span class="br-t">BROWSE · local folder</span>
+<span class="br-t">BROWSE · Local folder:</span>
 <span class="br-path" id="brPath">no folder selected</span>
 <button class="btn sm" id="brPick">SELECT FOLDER</button>
 <button class="btn sm" id="brRefresh">REFRESH</button>
 </div>
-<div class="br-head"><span></span><span>NAME</span><span>SIZE</span><span>BPM</span><span>KEY</span><span>ENERGY</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DECK</span><span></span></div>
+<div class="br-head"><span>FMT</span><span>| FILE NAME</span><span>| SIZE</span><span>| BPM</span><span>| KEY</span><span>| NRG</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;DECK</span></div>
 <div class="br-list" id="brList">
 <div class="br-empty">Pick a folder to browse your audio files. Double-click loads the first free deck, the A / B buttons pick the deck, or drag a row onto a deck.</div>
 </div>
