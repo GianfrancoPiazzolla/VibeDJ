@@ -152,9 +152,14 @@ font-weight:800;font-size:11px;cursor:pointer}
 .bend-row .bend{flex:1}
 .mx-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px}
 .mx-t{font-weight:800;letter-spacing:.14em;font-size:11px;color:#8b95a7}
-.mx-left{display:flex;justify-content:flex-start}
+.mx-left{display:flex;justify-content:flex-start;align-items:center;gap:8px}
 .mx-center{display:flex;align-items:center;justify-content:center;gap:10px}
 .mx-right{display:flex;justify-content:flex-end}
+.beat-leds{display:flex;flex-direction:column;gap:3px}
+.bl-row{display:flex;gap:3px}
+.bl-row i{width:9px;height:9px;border-radius:2px;background:#0a0c10;border:1px solid #2a303c;display:block}
+#beatLedA i.on{background:var(--a);border-color:var(--a);box-shadow:0 0 7px var(--a)}
+#beatLedB i.on{background:var(--b);border-color:var(--b);box-shadow:0 0 7px var(--b)}
 .mx-chans{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}
 .chan{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:5px 4px;
 display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -1069,7 +1074,7 @@ class Deck{
     this.hpf.frequency.value=20;
     this.hpf.Q.value=0.707;
     this.chanVol=AC.createGain();
-    this.chanVol.gain.value=0.8;
+    this.chanVol.gain.value=0;
     this.xf=AC.createGain();
     this.cueSend=AC.createGain();
     this.cueSend.gain.value=0;
@@ -2055,7 +2060,7 @@ function mixerHTML(){
   return ''+
   '<div class="mx-head">'+
     '<div class="mx-left"><div class="kk" id="knobHp"></div></div>'+
-    '<div class="mx-center"><div class="mx-t">MIXER</div><canvas class="meter meter-m" id="meterM"></canvas></div>'+
+    '<div class="mx-center"><div class="beat-leds"><div class="bl-row" id="beatLedA"><i></i><i></i><i></i><i></i></div><div class="bl-row" id="beatLedB"><i></i><i></i><i></i><i></i></div></div><div class="mx-t">MIXER</div><canvas class="meter meter-m" id="meterM"></canvas></div>'+
     '<div class="mx-right"><div class="kk" id="knobMaster"></div></div>'+
   '</div>'+
   '<div class="mx-chans">'+chanHTML('A')+chanHTML('B')+'</div>'+
@@ -2088,7 +2093,7 @@ function buildChan(L){
   document.getElementById(id+'Mid').appendChild(mid.el);
   document.getElementById(id+'Low').appendChild(low.el);
   document.getElementById(id+'Fil').appendChild(fil.el);
-  const f=makeFader({vertical:true,min:0,max:1,value:0.8,onChange:v=>deck.setVolume(v)});
+  const f=makeFader({vertical:true,min:0,max:1,value:0,onChange:v=>deck.setVolume(v)});
   document.getElementById(id+'Fader').appendChild(f.el);
   return {trim:trim,hi:hi,mid:mid,low:low,fil:fil,fader:f,deck:deck};
 }
@@ -2147,6 +2152,20 @@ mixer.setXfade(0.5);
 mixer.setMaster(0.8);
 mixer.setHp(0.7);
 $('#recBtn').addEventListener('click',()=>mixer.toggleRecord());
+const beatLedEls={A:[...document.querySelectorAll('#beatLedA i')],B:[...document.querySelectorAll('#beatLedB i')]};
+const beatLedState={A:-1,B:-1};
+function beatLedIndex(dk){
+  if(!dk||!dk.playing||!dk.buffer||!dk.bpm||!dk.beats||!dk.beats.length)return -1;
+  const bs=dk.beats,p=dk.pNow;
+  let lo=0,hi=bs.length-1,idx=-1;
+  while(lo<=hi){const m=(lo+hi)>>1;if(bs[m]<=p){idx=m;lo=m+1;}else{hi=m-1;}}
+  return idx<0?-1:idx%4;
+}
+function updateBeatLeds(){
+  const ia=beatLedIndex(deckA),ib=beatLedIndex(deckB);
+  if(ia!==beatLedState.A){beatLedState.A=ia;beatLedEls.A.forEach((e,i)=>e.classList.toggle('on',i===ia));}
+  if(ib!==beatLedState.B){beatLedState.B=ib;beatLedEls.B.forEach((e,i)=>e.classList.toggle('on',i===ib));}
+}
 const helpModal=$('#helpModal');
 const openHelp=()=>{helpModal.hidden=false;};
 const closeHelp=()=>{helpModal.hidden=true;};
@@ -2418,7 +2437,7 @@ const SV={
       const x=(t-t0)/spx;
       const bar=(i%4)===0;
       g.fillStyle=dk.accent+(other?(bar?'99':'55'):(bar?'e6':'80'));
-      g.fillRect(x,y0,bar?1.5:1,h);
+      g.fillRect(bar?x-1:x,y0,bar?3:1,h);
     }
     g.restore();
     if(!other){
@@ -2739,6 +2758,7 @@ function frame(){
   SV.draw();
   mixer.updateMeters();
   mixer.updateRec();
+  updateBeatLeds();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
