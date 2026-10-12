@@ -166,7 +166,7 @@ display:flex;flex-direction:column;align-items:center;gap:3px}
 .chan-bottom .meter{height:auto}
 .chan-bottom .fb{display:flex;align-items:stretch}
 .chan-bottom .fb .fader{height:100%}
-.knob{display:flex;flex-direction:column;align-items:center;gap:0;width:45px}
+.knob{display:flex;flex-direction:column;align-items:center;gap:0;width:40px}
 .knob-dial{width:28px;height:28px;border-radius:50%;position:relative;cursor:ns-resize;touch-action:none;
 background:radial-gradient(circle at 34% 28%,#2d3441,#11141a 72%);border:1px solid #343b49;
 box-shadow:inset 0 1px 0 #ffffff14,0 3px 6px #00000066}
@@ -1221,7 +1221,7 @@ class Deck{
       if(this.scrub){
         this.seek(this.pos()+(d/(Math.PI*2))*this.spinSec);
       }else{
-        const r=clamp(this.jogVel,0,8);
+        const r=clamp(this.jogVel,-8,8);
         this.scratchRate=r;
         this.setRate(r,true);
       }
@@ -1483,7 +1483,7 @@ class Deck{
   }
   currentRate(){
     let r=(1+this.pitch/100)*this.bend*(this.scratchRate===null?1:this.scratchRate);
-    return clamp(r,0,8);
+    return clamp(r,-8,8);
   }
   setRate(r,smooth){
     const now=AC.currentTime;
