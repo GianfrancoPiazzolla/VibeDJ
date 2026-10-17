@@ -5,7 +5,7 @@
 ### 🎶 Mix your tracks right in the browser! 🎶
 
 A **two-deck DJ webapp** that runs entirely **locally** — no install, no server, no upload. 🔒
-Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, then **sync**, **EQ**, **filter**, add **effects**, set **loops** and **hot cues**, and **record** your set. 🚀
+Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, then **sync**, **EQ**, **filter**, add **effects**, isolate **stems**, set **loops** and **hot cues**, and **record** your set. 🚀
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-web%20browser-22d3ee.svg)
@@ -27,6 +27,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 - [🎛️ The decks](#️-the-decks)
 - [🌊 Overlaid waveform & beatgrid](#-overlaid-waveform--beatgrid)
 - [🔊 Effects](#-effects)
+- [🎤 Stems](#-stems)
 - [🎯 Loops & hot cues](#-loops--hot-cues)
 - [🎚️ The mixer](#️-the-mixer)
 - [🎙️ Recording](#️-recording)
@@ -52,9 +53,12 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 🥁 | Automatic **beatgrid** with downbeats |
 | 🧠 | **BPM**, **harmonic key (Camelot)** & **energy** detection |
 | 🎚️ | 3-band EQ + kill, LP/HP filter, trim, faders, crossfader |
-| 🔊 | Per-deck **delay**, **echo**, **flanger**, **reverb** |
+| 🔊 | Per-deck **delay**, **echo**, **flanger**, **reverb**, **phaser**, **bitcrush** |
+| 🎤 | Per-deck **stems**: isolate vocal / instrumental / bass / drums |
 | 🎯 | Beat loops (1/4 → 8) and **8 hot cues** per deck |
-| 📂 | Local **folder browser** with drag & drop |
+| 🥁 | **Quantize**, **beat jump** and **BPM/grid tools** |
+| 🛡️ | Master **limiter** with a clip indicator |
+| 📂 | Local **folder browser** with sorting, filtering & drag & drop |
 | 🎙️ | **Record** the master output to a file |
 | ⌨️ | Full **keyboard** control with on-screen tooltips |
 | 📱 | Installable **PWA** (offline-capable) |
@@ -113,6 +117,7 @@ Every audio row shows 🏷️:
 | 📛 | **EXT tag** | File extension |
 | 📄 | **NAME** | File name |
 | 💾 | **SIZE** | File size (KB / MB) |
+| ⏱️ | **TIME** | Duration |
 | 🥁 | **BPM** | Estimated tempo |
 | 🎼 | **KEY** | Harmonic key in **Camelot** notation (e.g. `1A`, `8B`) |
 | ⚡ | **ENERGY** | Loudness tag `1`–`5` |
@@ -122,6 +127,8 @@ Every audio row shows 🏷️:
 - 🅰️🅱️ **A / B** buttons → send the track to a chosen deck.
 - 🪂 **Drag a row** → drop it onto a deck.
 - ⏳ Analysis (BPM/key/energy) runs **in the background** in a **Web Worker**, so the UI never freezes. 🧵
+- 🔃 **Sort** by clicking a column header (name / size / time / BPM / key / energy) — click again to flip the order.
+- 🔎 **Filter** the list with the search box above the columns. 🧲
 
 **🧠 How the analysis works:**
 
@@ -150,6 +157,11 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 | ⚡ **SYNC** | Match the other deck's tempo **and** beat phase |
 | 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**) |
 
+### ⏭️ Beat jump & 🎚️ BPM/grid tools
+- ⏭️ **Beat jump** — buttons `−4 · −2 · −1 · +1 · +2 · +4` jump whole beats (uses the detected BPM, defaults to 120 if none).
+- 🎚️ **Grid tools** — `÷2` / `×2` halve or double the BPM (recalculated from the first downbeat), `◀` / `▶` nudge the grid, **SET** lets you type a BPM (40–240), and **TAP** tap-tempo from the beat.
+- ⌨️ Every button in both rows has a **keyboard shortcut** — hover it or check the [shortcuts table](#️-keyboard-shortcuts).
+
 ### 📟 Deck readouts (above the jog)
 `⏱️ total` · `⌛ left` (turns **amber** under 30 s) · `🥁 BPM` · `🎼 key`
 
@@ -166,6 +178,7 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 - 🎨 Each half renders a **3-band colored waveform** (low / mid / high).
 - 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the marked bar is the **downbeat** (every 4 bars).
 - 📏 Each half displays the **phase offset in ms** against the beat — nudge the **TEMPO** fader until both grids stay locked. 🔒
+- 🧭 A small **graphical phase meter** compares both decks' phase (it turns the deck color when the beats are aligned). 🎯
 
 Each deck additionally has its own **overview waveform** canvas you can click to seek. 📊
 
@@ -181,8 +194,27 @@ Each deck has its own chain of effects, toggled from the **FX row** (they stack 
 | **ECHO** | Longer repeats (≈0.42 s, strong feedback) |
 | **FLANGER** | Modulated short delay with an LFO sweep 🌀 |
 | **REVERB** | Convolution reverb with a generated impulse response 🌫️ |
+| **PHASER** | 4-stage all-pass filter chain swept by an LFO (notch sweep, distinct from the flanger) 🎛️ |
+| **BITCRUSH** | Lo-Fi bit-depth reduction (wave-shaper) with a downsample-emulating low-pass 🔻 |
 
-Each effect crossfades **dry/wet** smoothly when toggled. ❇️ Effects chain as: `delay → echo → flanger → reverb`. 🔗
+Each effect crossfades **dry/wet** smoothly when toggled. ❇️ Effects chain as: `delay → echo → flanger → reverb → phaser → bitcrush`. 🔗
+
+---
+
+## 🎤 Stems
+
+Each deck can **isolate a component of the mix** from the **STEMS row** (between the FX and bend rows). 🎚️ The four stems are **independent toggles**: switch one — or several — on to hear only the isolated component(s), and switch them all off to return to the **full mix**. 🔀
+
+| 🎚️ Stem | 🧪 Isolation |
+| :--- | :--- |
+| **VOCAL** | Band-pass ≈ 380 Hz – 3.6 kHz (acapella-ish upper-mid) 🎙️ |
+| **INST** | Full mix with a ≈ −18 dB notch at 1.2 kHz (vocals reduced → instrumental) 🎹 |
+| **BASS** | Low-pass ≈ 220 Hz (bass only) 🔉 |
+| **DRUMS** | High-pass ≈ 3 kHz (hats / cymbals and percussion top) 🥁 |
+
+The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Each button is **colour-coded like rekordbox** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums.
+
+> ⚠️ These stems are a **filter-based approximation**, not machine-learning source separation: they shape the spectrum (and reduce centered vocals) rather than truly unmixing the track.
 
 ---
 
@@ -192,6 +224,8 @@ Each effect crossfades **dry/wet** smoothly when toggled. ❇️ Effects chain a
 - 🎚️ Quick presets: **1/4 · 1/2 · 1 · 2 · 4 · 8** beats (auto-sized from the detected BPM).
 - ✂️ Manual **IN / OUT / EXIT** for free loop points.
 - 🟢 The active loop highlights and playback wraps seamlessly. 🔄
+
+> 🎯 Turn on **QUANTIZE** (top bar) to snap cue points, loops and hot cues to the nearest beat. ✨
 
 ### 🎨 Hot cues
 - 🔢 **8 hot cues** per deck, each with its own **color**.
@@ -214,6 +248,7 @@ The central mixer is a classic 2-channel strip. 🎛️
 | **Channel faders** 📉 | Smooth `gain^1.6` curve per channel |
 | **CROSSFADER** ↔️ | **Constant-power** curve (cosine/sine) between A and B |
 | **MASTER** 🔊 | Master output level |
+| **Limiter** 🛡️ | Master limiter before the output/recording with a **clip LED** that flashes on overload |
 | **PHONES** 🎧 | Headphone / cue-bus level |
 | **Meters** 📊 | Per-channel + stereo master meters with **peak hold** |
 | **PFL** 🎧 | Exclusive headphone monitoring of one deck (pre-fader) |
@@ -236,6 +271,7 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 - 💬 Every control shows its key in its **tooltip** — just hover it. 🖱️
 - 🎚️ **Analog controls**: press the control's key to **select** it, then use **↑ / ↓** to adjust.
 - 🔠 Shortcuts are **case-sensitive** (e.g. `z` vs `Shift+Z` are different cues).
+- 🎤 The **stems** use the **Alt** modifier (`Alt+1..4` on A, `Alt+7..0` on B), mirroring the effects layout.
 
 ### 🎛️ Deck shortcuts
 
@@ -252,7 +288,10 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 | 🔁 Loop in / out / exit | `Q W E` | `I O P` |
 | 🔢 Loop 1/4 · 1/2 · 1 · 2 · 4 · 8 | `Shift+5 ~ 2 3 4 5` | `Shift+6 \| 6 7 8 9` |
 | ↘️↗️ Bend − / + (hold) | `-` / `+` | `.` / `è` |
-| 🔊 Effects: delay / echo / flanger / reverb | `Shift+1..4` | `Shift+7..0` |
+| 🔊 Effects: delay / echo / flanger / reverb / phaser / bitcrush | `Shift+1..4` · `Shift+B` · `Backtick` | `Shift+7..0` · `Shift+N` · `=` |
+| 🎤 Stems: vocal / instrumental / bass / drums | `Alt+1..4` | `Alt+7..0` |
+| ⏭️ Beat jump −4 · −2 · −1 · +1 · +2 · +4 | `Shift+Q W E R T Y` | `Shift+U I O P { }` |
+| 🎚️ Grid ÷2 · ×2 · nudge ◀ · ▶ · SET · TAP | `Shift+A S D F G H` | `Shift+J K L ; : "` |
 | 🔇 Kill highs / mids / lows | `T G B` | `Y H N` |
 | 🎚️ Pitch | `PageUp` | `PageDown` |
 | 📉 Volume | `Insert` | `Delete` |
@@ -263,7 +302,8 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 
 | 🎬 Action | Key |
 | :--- | :---: |
-| 🔴 Record | `F12` |
+| 🔴 Record | `F6` |
+| 🎯 Quantize on / off | `F1` |
 | 🔊 Master | `F4` |
 | 🎧 Phones | `F5` |
 | ↔️ Crossfader | `←` / `→` |
@@ -275,6 +315,7 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 
 > 🛠️ The whole keymap lives in a single **`SHORTCUT_CONFIG`** object in `index.html` — swap any key to build your own layout. ✏️
 > ℹ️ Some slots (like **PFL** and **Trim**) may be left unassigned in the current layout.
+> ♿ Knobs and faders are **keyboard-focusable** (Tab) and respond to **↑ / ↓ / Home / End**; every slider exposes its value to screen readers.
 
 ---
 
