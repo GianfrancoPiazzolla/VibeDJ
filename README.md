@@ -154,7 +154,7 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 | :--- | :--- |
 | ⏮️ **START** | Jump back to the beginning |
 | ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback |
-| 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point |
+| 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point — the button shows its amber colour only while a cue is stored, standard grey otherwise |
 | ⚡ **SYNC** | Match the other deck's tempo **and** beat phase |
 | 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**) |
 
