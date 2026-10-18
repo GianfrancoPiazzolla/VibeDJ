@@ -61,7 +61,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 📂 | Local **folder browser** with sorting, filtering & drag & drop |
 | 🎙️ | **Record** the master output to a file |
 | ⌨️ | Full **keyboard** control with on-screen tooltips |
-| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (50% → 200%), all proportions preserved |
+| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (30% → 120%): the layout reflows to always fill the whole window exactly, with no empty margins and nothing cut off (modals, toasts and tooltips zoom too) |
 | 📱 | Installable **PWA** (offline-capable) |
 
 > 💡 Everything happens **in your browser**. VibeDJ never sends your music anywhere. 🔐
