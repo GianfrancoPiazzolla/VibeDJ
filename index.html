@@ -33,9 +33,12 @@ background:#101319e6;border-bottom:1px solid var(--line);position:sticky;top:0;z
 .top-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;z-index:1}
 .btn.zc{min-width:26px;padding:5px 6px;font-size:13px;line-height:1}
 .z-pct{font:700 11px ui-monospace,Menlo,monospace;color:var(--dim);min-width:38px;text-align:center;letter-spacing:.03em}
-#ui{flex:1 1 auto;display:flex;flex-direction:column;min-height:100vh;transform-origin:0 0}
-html.zoomed #ui{will-change:transform}
-html.zoomed .top{position:relative}
+#ui{flex:1 1 auto;display:flex;flex-direction:column;min-height:100vh}
+html.zoomed #ui{zoom:var(--zz,1);width:100%;min-height:calc(100vh / var(--zz,1))}
+html.zoomed .modal,html.zoomed #dropOverlay,html.zoomed #toasts,html.zoomed .tt{zoom:var(--zz,1)}
+html.zoomed .modal-card{max-height:calc(86vh / var(--zz,1))}
+html.zoomed .lib-card{max-width:calc(50vw / var(--zz,1));width:calc(50vw / var(--zz,1));
+max-height:calc(90vh / var(--zz,1));height:calc(50vh / var(--zz,1))}
 .btn{background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#cfd6e2;border-radius:7px;
 padding:5px 9px;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.05em;text-align:center;
 display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:border-color .12s,color .12s,background .12s}
@@ -50,7 +53,8 @@ display:inline-flex;align-items:center;justify-content:center;gap:7px;transition
 @keyframes blink{50%{opacity:.25}}
 .rec-time{font:700 12px ui-monospace,Menlo,monospace;color:#fca5a5;min-width:46px;text-align:center}
 .stage{display:grid;grid-template-columns:minmax(330px,1fr) 320px minmax(330px,1fr);gap:6px;padding:4px;align-items:stretch;flex:none}
-@media(max-width:1100px){.stage{grid-template-columns:1fr}}
+@media(max-width:1100px){html:not(.zoomed) .stage{grid-template-columns:1fr}}
+html.zoomed.znarrow .stage{grid-template-columns:1fr}
 .deck,.mixer{background:linear-gradient(#151920,#11141a);border:1px solid var(--line);border-radius:14px;padding:6px;
 display:flex;flex-direction:column;gap:6px;box-shadow:0 10px 30px #00000055}
 .deck{position:relative;overflow:hidden}
@@ -187,8 +191,9 @@ display:flex;flex-direction:column;align-items:center;gap:3px}
 .krow .kill{width:17px;height:17px;padding:0;font-size:9px;margin-top:5px;border-radius:5px;flex:none;margin-left:auto}
 .kill.on{background:#b91c1c;border-color:#ef4444;color:#fff;box-shadow:0 0 9px #ef444459}
 .chan-bottom{display:flex;gap:6px;align-items:stretch;justify-content:center;margin-top:0}
-.chan-body{display:flex;flex-direction:row-reverse;gap:8px;align-items:stretch;justify-content:center;width:100%}
-.chan-bottom .meter{height:auto}
+.chan-body{display:flex;flex-direction:row-reverse;gap:8px;align-items:stretch;justify-content:center;width:100%;flex:1 0 auto}
+.chan-bottom .mw{position:relative;width:14px;flex:none}
+.chan-bottom .meter{position:absolute;left:0;top:0;width:100%;height:100%}
 .chan-bottom .fb{display:flex;align-items:stretch}
 .chan-bottom .fb .fader{height:100%}
 .knob{display:flex;flex-direction:column;align-items:center;gap:0;width:40px}
@@ -253,12 +258,13 @@ gap:6px;z-index:70;align-items:center;pointer-events:none}
 font-size:12px;box-shadow:0 8px 24px #000000aa;animation:tin .18s ease}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}}
 @media(max-height:980px){
-  .ov{margin-top:4px}
-  .jog-box{width:190px}
-  .meter{height:64px}
-  .meter-m{height:36px}
-  .fader:not(.h){height:64px}
+  html:not(.zoomed) .ov{margin-top:4px}
+  html:not(.zoomed) .jog-box{width:190px}
+  html:not(.zoomed) .meter-m{height:36px}
 }
+html.zoomed.zshort .ov{margin-top:4px}
+html.zoomed.zshort .jog-box{width:190px}
+html.zoomed.zshort .meter-m{height:36px}
 .modal-overlay{position:fixed;inset:0;z-index:50;background:#000000b3;backdrop-filter:blur(4px);
 display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .2s ease}
 .modal-overlay.open{opacity:1;pointer-events:auto}
@@ -299,9 +305,9 @@ font-size:11px;min-width:150px}
 <header class="top">
 <div class="brand">Vibe<b>DJ</b><em>Mix your tracks right in the browser!</em></div>
 <div class="top-center">
-<button class="btn zc" id="uiZoomOut" title="Zoom out the interface (50%)">&#8722;</button>
+<button class="btn zc" id="uiZoomOut" title="Zoom out the interface (30%)">&#8722;</button>
 <span class="z-pct" id="uiZoomVal">100%</span>
-<button class="btn zc" id="uiZoomIn" title="Zoom in the interface (200%)">+</button>
+<button class="btn zc" id="uiZoomIn" title="Zoom in the interface (120%)">+</button>
 </div>
 <div class="top-right">
 <button class="btn rec" id="recBtn"><span class="dot"></span>RECORD</button>
@@ -363,7 +369,7 @@ font-size:11px;min-width:150px}
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear)</li>
 <li><b>Quantize</b> (top bar): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
-<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 50% to 200% (CSS transform, every proportion preserved, the setting is remembered)</li>
+<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: the layout always fills the whole window exactly — nothing is cut off, no empty margins — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
@@ -725,14 +731,20 @@ function makeFader(opt){
   }
   function fromEvent(e){
     const r=el.getBoundingClientRect();
+    const zz=parseFloat(document.documentElement.style.getPropertyValue('--zz'))||1;
     let t;
-    if(opt.vertical)t=1-(e.clientY-r.top-9)/(r.height-18);
-    else t=(e.clientX-r.left-half)/(r.width-2*half);
+    if(opt.vertical){
+      const dh=Math.max(1,r.height-18*zz);
+      t=1-(e.clientY-r.top-9*zz)/dh;
+    }else{
+      const dw=Math.max(1,r.width-2*half*zz);
+      t=(e.clientX-r.left-half*zz)/dw;
+    }
     set(min+(max-min)*clamp(t,0,1),true);
   }
   el.addEventListener('pointerdown',e=>{
     dragging=true;
-    el.setPointerCapture(e.pointerId);
+    try{el.setPointerCapture(e.pointerId);}catch(_){}
     el.classList.add('drag');
     fromEvent(e);
     e.preventDefault();
@@ -2429,7 +2441,7 @@ function chanHTML(L){
         '<div class="krow"><div class="kk" id="'+id+'Fil"></div></div>'+
       '</div>'+
       '<div class="chan-bottom">'+
-        '<canvas class="meter" id="'+id+'Meter"></canvas>'+
+        '<div class="mw"><canvas class="meter" id="'+id+'Meter"></canvas></div>'+
         '<div class="fb" id="'+id+'Fader"></div>'+
       '</div>'+
     '</div>'+
@@ -2578,27 +2590,30 @@ $('#infoBtn').addEventListener('click',openInfo);
 $('#infoClose').addEventListener('click',closeInfo);
 infoModal.addEventListener('click',e=>{if(e.target===infoModal)closeInfo();});
 (function(){
-  const uiEl=$('#ui'),inB=$('#uiZoomIn'),outB=$('#uiZoomOut'),pctEl=$('#uiZoomVal');
-  const MIN=0.5,MAX=2,STEP=0.1;
+  const inB=$('#uiZoomIn'),outB=$('#uiZoomOut'),pctEl=$('#uiZoomVal');
+  const MIN=0.3,MAX=1.2,STEP=0.1;
   let z=1;
   try{const s=parseFloat(localStorage.getItem('vibedj-uizoom'));if(isFinite(s)&&s>=MIN&&s<=MAX)z=s;}catch(e){}
+  function updateBP(){
+    const de=document.documentElement;
+    const zz=parseFloat(de.style.getPropertyValue('--zz'))||1;
+    de.classList.toggle('znarrow',de.clientWidth/zz<=1100);
+    de.classList.toggle('zshort',de.clientHeight/zz<=980);
+  }
   function apply(){
     z=Math.round(Math.min(MAX,Math.max(MIN,z))*100)/100;
-    if(Math.abs(z-1)<1e-9){
-      uiEl.style.transform='';
-      document.documentElement.classList.remove('zoomed');
-    }else{
-      const tx=Math.round((1-z)*5000)/100;
-      uiEl.style.transform=(z<1?'translate('+tx+'vw,'+tx+'vh) ':'')+'scale('+z+')';
-      document.documentElement.classList.add('zoomed');
-    }
+    document.documentElement.style.setProperty('--zz',String(z));
+    document.documentElement.classList.toggle('zoomed',Math.abs(z-1)>=1e-9);
     pctEl.textContent=Math.round(z*100)+'%';
     inB.classList.toggle('dis',z>=MAX-1e-9);
     outB.classList.toggle('dis',z<=MIN+1e-9);
     try{localStorage.setItem('vibedj-uizoom',String(z));}catch(e){}
+    updateBP();
+    window.dispatchEvent(new Event('resize'));
   }
   inB.addEventListener('click',()=>{z+=STEP;apply();});
   outB.addEventListener('click',()=>{z-=STEP;apply();});
+  window.addEventListener('resize',updateBP);
   apply();
 })();
 const KEY_LABEL={' ':'Space',arrowup:'\u2191',arrowdown:'\u2193',arrowleft:'\u2190',arrowright:'\u2192',backspace:'Backspace',enter:'Enter',escape:'Esc','!':'Shift+1','@':'Shift+2','#':'Shift+3','$':'Shift+4','%':'Shift+5','^':'Shift+6',')':'Shift+0','(':'Shift+9','*':'Shift+8','&':'Shift+7','~':'Shift+`','|':'Shift+\\','Z':'Shift+Z','X':'Shift+X','C':'Shift+C','V':'Shift+V','M':'Shift+M','<':'Shift+,','>':'Shift+.','?':'Shift+/','{':'Shift+[','}':'Shift+]',':':'Shift+;','"':'Shift+\'','`':'Backtick'};
@@ -3327,9 +3342,11 @@ setTimeout(()=>toast('Load two tracks (LOAD TRACK or drop files) and start mixin
     tt.style.display='block';
     const r=el.getBoundingClientRect();
     const w=tt.offsetWidth,h=tt.offsetHeight;
-    let left=Math.max(8+w/2,Math.min(window.innerWidth-8-w/2,r.left+r.width/2));
-    let top=r.top-8,ty='translate(-50%,-100%)';
-    if(top-h<4){top=r.bottom+8;ty='translate(-50%,0)';}
+    const zz=parseFloat(document.documentElement.style.getPropertyValue('--zz'))||1;
+    const IW=(document.documentElement.clientWidth||window.innerWidth)/zz;
+    let left=Math.max(8+w/2,Math.min(IW-8-w/2,(r.left+r.width/2)/zz));
+    let top=(r.top-8)/zz,ty='translate(-50%,-100%)';
+    if(top-h<4){top=(r.bottom+8)/zz;ty='translate(-50%,0)';}
     tt.style.left=left+'px';
     tt.style.top=top+'px';
     tt.style.transform=ty;
