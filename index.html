@@ -138,7 +138,7 @@ touch-action:none;cursor:grab;background:transparent}
 .row{display:flex;gap:6px;align-items:center}
 .transport .btn{flex:1;padding:5px 3px;font-size:11px}
 .t-play.on{background:linear-gradient(#15803d,#166534);border-color:#4ade80;color:#eafff1;box-shadow:0 0 12px #4ade803d}
-.t-cue{background:linear-gradient(#3a2f14,#2a220f);border-color:#6b5a24;color:#f5e7b0}
+.t-cue.set{background:linear-gradient(#3a2f14,#2a220f);border-color:#6b5a24;color:#f5e7b0}
 .t-cue.on{background:linear-gradient(#7c5d16,#5c460f);border-color:#fbbf24;color:#fff5d6;box-shadow:0 0 12px #fbbf243d}
 .t-sync.on{background:linear-gradient(#5b21b6,#4c1d95);border-color:#a78bfa;color:#f1e9ff;box-shadow:0 0 12px #a78bfa3d}
 .loops{flex-wrap:wrap;}
@@ -1766,12 +1766,13 @@ class Deck{
     });
   }
   updatePlayUI(){
-    const s=(this.playing?'p':'')+(this.cuePreview?'c':'');
+    const s=(this.playing?'p':'')+(this.cuePreview?'c':'')+(this.cueSet?'u':'');
     if(s===this._playState)return;
     this._playState=s;
     this.playBtn.classList.toggle('on',this.playing);
     this.playBtn.textContent=this.playing?'PAUSE':'PLAY';
     this.cueBtn.classList.toggle('on',this.cuePreview);
+    this.cueBtn.classList.toggle('set',this.cueSet);
   }
   currentRate(){
     let r=(1+this.pitch/100)*this.bend*(this.scratchRate===null?1:this.scratchRate);
@@ -1883,6 +1884,7 @@ class Deck{
     if(!this.cueSet){
       this.cuePoint=this.quant(this.pos());
       this.cueSet=true;
+      this.updatePlayUI();
       return;
     }
     if(Math.abs(this.pos()-this.cuePoint)>0.005){
