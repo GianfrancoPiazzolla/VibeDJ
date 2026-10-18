@@ -30,6 +30,12 @@ background:#101319e6;border-bottom:1px solid var(--line);position:sticky;top:0;z
 .brand b{color:var(--accent)}
 .brand em{font-style:normal;font-weight:400;font-size:11px;color:var(--dim);margin-left:10px;letter-spacing:0}
 .top-right{display:flex;gap:8px;align-items:center}
+.top-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;z-index:1}
+.btn.zc{min-width:26px;padding:5px 6px;font-size:13px;line-height:1}
+.z-pct{font:700 11px ui-monospace,Menlo,monospace;color:var(--dim);min-width:38px;text-align:center;letter-spacing:.03em}
+#ui{flex:1 1 auto;display:flex;flex-direction:column;min-height:100vh;transform-origin:0 0}
+html.zoomed #ui{will-change:transform}
+html.zoomed .top{position:relative}
 .btn{background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#cfd6e2;border-radius:7px;
 padding:5px 9px;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.05em;text-align:center;
 display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:border-color .12s,color .12s,background .12s}
@@ -120,8 +126,8 @@ display:block;margin-top:5px;touch-action:none;cursor:pointer}
 .jog-info{display:grid;grid-template-columns:repeat(4,1fr);gap:1px 8px;padding:4px 11px;border-radius:10px;
 background:linear-gradient(#1c222d,#11151c);border:1px solid var(--line);box-shadow:0 5px 14px #0006}
 .ji{display:flex;flex-direction:column;align-items:center;line-height:1.08}
-.ji-v{font:700 13px ui-monospace,Menlo,monospace;color:#eaf1fb;font-variant-numeric:tabular-nums}
-.ji-l{font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700}
+.ji-v{font:700 13px ui-monospace,Menlo,monospace;color:#eaf1fb;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ji-l{font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700;white-space:nowrap}
 .ji-v.key{color:var(--accent)}
 .ji-v.warn{color:#ff5252;animation:blink .6s infinite}
 .jog{width:100%;height:auto;aspect-ratio:1;border-radius:50%;display:block;
@@ -289,12 +295,18 @@ font-size:11px;min-width:150px}
 </style>
 </head>
 <body>
+<div id="ui">
 <header class="top">
 <div class="brand">Vibe<b>DJ</b><em>Mix your tracks right in the browser!</em></div>
+<div class="top-center">
+<button class="btn zc" id="uiZoomOut" title="Zoom out the interface (50%)">&#8722;</button>
+<span class="z-pct" id="uiZoomVal">100%</span>
+<button class="btn zc" id="uiZoomIn" title="Zoom in the interface (200%)">+</button>
+</div>
 <div class="top-right">
 <button class="btn rec" id="recBtn"><span class="dot"></span>RECORD</button>
 <span class="rec-time" id="recTime"></span>
-<button class="btn quant" id="quantBtn" title="Snap cue points, hot cues and loops to the beatgrid">QUANTIZE</button>
+<button class="btn quant" id="quantBtn" title="Snap cue points, hot cues, loops and beat jumps to the beatgrid">QUANTIZE</button>
 <button class="btn" id="libBtn">LIBRARY</button>
 <button class="btn" id="helpBtn">SHORTCUTS</button>
 <button class="btn" id="infoBtn">INFO</button>
@@ -313,6 +325,7 @@ font-size:11px;min-width:150px}
 <section class="mixer" id="mixer"></section>
 <section class="deck" id="deckB" style="--acc:var(--b)"></section>
 </main>
+</div>
 
 <div class="modal" id="libModal" hidden>
 <div class="modal-card lib-card">
@@ -349,11 +362,12 @@ font-size:11px;min-width:150px}
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear)</li>
-<li><b>Quantize</b> (top bar): snaps cue points, hot cues and loops to the nearest beat when a beatgrid is available</li>
-<li><b>Beat jump</b>: &minus;4 / &minus;2 / &minus;1 / +1 / +2 / +4 beats per deck</li>
+<li><b>Quantize</b> (top bar): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
+<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 50% to 200% (CSS transform, every proportion preserved, the setting is remembered)</li>
+<li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
-<li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — isolate a component of the mix with the buttons in the STEMS row (a filter-based approximation, not AI source separation)</li>
+<li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a filter-based approximation, not AI source separation)</li>
 <li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (with Chrome/Edge you can enter subfolders and use REFRESH to re-read the files)</li>
 <li>SYNC: automatically aligns the other deck's tempo and phase</li>
 <li>3-band EQ with kill, LP/HP filters, trim, channel faders and a constant-power crossfader</li>
@@ -391,7 +405,7 @@ font-size:11px;min-width:150px}
 <div style="font-size:12px;color:#94A3B8">Pushing the vibe coding era beyond!</div>
 </div>
 </div>
-<p class="about-desc"><b>Synopsis</b>: VibeDJ is a webapp for DJing right in the browser. Load two tracks, let it detect BPM and beatgrids, then sync and mix them with EQ, filters and per-deck effects (delay, echo, flanger, reverb, phaser, bitcrush), isolate stems (vocal, instrumental, bass, drums), set loops and hot cues, and record your set. Everything runs locally — nothing is uploaded.</p>
+<p class="about-desc"><b>Synopsis</b>: VibeDJ is a webapp for DJing right in the browser. Load two tracks, let it detect BPM and beatgrids, then sync and mix them with EQ, filters and per-deck effects (delay, echo, flanger, reverb, phaser, bitcrush), mute/unmute stems (vocal, instrumental, bass, drums), set loops and hot cues, and record your set. Everything runs locally — nothing is uploaded.</p>
 <p class="about-desc"><b>GitHub repository</b>: <a href="https://github.com/GianfrancoPiazzolla/VibeDJ" target="_blank" rel="noopener"><b>VibeDJ</b></a></p>
 <p class="about-desc"><b>More Apps</b>: <a href="https://github.com/GianfrancoPiazzolla?tab=repositories" target="_blank" rel="noopener">GitHub</a></p>
 <p class="about-desc"><b>License</b>: Distributed under the MIT License. Feel free to use, modify, and share.</p>
@@ -853,67 +867,93 @@ function makeEffect(kind){
 }
 function makeStems(){
   const names=['vocal','inst','bass','drums'];
-  const active={vocal:false,inst:false,bass:false,drums:false};
+  const on={vocal:true,inst:true,bass:true,drums:true};
   const input=AC.createGain();
   const output=AC.createGain();
-  const dry=AC.createGain();
-  dry.gain.value=1;
-  input.connect(dry);
-  dry.connect(output);
-  const mix={};
+  input.connect(output);
+  const cuts={};
   names.forEach(n=>{
     const g=AC.createGain();
     g.gain.value=0;
     g.connect(output);
-    mix[n]=g;
+    cuts[n]=g;
   });
-  const vHp=AC.createBiquadFilter();
-  vHp.type='highpass';
-  vHp.frequency.value=380;
-  vHp.Q.value=0.707;
-  const vLp=AC.createBiquadFilter();
-  vLp.type='lowpass';
-  vLp.frequency.value=3600;
-  vLp.Q.value=0.707;
-  input.connect(vHp);
-  vHp.connect(vLp);
-  vLp.connect(mix.vocal);
-  const iPk=AC.createBiquadFilter();
-  iPk.type='peaking';
-  iPk.frequency.value=1200;
-  iPk.Q.value=0.8;
-  iPk.gain.value=-18;
-  input.connect(iPk);
-  iPk.connect(mix.inst);
+  const mid=AC.createGain();
+  mid.channelCount=1;
+  mid.channelCountMode='explicit';
+  mid.channelInterpretation='speakers';
+  input.connect(mid);
+  const vs=AC.createGain();
+  mid.connect(vs);
+  let vl=mid;
+  for(let i=0;i<2;i++){
+    const b=AC.createBiquadFilter();
+    b.type='lowpass';
+    b.frequency.value=120;
+    b.Q.value=-3.0103;
+    vl.connect(b);
+    vl=b;
+  }
+  const nvl=AC.createGain();
+  nvl.gain.value=-1;
+  vl.connect(nvl);
+  nvl.connect(vs);
+  let vh=mid;
+  for(let i=0;i<3;i++){
+    const b=AC.createBiquadFilter();
+    b.type='highpass';
+    b.frequency.value=9000;
+    b.Q.value=-3.0103;
+    vh.connect(b);
+    vh=b;
+  }
+  const nvh=AC.createGain();
+  nvh.gain.value=-1;
+  vh.connect(nvh);
+  nvh.connect(vs);
+  vs.connect(cuts.vocal);
   const bLp=AC.createBiquadFilter();
   bLp.type='lowpass';
   bLp.frequency.value=220;
-  bLp.Q.value=0.707;
+  bLp.Q.value=-3.0103;
   input.connect(bLp);
-  bLp.connect(mix.bass);
+  bLp.connect(cuts.bass);
   const dHp=AC.createBiquadFilter();
   dHp.type='highpass';
   dHp.frequency.value=3000;
-  dHp.Q.value=0.707;
+  dHp.Q.value=-3.0103;
   input.connect(dHp);
-  dHp.connect(mix.drums);
+  dHp.connect(cuts.drums);
+  const rest=AC.createGain();
+  const nv=AC.createGain();
+  nv.gain.value=-1;
+  const nb=AC.createGain();
+  nb.gain.value=-1;
+  const nd=AC.createGain();
+  nd.gain.value=-1;
+  input.connect(rest);
+  vs.connect(nv);
+  nv.connect(rest);
+  bLp.connect(nb);
+  nb.connect(rest);
+  dHp.connect(nd);
+  nd.connect(rest);
+  rest.connect(cuts.inst);
   const refresh=()=>{
-    const any=names.some(n=>active[n]);
     const now=AC.currentTime;
-    dry.gain.setTargetAtTime(any?0:1,now,0.02);
-    names.forEach(n=>mix[n].gain.setTargetAtTime(active[n]?1:0,now,0.02));
+    names.forEach(n=>cuts[n].gain.setTargetAtTime(on[n]?0:-1,now,0.02));
   };
   return {
     input:input,
     output:output,
     stems:names,
-    isActive:n=>!!active[n],
-    setActive:(n,on)=>{if(n in active){active[n]=!!on;refresh();}},
+    isActive:n=>!!on[n],
+    setActive:(n,v)=>{if(n in on){on[n]=!!v;refresh();}},
     toggle:n=>{
-      if(!(n in active))return false;
-      active[n]=!active[n];
+      if(!(n in on))return false;
+      on[n]=!on[n];
       refresh();
-      return active[n];
+      return on[n];
     }
   };
 }
@@ -1196,12 +1236,12 @@ function deckHTML(L){
       '</div>'+
       '<div class="row bj-row">'+
         '<span class="lab">jump</span>'+
+        '<button class="btn sm bj" data-bj="-16" title="Beat jump back 16 beats">-16</button>'+
+        '<button class="btn sm bj" data-bj="-8" title="Beat jump back 8 beats">-8</button>'+
         '<button class="btn sm bj" data-bj="-4" title="Beat jump back 4 beats">-4</button>'+
-        '<button class="btn sm bj" data-bj="-2" title="Beat jump back 2 beats">-2</button>'+
-        '<button class="btn sm bj" data-bj="-1" title="Beat jump back 1 beat">-1</button>'+
-        '<button class="btn sm bj" data-bj="1" title="Beat jump forward 1 beat">+1</button>'+
-        '<button class="btn sm bj" data-bj="2" title="Beat jump forward 2 beats">+2</button>'+
         '<button class="btn sm bj" data-bj="4" title="Beat jump forward 4 beats">+4</button>'+
+        '<button class="btn sm bj" data-bj="8" title="Beat jump forward 8 beats">+8</button>'+
+        '<button class="btn sm bj" data-bj="16" title="Beat jump forward 16 beats">+16</button>'+
       '</div>'+
       '<div class="row fx-row">'+
         '<span class="lab">effects</span>'+
@@ -1214,10 +1254,10 @@ function deckHTML(L){
       '</div>'+
       '<div class="row stems-row">'+
         '<span class="lab">stems</span>'+
-        '<button class="btn sm stem" data-stem="vocal" title="Vocal stem">VOCAL</button>'+
-        '<button class="btn sm stem" data-stem="inst" title="Instrumental stem">INST</button>'+
-        '<button class="btn sm stem" data-stem="bass" title="Bass stem">BASS</button>'+
-        '<button class="btn sm stem" data-stem="drums" title="Drums stem">DRUMS</button>'+
+        '<button class="btn sm stem on" data-stem="vocal" title="Vocal stem: mute / unmute">VOCAL</button>'+
+        '<button class="btn sm stem on" data-stem="inst" title="Instrumental stem: mute / unmute">INST</button>'+
+        '<button class="btn sm stem on" data-stem="bass" title="Bass stem: mute / unmute">BASS</button>'+
+        '<button class="btn sm stem on" data-stem="drums" title="Drums stem: mute / unmute">DRUMS</button>'+
       '</div>'+
       '<div class="row bend-row">'+
         '<span class="lab">bend</span>'+
@@ -1367,7 +1407,13 @@ class Deck{
     q('.t-start').addEventListener('click',()=>this.seek(0));
     this.syncBtn.addEventListener('click',()=>this.sync());
     const cue=q('.t-cue');
-    cue.addEventListener('pointerdown',e=>{cue.setPointerCapture(e.pointerId);this.cueDown();e.preventDefault();});
+    cue.addEventListener('contextmenu',e=>{e.preventDefault();this.clearCue();});
+    cue.addEventListener('pointerdown',e=>{
+      if(e.button!==0)return;
+      cue.setPointerCapture(e.pointerId);
+      this.cueDown();
+      e.preventDefault();
+    });
     cue.addEventListener('pointerup',()=>this.cueUp());
     cue.addEventListener('pointercancel',()=>this.cueUp());
     q('.l-in').addEventListener('click',()=>this.setLoopIn());
@@ -1820,6 +1866,12 @@ class Deck{
     }
     return clamp(p,0,this.buffer.duration);
   }
+  clearCue(){
+    this.cueSet=false;
+    this.cuePoint=0;
+    this.cuePreview=false;
+    this.updatePlayUI();
+  }
   cueDown(){
     if(!this.buffer)return;
     ensureAudio();
@@ -1970,7 +2022,7 @@ class Deck{
     if(!this.buffer)return;
     if(n<0&&this.pos()<=0)return;
     const per=60/(this.bpm||120);
-    this.seek(this.pos()+n*per);
+    this.seek(this.quant(this.pos()+n*per));
   }
   scaleBpm(f){
     if(!this.buffer||!this.bpm||!this.beats||!this.beats.length)return;
@@ -2387,7 +2439,7 @@ function mixerHTML(){
   '<div class="mx-head">'+
     '<div class="mx-left"><div class="kk" id="knobHp"></div></div>'+
     '<div class="mx-center"><div class="beat-leds"><div class="bl-row" id="beatLedA"><i></i><i></i><i></i><i></i></div><div class="bl-row" id="beatLedB"><i></i><i></i><i></i><i></i></div></div><div class="mx-t">MIXER</div><canvas class="meter meter-m" id="meterM"></canvas></div>'+
-    '<div class="mx-right"><div class="kk" id="knobMaster"></div><span class="clip" id="clipLed" title="Master clipping"></span></div>'+
+    '<div class="mx-right"><span class="clip" id="clipLed" title="Master clipping"></span><div class="kk" id="knobMaster"></div></div>'+
   '</div>'+
   '<div class="mx-chans">'+chanHTML('A')+chanHTML('B')+'</div>'+
   '<div class="mx-xf">'+
@@ -2411,7 +2463,13 @@ function buildChan(L){
   const low=makeKnob({label:'lows',min:-26,max:12,value:0,format:dBandFmt,onChange:v=>deck.setEq('low',v)});
   const fil=makeKnob({
     label:'filter',min:-1,max:1,value:0,
-    format:v=>v<-0.02?('LP '+Math.round(22050*Math.pow(200/22050,-v))):(v>0.02?('HP '+Math.round(20*Math.pow(100,v))):'off'),
+    format:v=>{
+      if(v<-0.02){
+        const hz=Math.round(22050*Math.pow(200/22050,-v));
+        return 'LP '+(hz>=1000?(Math.round(hz/100)/10)+'k':hz);
+      }
+      return v>0.02?('HP '+Math.round(20*Math.pow(100,v))):'off';
+    },
     onChange:v=>deck.setFilter(v)
   });
   document.getElementById(id+'Trim').appendChild(trim.el);
@@ -2483,7 +2541,7 @@ const quantBtn=$('#quantBtn');
 quantBtn.addEventListener('click',()=>{
   QZ.on=!QZ.on;
   quantBtn.classList.toggle('on',QZ.on);
-  toast('Quantize '+(QZ.on?'on — cues and loops snap to the beatgrid':'off'));
+  toast('Quantize '+(QZ.on?'on — cues, loops and beat jumps snap to the beatgrid':'off'));
 });
 const beatLedEls={A:[...document.querySelectorAll('#beatLedA i')],B:[...document.querySelectorAll('#beatLedB i')]};
 const beatLedState={A:-1,B:-1};
@@ -2517,6 +2575,30 @@ const closeInfo=()=>{infoModal.hidden=true;};
 $('#infoBtn').addEventListener('click',openInfo);
 $('#infoClose').addEventListener('click',closeInfo);
 infoModal.addEventListener('click',e=>{if(e.target===infoModal)closeInfo();});
+(function(){
+  const uiEl=$('#ui'),inB=$('#uiZoomIn'),outB=$('#uiZoomOut'),pctEl=$('#uiZoomVal');
+  const MIN=0.5,MAX=2,STEP=0.1;
+  let z=1;
+  try{const s=parseFloat(localStorage.getItem('vibedj-uizoom'));if(isFinite(s)&&s>=MIN&&s<=MAX)z=s;}catch(e){}
+  function apply(){
+    z=Math.round(Math.min(MAX,Math.max(MIN,z))*100)/100;
+    if(Math.abs(z-1)<1e-9){
+      uiEl.style.transform='';
+      document.documentElement.classList.remove('zoomed');
+    }else{
+      const tx=Math.round((1-z)*5000)/100;
+      uiEl.style.transform=(z<1?'translate('+tx+'vw,'+tx+'vh) ':'')+'scale('+z+')';
+      document.documentElement.classList.add('zoomed');
+    }
+    pctEl.textContent=Math.round(z*100)+'%';
+    inB.classList.toggle('dis',z>=MAX-1e-9);
+    outB.classList.toggle('dis',z<=MIN+1e-9);
+    try{localStorage.setItem('vibedj-uizoom',String(z));}catch(e){}
+  }
+  inB.addEventListener('click',()=>{z+=STEP;apply();});
+  outB.addEventListener('click',()=>{z-=STEP;apply();});
+  apply();
+})();
 const KEY_LABEL={' ':'Space',arrowup:'\u2191',arrowdown:'\u2193',arrowleft:'\u2190',arrowright:'\u2192',backspace:'Backspace',enter:'Enter',escape:'Esc','!':'Shift+1','@':'Shift+2','#':'Shift+3','$':'Shift+4','%':'Shift+5','^':'Shift+6',')':'Shift+0','(':'Shift+9','*':'Shift+8','&':'Shift+7','~':'Shift+`','|':'Shift+\\','Z':'Shift+Z','X':'Shift+X','C':'Shift+C','V':'Shift+V','M':'Shift+M','<':'Shift+,','>':'Shift+.','?':'Shift+/','{':'Shift+[','}':'Shift+]',':':'Shift+;','"':'Shift+\'','`':'Backtick'};
 function keyLabel(k){
   if(KEY_LABEL[k])return KEY_LABEL[k];
@@ -2545,7 +2627,7 @@ function buildHelpTable(){
     ['Bend \u2212 / + (hold)',seq(['bendMinus','bendPlus'])],
     ['Effects: delay / echo / flanger / reverb / phaser / bitcrush',seq(['effectDelay','effectEcho','effectFlanger','effectReverb','effectPhaser','effectBitcrush'])],
     ['Stems: vocal / instrumental / bass / drums',seq(['stemVocal','stemInst','stemBass','stemDrums'])],
-    ['Beat jump \u22124 / \u22122 / \u22121 / +1 / +2 / +4',seq(['beatJumpM4','beatJumpM2','beatJumpM1','beatJumpP1','beatJumpP2','beatJumpP4'])],
+    ['Beat jump \u221216 / \u22128 / \u22124 / +4 / +8 / +16',seq(['beatJumpM16','beatJumpM8','beatJumpM4','beatJumpP4','beatJumpP8','beatJumpP16'])],
     ['Grid \u00f72 / \u00d72 / nudge \u2190 / \u2192 / SET / TAP',seq(['gridHalf','gridDouble','gridNudgeM','gridNudgeP','gridSet','gridTap'])],
     ['Quantize on / off',keyLabel(SHORTCUT_CONFIG.global.quantize)],
     ['Record',keyLabel(SHORTCUT_CONFIG.mixer.record)],
@@ -2603,7 +2685,7 @@ const SHORTCUT_CONFIG={
     bendMinus:'-',bendPlus:'+',
     killHighs:'t',killMids:'g',killLows:'b',
     pitch:'pageup',volume:'insert',trim:'???',highs:'f7',mids:'f9',lows:'f11',filter:'home',
-    beatJumpM4:'Q',beatJumpM2:'W',beatJumpM1:'E',beatJumpP1:'R',beatJumpP2:'T',beatJumpP4:'Y',
+    beatJumpM16:'Q',beatJumpM8:'W',beatJumpM4:'E',beatJumpP4:'R',beatJumpP8:'T',beatJumpP16:'Y',
     gridHalf:'A',gridDouble:'S',gridNudgeM:'D',gridNudgeP:'F',gridSet:'G',gridTap:'H'
   },
   deckB:{
@@ -2617,7 +2699,7 @@ const SHORTCUT_CONFIG={
     bendMinus:'.',bendPlus:'è',
     killHighs:'y',killMids:'h',killLows:'n',
     pitch:'pagedown',volume:'delete',trim:'???',highs:'f8',mids:'f10',lows:'f12',filter:'end',
-    beatJumpM4:'U',beatJumpM2:'I',beatJumpM1:'O',beatJumpP1:'P',beatJumpP2:'{',beatJumpP4:'}',
+    beatJumpM16:'U',beatJumpM8:'I',beatJumpM4:'O',beatJumpP4:'P',beatJumpP8:'{',beatJumpP16:'}',
     gridHalf:'J',gridDouble:'K',gridNudgeM:'L',gridNudgeP:';',gridSet:':',gridTap:'"'
   },
   mixer:{
@@ -2679,12 +2761,12 @@ function wireDeck(deck,chanEl,keys){
     ['Instrumental','stemInst',bySel('.stem[data-stem="inst"]')],
     ['Bass','stemBass',bySel('.stem[data-stem="bass"]')],
     ['Drums','stemDrums',bySel('.stem[data-stem="drums"]')],
+    ['Beat jump \u221216','beatJumpM16',bySel('.bj[data-bj="-16"]')],
+    ['Beat jump \u22128','beatJumpM8',bySel('.bj[data-bj="-8"]')],
     ['Beat jump \u22124','beatJumpM4',bySel('.bj[data-bj="-4"]')],
-    ['Beat jump \u22122','beatJumpM2',bySel('.bj[data-bj="-2"]')],
-    ['Beat jump \u22121','beatJumpM1',bySel('.bj[data-bj="-1"]')],
-    ['Beat jump +1','beatJumpP1',bySel('.bj[data-bj="1"]')],
-    ['Beat jump +2','beatJumpP2',bySel('.bj[data-bj="2"]')],
     ['Beat jump +4','beatJumpP4',bySel('.bj[data-bj="4"]')],
+    ['Beat jump +8','beatJumpP8',bySel('.bj[data-bj="8"]')],
+    ['Beat jump +16','beatJumpP16',bySel('.bj[data-bj="16"]')],
     ['Grid \u00f72','gridHalf',bySel('.gb[data-g="half"]')],
     ['Grid \u00d72','gridDouble',bySel('.gb[data-g="double"]')],
     ['Grid nudge \u2190','gridNudgeM',bySel('.gb[data-g="nudge-"]')],
@@ -2715,7 +2797,7 @@ regAnalog(mixer.hpKnob,'Phones',SHORTCUT_CONFIG.mixer.phones,0.02);
 regBtn($('#zoomIn'),'Zoom in',SHORTCUT_CONFIG.global.zoomIn);
 regBtn($('#zoomOut'),'Zoom out',SHORTCUT_CONFIG.global.zoomOut);
 regBtn($('#quantBtn'),'Quantize',SHORTCUT_CONFIG.global.quantize);
-$('#quantBtn').title='Quantize \u2014 snap cue points, loops and hot cues to the beatgrid ('+keyLabel(SHORTCUT_CONFIG.global.quantize)+')';
+$('#quantBtn').title='Quantize \u2014 snap cue points, loops, hot cues and beat jumps to the beatgrid ('+keyLabel(SHORTCUT_CONFIG.global.quantize)+')';
 $('#zoomIn').addEventListener('click',()=>SV.zoom(1/1.35));
 $('#zoomOut').addEventListener('click',()=>SV.zoom(1.35));
 $('#helpBtn').title='Help: '+keyLabel(SHORTCUT_CONFIG.global.help);
