@@ -5,7 +5,7 @@
 ### 🎶 Mix your tracks right in the browser! 🎶
 
 A **two-deck DJ webapp** that runs entirely **locally** — no install, no server, no upload. 🔒
-Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, then **sync**, **EQ**, **filter**, add **effects**, isolate **stems**, set **loops** and **hot cues**, and **record** your set. 🚀
+Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, then **sync**, **EQ**, **filter**, add **effects**, mute/unmute **stems**, set **loops** and **hot cues**, and **record** your set. 🚀
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-web%20browser-22d3ee.svg)
@@ -54,13 +54,14 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 🧠 | **BPM**, **harmonic key (Camelot)** & **energy** detection |
 | 🎚️ | 3-band EQ + kill, LP/HP filter, trim, faders, crossfader |
 | 🔊 | Per-deck **delay**, **echo**, **flanger**, **reverb**, **phaser**, **bitcrush** |
-| 🎤 | Per-deck **stems**: isolate vocal / instrumental / bass / drums |
+| 🎤 | Per-deck **stems** (rekordbox-style): mute / unmute vocal, instrumental, bass and drums |
 | 🎯 | Beat loops (1/4 → 8) and **8 hot cues** per deck |
 | 🥁 | **Quantize**, **beat jump** and **BPM/grid tools** |
 | 🛡️ | Master **limiter** with a clip indicator |
 | 📂 | Local **folder browser** with sorting, filtering & drag & drop |
 | 🎙️ | **Record** the master output to a file |
 | ⌨️ | Full **keyboard** control with on-screen tooltips |
+| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (50% → 200%), all proportions preserved |
 | 📱 | Installable **PWA** (offline-capable) |
 
 > 💡 Everything happens **in your browser**. VibeDJ never sends your music anywhere. 🔐
@@ -153,12 +154,12 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 | :--- | :--- |
 | ⏮️ **START** | Jump back to the beginning |
 | ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback |
-| 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back |
+| 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point |
 | ⚡ **SYNC** | Match the other deck's tempo **and** beat phase |
 | 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**) |
 
 ### ⏭️ Beat jump & 🎚️ BPM/grid tools
-- ⏭️ **Beat jump** — buttons `−4 · −2 · −1 · +1 · +2 · +4` jump whole beats (uses the detected BPM, defaults to 120 if none).
+- ⏭️ **Beat jump** — buttons `−16 · −8 · −4 · +4 · +8 · +16` jump whole beats (uses the detected BPM, defaults to 120 if none); with **QUANTIZE** on, the landing position snaps to the beatgrid.
 - 🎚️ **Grid tools** — `÷2` / `×2` halve or double the BPM (recalculated from the first downbeat), `◀` / `▶` nudge the grid, **SET** lets you type a BPM (40–240), and **TAP** tap-tempo from the beat.
 - ⌨️ Every button in both rows has a **keyboard shortcut** — hover it or check the [shortcuts table](#️-keyboard-shortcuts).
 
@@ -203,18 +204,18 @@ Each effect crossfades **dry/wet** smoothly when toggled. ❇️ Effects chain a
 
 ## 🎤 Stems
 
-Each deck can **isolate a component of the mix** from the **STEMS row** (between the FX and bend rows). 🎚️ The four stems are **independent toggles**: switch one — or several — on to hear only the isolated component(s), and switch them all off to return to the **full mix**. 🔀
+The **STEMS row** (between the FX and bend rows) works exactly like rekordbox's **ACTIVE STEM** controls: 🎚️ all four parts — **VOCAL**, **INST**, **BASS**, **DRUMS** — play by default (full mix) and each button **mutes / unmutes its own part**, so you can cut just the vocals, just the bass, and so on. 🔀 Mute them all and the deck goes silent.
 
-| 🎚️ Stem | 🧪 Isolation |
+| 🎚️ Stem | 🧪 When the button is off the… |
 | :--- | :--- |
-| **VOCAL** | Band-pass ≈ 380 Hz – 3.6 kHz (acapella-ish upper-mid) 🎙️ |
-| **INST** | Full mix with a ≈ −18 dB notch at 1.2 kHz (vocals reduced → instrumental) 🎹 |
-| **BASS** | Low-pass ≈ 220 Hz (bass only) 🔉 |
-| **DRUMS** | High-pass ≈ 3 kHz (hats / cymbals and percussion top) 🥁 |
+| **VOCAL** | …the **centre** of the mix (mid = (L+R)/2) band-passed ≈ 120 Hz – 9 kHz is subtracted from **both** channels, wiping centre-panned vocals across their whole range (fundamental → formants → sibilants); bass/kick below 120 Hz, "air" above 9 kHz and side-panned instruments survive 🎙️ |
+| **INST** | …remaining instruments (everything but vocals, bass and drums) are removed 🎹 |
+| **BASS** | …lows (low-pass ≈ 220 Hz) are removed 🔉 |
+| **DRUMS** | …hats / cymbals and percussion top (high-pass ≈ 3 kHz) are removed 🥁 |
 
-The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Each button is **colour-coded like rekordbox** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums.
+The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Each button is **lit while its part is audible** and **colour-coded like rekordbox** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums.
 
-> ⚠️ These stems are a **filter-based approximation**, not machine-learning source separation: they shape the spectrum (and reduce centered vocals) rather than truly unmixing the track.
+> ⚠️ These stems are a **filter-based approximation**, not machine-learning source separation: muting a part carves its frequency range out of the mix (centered vocals are strongly reduced) rather than truly unmixing the track. Measured centre-channel residuals when VOCAL is off: **−33 dB to −70 dB across 300 Hz – 4 kHz** (formants/words), **−11 dB at 150 Hz / −19 dB at 200 Hz** (vocal fundamentals), **−27 dB at 6 kHz** (sibilance) — while bass below 100 Hz stays within ~3 dB and air at 10 kHz within ~6 dB, and side-panned content passes untouched. Bass/drums cuts use the same 2nd-order Butterworth shape.
 
 ---
 
@@ -225,7 +226,7 @@ The stems are applied **after** the effects chain (`… → phaser → bitcrush 
 - ✂️ Manual **IN / OUT / EXIT** for free loop points.
 - 🟢 The active loop highlights and playback wraps seamlessly. 🔄
 
-> 🎯 Turn on **QUANTIZE** (top bar) to snap cue points, loops and hot cues to the nearest beat. ✨
+> 🎯 Turn on **QUANTIZE** (top bar) to snap cue points, loops, hot cues and beat jumps to the nearest beat. ✨
 
 ### 🎨 Hot cues
 - 🔢 **8 hot cues** per deck, each with its own **color**.
@@ -244,7 +245,7 @@ The central mixer is a classic 2-channel strip. 🎛️
 | **TRIM** 🎚️ | Input gain, −20 dB … +6 dB |
 | **HI / MID / LOW** | 3-band EQ (high-shelf 6.5 kHz, peak 1.1 kHz, low-shelf 140 Hz) |
 | **Kill** 🔇 | Per-band **K** buttons mute a band (−60 dB) |
-| **FILTER** 🌊 | Bipolar **LP / HP** filter (low-pass down to ~200 Hz, high-pass up to ~2 kHz) |
+| **FILTER** 🌊 | Bipolar **LP / HP** filter (low-pass down to ~200 Hz, high-pass up to ~2 kHz); LP values of 1 kHz or more are shown compactly, e.g. `18.2k` |
 | **Channel faders** 📉 | Smooth `gain^1.6` curve per channel |
 | **CROSSFADER** ↔️ | **Constant-power** curve (cosine/sine) between A and B |
 | **MASTER** 🔊 | Master output level |
@@ -290,7 +291,7 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 | ↘️↗️ Bend − / + (hold) | `-` / `+` | `.` / `è` |
 | 🔊 Effects: delay / echo / flanger / reverb / phaser / bitcrush | `Shift+1..4` · `Shift+B` · `Backtick` | `Shift+7..0` · `Shift+N` · `=` |
 | 🎤 Stems: vocal / instrumental / bass / drums | `Alt+1..4` | `Alt+7..0` |
-| ⏭️ Beat jump −4 · −2 · −1 · +1 · +2 · +4 | `Shift+Q W E R T Y` | `Shift+U I O P { }` |
+| ⏭️ Beat jump −16 · −8 · −4 · +4 · +8 · +16 | `Shift+Q W E R T Y` | `Shift+U I O P { }` |
 | 🎚️ Grid ÷2 · ×2 · nudge ◀ · ▶ · SET · TAP | `Shift+A S D F G H` | `Shift+J K L ; : "` |
 | 🔇 Kill highs / mids / lows | `T G B` | `Y H N` |
 | 🎚️ Pitch | `PageUp` | `PageDown` |
