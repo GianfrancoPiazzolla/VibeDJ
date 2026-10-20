@@ -34,7 +34,7 @@ background:#101319e6;border-bottom:1px solid var(--line);position:sticky;top:0;z
 .btn.zc{min-width:26px;padding:5px 6px;font-size:13px;line-height:1}
 .z-pct{font:700 11px ui-monospace,Menlo,monospace;color:var(--dim);min-width:38px;text-align:center;letter-spacing:.03em}
 #ui{flex:1 1 auto;display:flex;flex-direction:column;min-height:100vh}
-html.zoomed #ui{zoom:var(--zz,1);width:100%;min-height:calc(100vh / var(--zz,1))}
+html.zoomed #ui{zoom:var(--zz,1);width:100%;min-height:calc(100vh / var(--zz,1));min-height:calc(100dvh / var(--zz,1))}
 html.zoomed .modal,html.zoomed #dropOverlay,html.zoomed #toasts,html.zoomed .tt{zoom:var(--zz,1)}
 html.zoomed .modal-card{max-height:calc(86vh / var(--zz,1))}
 html.zoomed .lib-card{max-width:calc(50vw / var(--zz,1));width:calc(50vw / var(--zz,1));
@@ -72,12 +72,13 @@ background:#0e1116;border:1px solid var(--acc);color:var(--acc);flex:none}
 .deck-actions{display:flex;gap:6px;flex:none}
 .load{cursor:pointer}
 .syncbar{padding:6px 8px 0;flex:1 1 auto;display:flex;flex-direction:column;min-height:120px}
+html.zoomed.zout .syncbar{flex:0 0 auto;height:var(--sync-h,120px)}
 .sv-wrap{position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column}
 .sv-wrap .zoom{position:absolute;top:6px;right:6px;width:26px;height:20px;padding:0;font-size:13px;line-height:1;z-index:2;
 background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#cfd6e2;border-radius:6px;cursor:pointer;font-weight:700}
 .sv-wrap .zoom:hover{color:#fff;border-color:#414a5c}
 .sv-wrap .zoom-out{right:37px}
-#syncWave{width:100%;flex:1 1 0;min-height:70px;border-radius:11px;background:#0a0c10;border:1px solid var(--line);
+#syncWave{position:absolute;inset:0;width:100%;height:100%;border-radius:11px;background:#0a0c10;border:1px solid var(--line);
 display:block;touch-action:none;cursor:crosshair}
 .browse{margin:0 8px 6px;background:linear-gradient(#151920,#11141a);border:1px solid var(--line);
 border-radius:14px;padding:6px;box-shadow:0 10px 30px #00000055}
@@ -144,6 +145,10 @@ touch-action:none;cursor:grab;background:transparent}
 .t-play.on{background:linear-gradient(#15803d,#166534);border-color:#4ade80;color:#eafff1;box-shadow:0 0 12px #4ade803d}
 .t-cue.set{background:linear-gradient(#3a2f14,#2a220f);border-color:#6b5a24;color:#f5e7b0}
 .t-cue.on{background:linear-gradient(#7c5d16,#5c460f);border-color:#fbbf24;color:#fff5d6;box-shadow:0 0 12px #fbbf243d}
+.t-cue .cue-label{display:inline-block}
+.t-cue.blink .cue-label{animation:cueBlink 1s steps(1,end) infinite}
+@keyframes cueBlink{0%{opacity:1}50%{opacity:.12}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.t-cue.blink .cue-label{animation:none}}
 .t-sync.on{background:linear-gradient(#5b21b6,#4c1d95);border-color:#a78bfa;color:#f1e9ff;box-shadow:0 0 12px #a78bfa3d}
 .loops{flex-wrap:wrap;}
 .fx-row{flex-wrap:wrap;justify-content:center}
@@ -155,10 +160,11 @@ touch-action:none;cursor:grab;background:transparent}
 .stem[data-stem="inst"]{border-color:#16a34a;color:#86efac}
 .stem[data-stem="bass"]{border-color:#2563eb;color:#93c5fd}
 .stem[data-stem="drums"]{border-color:#ca8a04;color:#fde047}
-.stem[data-stem="vocal"].on{background:linear-gradient(#7c3aed,#5b21b6);border-color:#c4b5fd;color:#faf5ff;box-shadow:0 0 12px #7c3aed55}
-.stem[data-stem="inst"].on{background:linear-gradient(#16a34a,#14532d);border-color:#4ade80;color:#f0fdf4;box-shadow:0 0 12px #16a34a55}
-.stem[data-stem="bass"].on{background:linear-gradient(#2563eb,#1e3a8a);border-color:#60a5fa;color:#eff6ff;box-shadow:0 0 12px #2563eb55}
-.stem[data-stem="drums"].on{background:linear-gradient(#ca8a04,#854d0e);border-color:#fde047;color:#fffbe8;box-shadow:0 0 12px #ca8a0455}
+.stem.on{background:linear-gradient(#232833,#181b22)}
+.stem[data-stem="vocal"]:not(.on){background:linear-gradient(#7c3aed,#5b21b6);border-color:#c4b5fd;color:#faf5ff;box-shadow:0 0 12px #7c3aed55}
+.stem[data-stem="inst"]:not(.on){background:linear-gradient(#16a34a,#14532d);border-color:#4ade80;color:#f0fdf4;box-shadow:0 0 12px #16a34a55}
+.stem[data-stem="bass"]:not(.on){background:linear-gradient(#2563eb,#1e3a8a);border-color:#60a5fa;color:#eff6ff;box-shadow:0 0 12px #2563eb55}
+.stem[data-stem="drums"]:not(.on){background:linear-gradient(#ca8a04,#854d0e);border-color:#fde047;color:#fffbe8;box-shadow:0 0 12px #ca8a0455}
 .lab{font-size:9px;letter-spacing:.1em;color:var(--dim);font-weight:700;text-transform:uppercase}
 .pads{gap:5px}
 .pad{flex:1;height:24px;border-radius:6px;background:#1b2029;border:1px solid #2b3240;color:#6b7686;
@@ -170,18 +176,17 @@ font-weight:800;font-size:11px;cursor:pointer}
 .pitch-fader{flex:1;min-height:0;width:32px;display:flex}
 .pitch-box .pitch-fader .fader{height:100%}
 .bend-row .bend{flex:1}
-.mx-head{display:grid;grid-template-columns:4fr auto 5fr;align-items:center;gap:8px}
-.mx-t{font-weight:800;letter-spacing:.14em;font-size:11px;color:#8b95a7}
-.mx-left{display:flex;justify-content:flex-start;align-items:center;gap:8px}
+.mx-head{display:grid;grid-template-columns:4fr auto 4fr;align-items:center;gap:8px}
+.mx-left{display:flex;justify-content:flex-start;align-items:center;gap:15px}
 .mx-center{display:flex;align-items:center;justify-content:center;gap:10px}
 .mx-right{display:flex;justify-content:flex-end}
-.beat-leds{display:flex;flex-direction:column;gap:3px}
-.bl-row{display:flex;gap:3px}
-.bl-row i{width:9px;height:9px;border-radius:2px;background:#0a0c10;border:1px solid #2a303c;display:block}
-#beatLedA i.on{background:var(--a);border-color:var(--a);box-shadow:0 0 7px var(--a)}
-#beatLedB i.on{background:var(--b);border-color:var(--b);box-shadow:0 0 7px var(--b)}
-#beatLedA i:first-child.on{filter:brightness(1.75);box-shadow:0 0 12px var(--a),0 0 4px var(--a)}
-#beatLedB i:first-child.on{filter:brightness(1.75);box-shadow:0 0 12px var(--b),0 0 4px var(--b)}
+.beat-leds{display:flex;flex-direction:column;gap:4px}
+.bl-row{display:flex;gap:4px}
+.bl-row i{width:14px;height:14px;border-radius:3px;background:#0a0c10;border:1px solid #2a303c;display:block}
+#beatLedA i.on{background:var(--a);border-color:var(--a);box-shadow:0 0 10px var(--a)}
+#beatLedB i.on{background:var(--b);border-color:var(--b);box-shadow:0 0 10px var(--b)}
+#beatLedA i:first-child.on{filter:brightness(1.75);box-shadow:0 0 16px var(--a),0 0 6px var(--a)}
+#beatLedB i:first-child.on{filter:brightness(1.75);box-shadow:0 0 16px var(--b),0 0 6px var(--b)}
 .mx-chans{display:grid;grid-template-columns:1fr 1fr;gap:6px;flex:1}
 .chan{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:5px 4px;
 display:flex;flex-direction:column;align-items:center;gap:3px}
@@ -206,7 +211,7 @@ border-radius:2px;transform-origin:50% 14px;box-shadow:0 0 4px #ffffff66}
 .knob-val{font-size:8.5px;color:#93a0b4;font-family:ui-monospace,Menlo,monospace;line-height:1.05}
 .knob-lab{font-size:8px;letter-spacing:.08em;color:#79839a;text-transform:uppercase;font-weight:700;line-height:1.05}
 .meter{width:14px;height:74px;display:block;border-radius:4px;background:#0a0c10;border:1px solid var(--line)}
-.meter-m{width:26px;height:44px}
+.meter-m{width:26px;height:auto;align-self:stretch}
 .fader{position:relative;touch-action:none;cursor:pointer}
 .fader .track{position:absolute;background:#0a0c10;border:1px solid #2a2f3a;border-radius:4px}
 .fader .thumb{position:absolute;background:linear-gradient(#3b4252,#1e222b);border:1px solid #4d5666;
@@ -260,11 +265,9 @@ font-size:12px;box-shadow:0 8px 24px #000000aa;animation:tin .18s ease}
 @media(max-height:980px){
   html:not(.zoomed) .ov{margin-top:4px}
   html:not(.zoomed) .jog-box{width:190px}
-  html:not(.zoomed) .meter-m{height:36px}
 }
 html.zoomed.zshort .ov{margin-top:4px}
 html.zoomed.zshort .jog-box{width:190px}
-html.zoomed.zshort .meter-m{height:36px}
 .modal-overlay{position:fixed;inset:0;z-index:50;background:#000000b3;backdrop-filter:blur(4px);
 display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .2s ease}
 .modal-overlay.open{opacity:1;pointer-events:auto}
@@ -280,9 +283,20 @@ display:flex;align-items:center;justify-content:center;font-size:18px;font-weigh
 .about-desc{font-size:12px;color:#94A3B8;line-height:1.6;margin-bottom:12px}
 .about-desc a{color:var(--accent);text-decoration:none}
 .about-desc a:hover{text-decoration:underline}
-.quant.on{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
+.qsw{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;padding:0;cursor:pointer;
+font:inherit;color:var(--dim);flex:none;align-self:flex-start;margin-top:9px;border-radius:6px}
+.qsw-track{display:block;width:30px;height:16px;border-radius:9px;background:#0a0c10;border:1px solid #2d3340;
+position:relative;transition:background .12s,border-color .12s,box-shadow .12s}
+.qsw-track i{position:absolute;left:2px;top:2px;width:10px;height:10px;border-radius:50%;
+background:linear-gradient(#67718a,#3b4252);transition:left .12s,background .12s,box-shadow .12s}
+.qsw-lab{font-size:8px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;line-height:1.05;color:#79839a}
+.qsw:hover .qsw-track{border-color:#414a5c}
+.qsw.on .qsw-track{background:#0e7490;border-color:var(--accent);box-shadow:0 0 10px #22d3ee44}
+.qsw.on .qsw-track i{left:16px;background:#e6fbff;box-shadow:0 0 5px #22d3ee}
+.qsw.on .qsw-lab{color:var(--accent)}
+.qsw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .bj-row .bj,.grid-row .gb{flex:1 1 0;min-width:0;padding:5px 2px;font-size:9px}
-.mx-right{align-items:center;gap:6px}
+.mx-right{align-items:center;gap:10px}
 .clip{width:12px;height:12px;border-radius:3px;background:#3a1d1d;border:1px solid #55242a;display:block;
 transition:background .1s,box-shadow .1s}
 .clip.on{background:#ef4444;border-color:#fca5a5;box-shadow:0 0 10px #ef4444}
@@ -298,6 +312,14 @@ transform:translateX(-50%);opacity:0;transition:opacity .1s;max-width:280px;whit
 #brSearch{background:#0d1015;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:5px 9px;
 font-size:11px;min-width:150px}
 #brSearch:focus{outline:none;border-color:var(--accent)}
+.flx-row{display:flex;align-items:center;gap:8px;margin:7px 0;flex-wrap:wrap}
+.flx-row label{font-size:10px;letter-spacing:.1em;color:var(--dim);font-weight:800;text-transform:uppercase}
+#flxStatus{margin:0 0 8px}
+#flxOut{background:#0d1015;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:5px 9px;
+font-size:11px;min-width:230px;max-width:100%}
+#flxMap{width:100%;min-height:220px;background:#0a0c10;border:1px solid var(--line);border-radius:9px;color:var(--text);
+font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-space:pre;tab-size:2}
+.btn.on.flx{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
 </style>
 </head>
 <body>
@@ -312,10 +334,10 @@ font-size:11px;min-width:150px}
 <div class="top-right">
 <button class="btn rec" id="recBtn"><span class="dot"></span>RECORD</button>
 <span class="rec-time" id="recTime"></span>
-<button class="btn quant" id="quantBtn" title="Snap cue points, hot cues, loops and beat jumps to the beatgrid">QUANTIZE</button>
 <button class="btn" id="libBtn">LIBRARY</button>
-<button class="btn" id="helpBtn">SHORTCUTS</button>
-<button class="btn" id="infoBtn">INFO</button>
+<button class="btn flx" id="flxBtn" title="Connect a Pioneer DDJ-FLX4 controller">DDJ-FLX4</button>
+<button class="btn" id="helpBtn">HELP</button>
+<button class="btn" id="infoBtn">ABOUT</button>
 </div>
 </header>
 
@@ -368,12 +390,13 @@ font-size:11px;min-width:150px}
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear)</li>
-<li><b>Quantize</b> (top bar): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
-<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: the layout always fills the whole window exactly — nothing is cut off, no empty margins — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
+<li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
+<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the interface simply shrinks and leaves unused space at the bottom instead of stretching the waveform — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
 <li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a filter-based approximation, not AI source separation)</li>
+<li><b>Pioneer DDJ-FLX4</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the FLX4 dialog</li>
 <li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (with Chrome/Edge you can enter subfolders and use REFRESH to re-read the files)</li>
 <li>SYNC: automatically aligns the other deck's tempo and phase</li>
 <li>3-band EQ with kill, LP/HP filters, trim, channel faders and a constant-power crossfader</li>
@@ -415,6 +438,31 @@ font-size:11px;min-width:150px}
 <p class="about-desc"><b>GitHub repository</b>: <a href="https://github.com/GianfrancoPiazzolla/VibeDJ" target="_blank" rel="noopener"><b>VibeDJ</b></a></p>
 <p class="about-desc"><b>More Apps</b>: <a href="https://github.com/GianfrancoPiazzolla?tab=repositories" target="_blank" rel="noopener">GitHub</a></p>
 <p class="about-desc"><b>License</b>: Distributed under the MIT License. Feel free to use, modify, and share.</p>
+</div>
+</div>
+</div>
+
+<div class="modal" id="flxModal" hidden>
+<div class="modal-card">
+<div class="modal-head"><h2>Pioneer DDJ-FLX4</h2><button class="btn" id="flxClose">CLOSE</button></div>
+<div class="modal-body">
+<p class="note" id="flxStatus">Not connected. Press DDJ-FLX4 in the top bar to enable the controller.</p>
+<div class="flx-row">
+<label for="flxOut">Audio output</label>
+<select id="flxOut"></select>
+<button class="btn sm" id="flxOutRefresh">REFRESH</button>
+<button class="btn sm" id="flxOutPick">CHOOSE…</button>
+</div>
+<p class="note">The master + PFL mix is routed to the controller's USB audio interface. A browser can only send one stereo stream to one output, so the headphone jack carries the same mix (use HEADPHONE MIX / LEVEL to blend PFL).</p>
+<h3>MIDI mapping</h3>
+<p class="note">A single editable JSON object. All numbers are decimal MIDI values and channels are 0-based (0 = MIDI channel 1). Changes are stored in this browser; RESET restores the built-in map. Close rekordbox before connecting so the controller exposes its MIDI surface.</p>
+<textarea id="flxMap" spellcheck="false" aria-label="FLX4 MIDI mapping JSON"></textarea>
+<div class="flx-row">
+<button class="btn sm" id="flxApply">APPLY</button>
+<button class="btn sm" id="flxReset">RESET</button>
+</div>
+<h3>Mapped controls</h3>
+<p class="note">Transport PLAY / CUE / SYNC, jog (outer = pitch bend, touched platter = scratch, otherwise bend, SHIFT = fast seek), TEMPO fader, loops (IN / OUT / 4 BEAT / CUE LOOP CALL), pads (HOT CUE sets/jumps, SHIFT clears; PAD FX toggles effects; BEAT JUMP and BEAT LOOP; SAMPLER pads 1-4 = stems, 5-8 = effects), TRIM, EQ, CFX = filter, channel fader, CH CUE, CROSSFADER, MASTER, MASTER CUE, headphone mix/level (both blend the PFL bus), FX CH1/CH2 (target deck) / SELECT / ON / LEVEL, BEAT ◁ / ▷ = beat jump, SMART CFX = quantize, SMART FADER = unmute all stems, BROWSE = waveform zoom, BROWSE press and LOAD open the library.</p>
 </div>
 </div>
 </div>
@@ -865,7 +913,7 @@ function makeEffect(kind){
   }
   node.connect(wet);
   wet.connect(output);
-  let enabled=false;
+  let enabled=false,amount=1;
   return {
     input:input,
     output:output,
@@ -873,7 +921,11 @@ function makeEffect(kind){
     setEnabled:on=>{
       enabled=on;
       dry.gain.setTargetAtTime(on?level[0]:1,AC.currentTime,0.02);
-      wet.gain.setTargetAtTime(on?level[1]:0,AC.currentTime,0.02);
+      wet.gain.setTargetAtTime(on?level[1]*amount:0,AC.currentTime,0.02);
+    },
+    setAmount:a=>{
+      amount=clamp(a,0,1);
+      wet.gain.setTargetAtTime(enabled?level[1]*amount:0,AC.currentTime,0.02);
     }
   };
 }
@@ -1225,7 +1277,7 @@ function deckHTML(L){
         '<span class="lab">deck</span>'+
         '<button class="btn t-start" title="Back to start">START</button>'+
         '<button class="btn t-play" title="Play / pause">PLAY</button>'+
-        '<button class="btn t-cue" title="Cue">CUE</button>'+
+        '<button class="btn t-cue" title="Cue"><span class="cue-label">CUE</span></button>'+
         '<button class="btn t-sync" title="Sync to deck '+other+'">SYNC</button>'+
       '</div>'+
       '<div class="row pads">'+
@@ -1778,13 +1830,16 @@ class Deck{
     });
   }
   updatePlayUI(){
-    const s=(this.playing?'p':'')+(this.cuePreview?'c':'')+(this.cueSet?'u':'');
+    const atCue=Math.abs(this.pos()-(this.cueSet?this.cuePoint:0))<=0.005;
+    const blink=!this.playing&&!this.cuePreview&&!atCue;
+    const s=(this.playing?'p':'')+(this.cuePreview?'c':'')+(this.cueSet?'u':'')+(blink?'b':'');
     if(s===this._playState)return;
     this._playState=s;
     this.playBtn.classList.toggle('on',this.playing);
     this.playBtn.textContent=this.playing?'PAUSE':'PLAY';
     this.cueBtn.classList.toggle('on',this.cuePreview);
     this.cueBtn.classList.toggle('set',this.cueSet);
+    this.cueBtn.classList.toggle('blink',blink);
   }
   currentRate(){
     let r=(1+this.pitch/100)*this.bend*(this.scratchRate===null?1:this.scratchRate);
@@ -1869,6 +1924,7 @@ class Deck{
     }else{
       this.refTime=AC.currentTime;
     }
+    this.updatePlayUI();
   }
   pos(){
     if(!this.buffer)return 0;
@@ -2122,6 +2178,10 @@ class Deck{
     const on=!fx.isEnabled();
     fx.setEnabled(on);
     return on;
+  }
+  setEffectAmount(name,a){
+    const fx=this.fx&&this.fx[name];
+    if(fx)fx.setAmount(a);
   }
   toggleStem(name){
     if(!this.stems)return false;
@@ -2451,9 +2511,9 @@ function chanHTML(L){
 function mixerHTML(){
   return ''+
   '<div class="mx-head">'+
-    '<div class="mx-left"><div class="kk" id="knobHp"></div></div>'+
-    '<div class="mx-center"><div class="beat-leds"><div class="bl-row" id="beatLedA"><i></i><i></i><i></i><i></i></div><div class="bl-row" id="beatLedB"><i></i><i></i><i></i><i></i></div></div><div class="mx-t">MIXER</div><canvas class="meter meter-m" id="meterM"></canvas></div>'+
-    '<div class="mx-right"><span class="clip" id="clipLed" title="Master clipping"></span><div class="kk" id="knobMaster"></div></div>'+
+    '<div class="mx-left"><div class="kk" id="knobHp"></div><button class="qsw" id="quantBtn" role="switch" aria-checked="false" aria-label="Quantize" title="Quantize: snap cue points, hot cues, loops and beat jumps to the beatgrid"><span class="qsw-track"><i></i></span><span class="qsw-lab">quantize</span></button></div>'+
+    '<div class="mx-center"><div class="beat-leds"><div class="bl-row" id="beatLedA"><i></i><i></i><i></i><i></i></div><div class="bl-row" id="beatLedB"><i></i><i></i><i></i><i></i></div></div></div>'+
+    '<div class="mx-right"><span class="clip" id="clipLed" title="Master clipping"></span><canvas class="meter meter-m" id="meterM"></canvas><div class="kk" id="knobMaster"></div></div>'+
   '</div>'+
   '<div class="mx-chans">'+chanHTML('A')+chanHTML('B')+'</div>'+
   '<div class="mx-xf">'+
@@ -2555,6 +2615,7 @@ const quantBtn=$('#quantBtn');
 quantBtn.addEventListener('click',()=>{
   QZ.on=!QZ.on;
   quantBtn.classList.toggle('on',QZ.on);
+  quantBtn.setAttribute('aria-checked',String(QZ.on));
   toast('Quantize '+(QZ.on?'on — cues, loops and beat jumps snap to the beatgrid':'off'));
 });
 const beatLedEls={A:[...document.querySelectorAll('#beatLedA i')],B:[...document.querySelectorAll('#beatLedB i')]};
@@ -2591,19 +2652,33 @@ $('#infoClose').addEventListener('click',closeInfo);
 infoModal.addEventListener('click',e=>{if(e.target===infoModal)closeInfo();});
 (function(){
   const inB=$('#uiZoomIn'),outB=$('#uiZoomOut'),pctEl=$('#uiZoomVal');
+  const de=document.documentElement,barEl=document.querySelector('.syncbar');
   const MIN=0.3,MAX=1.2,STEP=0.1;
-  let z=1;
+  let z=1,baseBar=0;
   try{const s=parseFloat(localStorage.getItem('vibedj-uizoom'));if(isFinite(s)&&s>=MIN&&s<=MAX)z=s;}catch(e){}
   function updateBP(){
-    const de=document.documentElement;
     const zz=parseFloat(de.style.getPropertyValue('--zz'))||1;
     de.classList.toggle('znarrow',de.clientWidth/zz<=1100);
     de.classList.toggle('zshort',de.clientHeight/zz<=980);
   }
+  function measureBar(){
+    const prevZ=de.style.getPropertyValue('--zz')||'1';
+    const wasZ=de.classList.contains('zoomed'),wasOut=de.classList.contains('zout');
+    de.classList.remove('zoomed','zout');
+    de.style.setProperty('--zz','1');
+    baseBar=barEl.getBoundingClientRect().height;
+    de.style.setProperty('--zz',prevZ);
+    if(wasZ)de.classList.add('zoomed');
+    if(wasOut)de.classList.add('zout');
+    de.style.setProperty('--sync-h',baseBar+'px');
+  }
   function apply(){
     z=Math.round(Math.min(MAX,Math.max(MIN,z))*100)/100;
-    document.documentElement.style.setProperty('--zz',String(z));
-    document.documentElement.classList.toggle('zoomed',Math.abs(z-1)>=1e-9);
+    const zout=z<1-1e-9;
+    if(zout)measureBar();
+    de.style.setProperty('--zz',String(z));
+    de.classList.toggle('zoomed',Math.abs(z-1)>=1e-9);
+    de.classList.toggle('zout',zout);
     pctEl.textContent=Math.round(z*100)+'%';
     inB.classList.toggle('dis',z>=MAX-1e-9);
     outB.classList.toggle('dis',z<=MIN+1e-9);
@@ -2613,7 +2688,7 @@ infoModal.addEventListener('click',e=>{if(e.target===infoModal)closeInfo();});
   }
   inB.addEventListener('click',()=>{z+=STEP;apply();});
   outB.addEventListener('click',()=>{z-=STEP;apply();});
-  window.addEventListener('resize',updateBP);
+  window.addEventListener('resize',()=>{updateBP();measureBar();});
   apply();
 })();
 const KEY_LABEL={' ':'Space',arrowup:'\u2191',arrowdown:'\u2193',arrowleft:'\u2190',arrowright:'\u2192',backspace:'Backspace',enter:'Enter',escape:'Esc','!':'Shift+1','@':'Shift+2','#':'Shift+3','$':'Shift+4','%':'Shift+5','^':'Shift+6',')':'Shift+0','(':'Shift+9','*':'Shift+8','&':'Shift+7','~':'Shift+`','|':'Shift+\\','Z':'Shift+Z','X':'Shift+X','C':'Shift+C','V':'Shift+V','M':'Shift+M','<':'Shift+,','>':'Shift+.','?':'Shift+/','{':'Shift+[','}':'Shift+]',':':'Shift+;','"':'Shift+\'','`':'Backtick'};
@@ -2820,10 +2895,623 @@ $('#zoomOut').addEventListener('click',()=>SV.zoom(1.35));
 $('#helpBtn').title='Help: '+keyLabel(SHORTCUT_CONFIG.global.help);
 $('#libBtn').title='Library: '+keyLabel(SHORTCUT_CONFIG.global.library);
 buildHelpTable();
+const FLX_MIDI_CONFIG={
+  device:["DDJ-FLX4","FLX4"],
+  tempoRange:16,
+  jogScale:1,
+  leds:{on:127,off:0,dim:32},
+  channels:{deckA:0,deckB:1,fxA:4,fxB:5,mixer:6,padA:7,padB:9,shiftPadA:8,shiftPadB:10},
+  deck:{
+    play:11,cue:12,cueShift:72,sync:88,shift:63,
+    loopIn:16,loopOut:17,loopExit:77,loopBack:81,loopFwd:83,
+    loopInShift:76,loopOutShift:78,loopExitShift:80,
+    pfl:84,pflShift:104,
+    jogSide:33,jogPlatterOn:34,jogPlatterOff:35,jogShift:41,touch:54,shiftTouch:103,
+    tempo:0,trim:4,eqHi:7,eqMid:11,eqLow:15,fader:19,
+    padsHot:[0,1,2,3,4,5,6,7],
+    padsJump:[32,33,34,35,36,37,38,39],
+    padsLoop:[96,97,98,99,100,101,102,103],
+    padsFx:[16,17,18,19,20,21,22,23],
+    padsStem:[48,49,50,51],
+    padsSampler:[52,53,54,55],
+    padMode:{hotcue:27,padfx1:30,beatjump:32,sampler:34,keyboard:105,padfx2:107,beatloop:109,keyshift:111}
+  },
+  fx:{selectBack:99,selectFwd:100,selectA:16,selectB:17,on:71,onShift:67,depth:2,beatBack:74,beatBackShift:102,beatFwd:75,beatFwdShift:107},
+  mixer:{crossfader:31,master:8,masterCue:99,hpMix:12,hpLevel:13,cfxA:23,cfxB:24,smartCfx:0,smartFader:1,browse:64,browsePress:65,loadA:70,loadB:71}
+};
+const FLX_FX=['delay','echo','flanger','reverb','phaser','bitcrush'];
+const FLX_LOOPS=[0.25,0.5,1,2,4,8,16,32];
+const FLX_JUMP=[-16,-8,-4,-1,1,4,8,16];
+const FLX={
+  cfg:FLX_MIDI_CONFIG,midi:null,input:null,output:null,want:false,sink:'',wasBound:false,
+  shift:{A:false,B:false},touch:{A:false,B:false},mode:{A:'hotcue',B:'hotcue'},fx:{A:0,B:0},fxTarget:'A',jogT:{A:null,B:null},
+  hpMix:0.7,hpLevel:1,last:'',lastT:0,
+  dk(L){return L==='A'?deckA:deckB;},
+  chan(L){return L==='A'?chanA:chanB;},
+  dcfg(L){
+    const D=this.cfg.deck;
+    return L==='A'?D:Object.assign({},D,this.cfg.deckB||{});
+  },
+  num(v){
+    if(typeof v==='number')return v;
+    const s=String(v==null?'':v).trim();
+    if(!s)return NaN;
+    return s.slice(0,2).toLowerCase()==='0x'?parseInt(s,16):parseInt(s,10);
+  },
+  merge(base,o){
+    const r=Object.assign({},base);
+    for(const k in o){
+      const v=o[k];
+      r[k]=(v&&typeof v==='object'&&!Array.isArray(v))?Object.assign({},base[k]||{},v):v;
+    }
+    return r;
+  },
+  match(name){
+    const s=String(name||'').toUpperCase();
+    return (this.cfg.device||[]).some(d=>s.indexOf(String(d).toUpperCase())>=0);
+  },
+  init(){
+    try{
+      const s=JSON.parse(localStorage.getItem('vibedj-flx4-map')||'null');
+      if(s&&typeof s==='object')this.cfg=this.merge(FLX_MIDI_CONFIG,s);
+    }catch(e){}
+    try{this.sink=localStorage.getItem('vibedj-flx4-sink')||'';}catch(e){}
+    $('#flxBtn').addEventListener('click',()=>this.toggle());
+    $('#flxClose').addEventListener('click',()=>this.close());
+    $('#flxModal').addEventListener('click',e=>{if(e.target===$('#flxModal'))this.close();});
+    $('#flxOut').addEventListener('change',e=>this.setSink(e.target.value));
+    $('#flxOutRefresh').addEventListener('click',()=>this.refreshOutputs());
+    $('#flxOutPick').addEventListener('click',()=>this.pickOutput());
+    $('#flxApply').addEventListener('click',()=>this.applyMap());
+    $('#flxReset').addEventListener('click',()=>this.resetMap());
+    $('#flxMap').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();this.close();}});
+    this.paintMap();
+    this.updateStatus();
+  },
+  open(){
+    $('#flxModal').hidden=false;
+    this.refreshOutputs();
+    $('#flxOut').focus();
+  },
+  close(){$('#flxModal').hidden=true;},
+  toggle(){
+    if(this.want){this.disable();this.close();return;}
+    this.enable();
+    this.open();
+  },
+  async enable(){
+    if(!navigator.requestMIDIAccess){toast('Web MIDI is not supported in this browser');return;}
+    this.want=true;
+    let m;
+    try{m=await navigator.requestMIDIAccess({sysex:true});}
+    catch(e){
+      try{m=await navigator.requestMIDIAccess();}
+      catch(e2){this.want=false;toast('MIDI access denied');this.updateStatus();return;}
+    }
+    this.midi=m;
+    this.midi.onstatechange=()=>this.bind();
+    this.hpMix=mixer.hpVal;
+    this.hpLevel=1;
+    this.bind();
+    if(!this.input){
+      this.want=false;
+      this.midi=null;
+      toast('DDJ-FLX4 not found — connect it and press DDJ-FLX4 again');
+      this.updateStatus();
+      return;
+    }
+    const b=$('#flxBtn');
+    b.classList.add('on');
+    b.title='DDJ-FLX4 connected';
+    this.sysex();
+    await this.audio();
+    this.last='';
+    this.repaint(true);
+    this.updateStatus();
+    toast('DDJ-FLX4 connected');
+  },
+  disable(){
+    this.want=false;
+    this.allOff();
+    clearTimeout(this.jogT.A);
+    clearTimeout(this.jogT.B);
+    this.touch={A:false,B:false};
+    if(this.input)this.input.onmidimessage=null;
+    if(this.midi)this.midi.onstatechange=null;
+    this.input=null;
+    this.output=null;
+    this.midi=null;
+    this.wasBound=false;
+    this.last='';
+    const b=$('#flxBtn');
+    b.classList.remove('on');
+    b.title='Connect a Pioneer DDJ-FLX4 controller';
+    this.restoreSink();
+    this.updateStatus();
+    toast('DDJ-FLX4 disconnected');
+  },
+  bind(){
+    if(!this.want||!this.midi)return;
+    const ins=[],outs=[];
+    this.midi.inputs.forEach(p=>{if(this.match(p.name))ins.push(p);});
+    this.midi.outputs.forEach(p=>{if(this.match(p.name))outs.push(p);});
+    if(!ins.length||!outs.length){
+      if(this.input)this.input.onmidimessage=null;
+      this.input=null;
+      this.output=null;
+      this.last='';
+      this.updateStatus();
+      return;
+    }
+    if(this.input)this.input.onmidimessage=null;
+    this.input=ins[0];
+    this.output=outs[0];
+    this.input.onmidimessage=e=>this.onMessage(e);
+    const re=this.wasBound;
+    this.wasBound=true;
+    this.sysex();
+    this.last='';
+    this.repaint(true);
+    this.updateStatus();
+    if(re){
+      $('#flxBtn').classList.add('on');
+      this.audio();
+    }
+  },
+  sysex(){
+    if(!this.output)return;
+    try{this.output.send([0xF0,0x00,0x40,0x05,0x00,0x00,0x04,0x05,0x00,0x50,0x02,0xF7]);}catch(e){}
+  },
+  async refreshOutputs(){
+    const sel=$('#flxOut');
+    if(!sel)return;
+    let list=[];
+    try{
+      if(navigator.mediaDevices&&navigator.mediaDevices.enumerateDevices)list=await navigator.mediaDevices.enumerateDevices();
+    }catch(e){}
+    const outs=list.filter(d=>d.kind==='audiooutput');
+    const cur=this.sink||(AC.sinkId||'');
+    sel.innerHTML='';
+    const def=document.createElement('option');
+    def.value='';
+    def.textContent='System default';
+    sel.appendChild(def);
+    outs.forEach((d,i)=>{
+      const o=document.createElement('option');
+      o.value=d.deviceId;
+      o.textContent=d.label||('Output '+(i+1));
+      sel.appendChild(o);
+    });
+    sel.value=cur;
+    this.updateStatus();
+  },
+  labelOf(id){
+    if(!id)return '';
+    const o=[...$('#flxOut').options].find(x=>x.value===id);
+    return o?o.textContent:'';
+  },
+  async audio(){
+    await this.refreshOutputs();
+    let id=this.sink;
+    const opts=[...$('#flxOut').options];
+    if(id&&!opts.some(o=>o.value===id))id='';
+    if(!id){
+      const o=opts.find(o=>o.value&&this.match(o.textContent));
+      if(o)id=o.value;
+    }
+    if(id)await this.setSink(id);
+    else if(!AC.setSinkId)toast('Audio routing needs Chrome or Edge');
+    this.updateStatus();
+  },
+  async setSink(id){
+    if(!AC.setSinkId){toast('Audio routing is not supported by this browser');return;}
+    try{
+      await AC.setSinkId(id||'');
+      this.sink=id||'';
+      const sel=$('#flxOut');
+      if(sel)sel.value=this.sink;
+      try{localStorage.setItem('vibedj-flx4-sink',this.sink);}catch(e){}
+      toast(id?('Audio routed to '+(this.labelOf(id)||'the selected output')):'Audio routed to the system default');
+    }catch(e){
+      toast('Cannot route audio to this output');
+    }
+    this.updateStatus();
+  },
+  async pickOutput(){
+    if(!navigator.mediaDevices||!navigator.mediaDevices.selectAudioOutput){
+      toast('This browser cannot open the output picker — choose from the list');
+      return;
+    }
+    try{
+      const d=await navigator.mediaDevices.selectAudioOutput();
+      await this.refreshOutputs();
+      await this.setSink(d.deviceId);
+    }catch(e){
+      if(!e||e.name!=='AbortError')toast('Output selection failed');
+    }
+  },
+  restoreSink(){
+    if(!AC.setSinkId)return;
+    try{
+      const p=AC.setSinkId('');
+      if(p&&p.catch)p.catch(()=>{});
+    }catch(e){}
+  },
+  updateStatus(){
+    const el=$('#flxStatus');
+    if(!el)return;
+    if(!this.want){el.textContent='Not connected. Press DDJ-FLX4 in the top bar to enable the controller.';return;}
+    if(!this.input){el.textContent='Waiting for a DDJ-FLX4… connect it over USB.';return;}
+    const out=this.labelOf(this.sink)||(this.sink?'selected output':'system default');
+    el.textContent='Connected · MIDI in/out ready · audio: '+out+(AC.setSinkId?'':' (audio routing not supported by this browser)');
+  },
+  onMessage(e){
+    const d=e.data;
+    if(!d||d.length<2)return;
+    const st=d[0];
+    if(st>=0xF0)return;
+    const t=st&0xF0,ch=st&0x0F,n=d[1],v=d.length>2?d[2]:0;
+    if(t===0xB0)this.onCC(ch,n,v);
+    else if(t===0x90||t===0x80)this.onNote(ch,n,t===0x90&&v>0);
+  },
+  L(ch){
+    const C=this.cfg.channels;
+    if(ch===this.num(C.deckA))return 'A';
+    if(ch===this.num(C.deckB))return 'B';
+    return null;
+  },
+  onNote(ch,n,on){
+    const C=this.cfg.channels,F=this.cfg.fx,M=this.cfg.mixer;
+    const L=this.L(ch);
+    if(L){
+      const dk=this.dk(L),cfg=this.dcfg(L);
+      const is=k=>n===this.num(cfg[k]);
+      if(is('shift')){this.shift[L]=on;return;}
+      if(!on){
+        if(is('cue'))dk.cueUp();
+        if(is('touch')||is('shiftTouch')){
+          this.touch[L]=false;
+          if(dk.scratchRate!==null){dk.scratchRate=null;dk.applyRate(true);}
+        }
+        return;
+      }
+      if(is('play')){dk.togglePlay();return;}
+      if(is('cue')){dk.cueDown();return;}
+      if(is('cueShift')){dk.clearCue();return;}
+      if(is('sync')){dk.sync();return;}
+      if(is('loopIn')){dk.setLoopIn();return;}
+      if(is('loopOut')){dk.setLoopOut();return;}
+      if(is('loopExit')){if(dk.loop.on)dk.clearLoop();else dk.setLoopLen(4);return;}
+      if(is('loopBack')){this.loopScale(dk,0.5);return;}
+      if(is('loopFwd')){this.loopScale(dk,2);return;}
+      if(is('loopInShift')||is('loopOutShift')||is('loopExitShift')){dk.clearLoop();return;}
+      if(is('pfl')||is('pflShift')){this.setPfl(dk);return;}
+      if(is('touch')||is('shiftTouch')){this.touch[L]=true;return;}
+      for(const k in cfg.padMode){
+        if(n===this.num(cfg.padMode[k])){this.mode[L]=k;this.repaint(true);return;}
+      }
+      return;
+    }
+    if(ch===this.num(C.fxA)||ch===this.num(C.fxB)){
+      if(!on)return;
+      const LL=ch===this.num(C.fxA)?'A':'B';
+      if(n===this.num(F.selectA)){this.fxTarget='A';return;}
+      if(n===this.num(F.selectB)){this.fxTarget='B';return;}
+      if(n===this.num(F.on)||n===this.num(F.onShift)){this.toggleFx(LL);return;}
+      if(ch===this.num(C.fxA)){
+        if(n===this.num(F.selectBack)){
+          const t=this.fxTarget;
+          this.fx[t]=(this.fx[t]+FLX_FX.length-1)%FLX_FX.length;
+          this.repaint(true);
+          return;
+        }
+        if(n===this.num(F.selectFwd)){
+          const t=this.fxTarget;
+          this.fx[t]=(this.fx[t]+1)%FLX_FX.length;
+          this.repaint(true);
+          return;
+        }
+        if(n===this.num(F.beatBack)||n===this.num(F.beatBackShift)){deckA.beatJump(-1);deckB.beatJump(-1);return;}
+        if(n===this.num(F.beatFwd)||n===this.num(F.beatFwdShift)){deckA.beatJump(1);deckB.beatJump(1);return;}
+      }
+      return;
+    }
+    if(ch===this.num(C.mixer)){
+      if(!on)return;
+      if(n===this.num(M.masterCue)){this.setPfl(deckA.pfl||deckB.pfl?null:deckA);return;}
+      if(n===this.num(M.smartCfx)){this.toggleQuant();return;}
+      if(n===this.num(M.smartFader)){this.resetStems();return;}
+      if(n===this.num(M.loadA)||n===this.num(M.loadB)){openLib();return;}
+      if(n===this.num(M.browsePress)){openLib();return;}
+      return;
+    }
+    if(ch===this.num(C.padA)||ch===this.num(C.shiftPadA)||ch===this.num(C.padB)||ch===this.num(C.shiftPadB)){
+      if(!on)return;
+      const A=ch===this.num(C.padA)||ch===this.num(C.shiftPadA);
+      const LL=A?'A':'B';
+      const shifted=ch===this.num(C.shiftPadA)||ch===this.num(C.shiftPadB)||this.shift[LL];
+      this.padAction(LL,n,shifted);
+    }
+  },
+  onCC(ch,n,v){
+    const C=this.cfg.channels,M=this.cfg.mixer,F=this.cfg.fx;
+    const L=this.L(ch);
+    if(L){
+      const dk=this.dk(L),cn=this.chan(L),cfg=this.dcfg(L);
+      const is=k=>n===this.num(cfg[k]);
+      if(is('tempo')){
+        const p=((v/127)*2-1)*this.num(this.cfg.tempoRange);
+        dk.setPitch(p);
+        dk.pitchFader.set(p,false);
+        return;
+      }
+      const rel=clamp(v-64,-8,8);
+      if(is('jogShift')){dk.seek(dk.pos()+rel*0.15*this.num(this.cfg.jogScale));return;}
+      if(is('jogSide')){this.jogMove(L,rel,0.006);return;}
+      if(is('jogPlatterOn')){this.jogMove(L,rel,0.01);return;}
+      if(is('jogPlatterOff')){this.jogMove(L,rel,0.008);return;}
+      if(is('trim')){
+        const db=clamp((v-64)/64*12,-20,6);
+        dk.setTrim(db);
+        cn.trim.set(db,false);
+        return;
+      }
+      if(is('eqHi')){this.eq(dk,cn.hi,'high',v);return;}
+      if(is('eqMid')){this.eq(dk,cn.mid,'mid',v);return;}
+      if(is('eqLow')){this.eq(dk,cn.low,'low',v);return;}
+      if(is('fader')){const vol=v/127;dk.setVolume(vol);cn.fader.set(vol,false);return;}
+      return;
+    }
+    if(ch===this.num(C.fxA)||ch===this.num(C.fxB)){
+      if(n===this.num(F.depth)){
+        deckA.setEffectAmount(FLX_FX[this.fx.A],v/127);
+        deckB.setEffectAmount(FLX_FX[this.fx.B],v/127);
+      }
+      return;
+    }
+    if(ch===this.num(C.mixer)){
+      if(n===this.num(M.crossfader)){mixer.setXfade(v/127);return;}
+      if(n===this.num(M.master)){mixer.setMaster(v/127);return;}
+      if(n===this.num(M.hpMix)){this.hpMix=v/127;this.applyCue();return;}
+      if(n===this.num(M.hpLevel)){this.hpLevel=v/127;this.applyCue();return;}
+      if(n===this.num(M.cfxA)){const f=(v-64)/64;deckA.setFilter(f);chanA.fil.set(f,false);return;}
+      if(n===this.num(M.cfxB)){const f=(v-64)/64;deckB.setFilter(f);chanB.fil.set(f,false);return;}
+      if(n===this.num(M.browse)){
+        const r=v<64?v:v-128;
+        if(r)SV.zoom(Math.pow(1.08,-clamp(r,-8,8)));
+        return;
+      }
+    }
+  },
+  jogMove(L,rel,amount){
+    const dk=this.dk(L);
+    if(!dk.playing||!dk.buffer){dk.seek(dk.pos()+rel*amount*20*this.num(this.cfg.jogScale));return;}
+    clearTimeout(this.jogT[L]);
+    if(this.touch[L]){
+      dk.scratchRate=clamp(1+clamp(rel,-8,8)*amount*12,0.25,4);
+      dk.setRate(dk.currentRate(),true);
+      this.jogT[L]=setTimeout(()=>{
+        const d=this.dk(L);
+        if(d.scratchRate!==null){d.scratchRate=null;d.applyRate(true);}
+      },160);
+      return;
+    }
+    dk.setBend(1+clamp(rel,-8,8)*amount);
+    this.jogT[L]=setTimeout(()=>{
+      const d=this.dk(L);
+      if(!d.scratching)d.setBend(1);
+    },140);
+  },
+  eq(dk,knob,band,v){
+    const db=clamp((v-64)/64*26,-26,12);
+    dk.setEq(band,db);
+    knob.set(db,false);
+  },
+  applyCue(){
+    const g=clamp(this.hpMix*this.hpLevel,0,1);
+    mixer.setHp(g);
+  },
+  loopScale(dk,f){
+    const len=dk.loop&&dk.loop.on&&dk.loop.len?dk.loop.len:4;
+    dk.setLoopLen(clamp(len*f,0.25,32));
+  },
+  toggleFx(L){
+    ensureAudio();
+    const dk=this.dk(L),name=FLX_FX[this.fx[L]];
+    const on=dk.toggleEffect(name);
+    const b=dk.root.querySelector('.fx[data-fx="'+name+'"]');
+    if(b)b.classList.toggle('on',on);
+    this.repaint(true);
+  },
+  toggleFxIndex(L,i){
+    if(!FLX_FX[i])return;
+    this.fx[L]=i;
+    this.toggleFx(L);
+  },
+  toggleStem(L,name){
+    ensureAudio();
+    const dk=this.dk(L),on=dk.toggleStem(name);
+    const b=dk.root.querySelector('.stem[data-stem="'+name+'"]');
+    if(b)b.classList.toggle('on',on);
+    this.repaint(true);
+  },
+  resetStems(){
+    [deckA,deckB].forEach(dk=>{
+      ['vocal','inst','bass','drums'].forEach(n=>dk.stems.setActive(n,true));
+      dk.stemBtns.forEach(b=>b.classList.add('on'));
+    });
+    this.repaint(true);
+  },
+  setPfl(dk){
+    const any=deckA.pfl||deckB.pfl;
+    let target=null;
+    if(dk)target=dk.pfl?null:dk;
+    else target=any?null:(deckA.buffer?deckA:deckB);
+    deckA.setPfl(false);
+    deckB.setPfl(false);
+    document.querySelectorAll('.cue-btn').forEach(x=>x.classList.remove('on'));
+    if(target){
+      target.setPfl(true);
+      const el=document.getElementById('c'+target.L+'Cue');
+      if(el)el.classList.add('on');
+    }
+  },
+  toggleQuant(){
+    QZ.on=!QZ.on;
+    const b=$('#quantBtn');
+    b.classList.toggle('on',QZ.on);
+    b.setAttribute('aria-checked',String(QZ.on));
+    toast('Quantize '+(QZ.on?'on':'off'));
+  },
+  padAction(L,n,shifted){
+    ensureAudio();
+    const dk=this.dk(L);
+    if(n>=0&&n<=7){if(shifted)dk.clearHot(n);else dk.hotcue(n);this.repaint(true);return;}
+    if(n>=16&&n<=23){this.toggleFxIndex(L,n-16);return;}
+    if(n>=32&&n<=39){dk.beatJump(FLX_JUMP[n-32]);return;}
+    if(n>=48&&n<=55){
+      const i=n-48;
+      if(i<4)this.toggleStem(L,['vocal','inst','bass','drums'][i]);
+      else this.toggleFxIndex(L,i-4);
+      return;
+    }
+    if(n>=96&&n<=103){dk.setLoopLen(FLX_LOOPS[n-96]);this.repaint(true);return;}
+  },
+  synced(dk){
+    const o=dk===deckA?deckB:deckA;
+    if(!dk.buffer||!o.buffer||!dk.bpm||!o.bpm)return false;
+    return Math.abs(dk.bpm*(1+dk.pitch/100)-o.bpm*(1+o.pitch/100))<0.05;
+  },
+  snapshot(){
+    let s='';
+    ['A','B'].forEach(L=>{
+      const dk=this.dk(L);
+      s+=dk.playing?1:0;
+      s+=dk.cueSet?1:0;
+      s+=this.synced(dk)?1:0;
+      s+=dk.loop.in>=0?1:0;
+      s+=dk.loop.out>=0?1:0;
+      s+=dk.loop.on?1:0;
+      s+=dk.pfl?1:0;
+      s+=this.mode[L];
+      s+=this.fx[L];
+      s+=FLX_FX.map(n=>dk.fx[n].isEnabled()?1:0).join('');
+      s+=dk.hotcues.map(c=>c!==null?'1':'0').join('');
+      s+=['vocal','inst','bass','drums'].map(n=>dk.stems.isActive(n)?'1':'0').join('');
+      s+=dk.loop.len;
+    });
+    s+=(deckA.pfl||deckB.pfl)?1:0;
+    return s;
+  },
+  sendNote(ch,note,val){
+    if(!this.output||!isFinite(note))return;
+    const v=this.num(val);
+    if(!isFinite(v))return;
+    try{this.output.send([0x90|(ch&0x0F),note&0x7F,clamp(v,0,127)]);}catch(e){}
+  },
+  clearPads(ch){
+    const D=this.cfg.deck;
+    [D.padsHot,D.padsJump,D.padsLoop,D.padsFx,D.padsStem,D.padsSampler].forEach(a=>a.forEach(n=>this.sendNote(ch,this.num(n),0)));
+    for(let n=64;n<=71;n++)this.sendNote(ch,n,0);
+    for(let n=112;n<=119;n++)this.sendNote(ch,n,0);
+  },
+  paintPads(ch,mode,dk){
+    const D=this.cfg.deck,Ls=this.cfg.leds;
+    const set=(n,v)=>this.sendNote(ch,this.num(n),v?Ls.on:Ls.off);
+    const dim=n=>this.sendNote(ch,this.num(n),Ls.dim);
+    if(mode==='hotcue'){
+      for(let i=0;i<8;i++)set(D.padsHot[i],dk.hotcues[i]!==null);
+    }else if(mode==='sampler'){
+      ['vocal','inst','bass','drums'].forEach((n,i)=>set(D.padsStem[i],dk.stems.isActive(n)));
+      for(let i=0;i<4;i++)set(D.padsSampler[i],dk.fx[FLX_FX[i]].isEnabled());
+    }else if(mode==='padfx1'||mode==='padfx2'){
+      for(let i=0;i<6;i++)set(D.padsFx[i],dk.fx[FLX_FX[i]].isEnabled());
+    }else if(mode==='beatloop'){
+      const idx=dk.loop.on?FLX_LOOPS.indexOf(dk.loop.len):-1;
+      for(let i=0;i<8;i++)set(D.padsLoop[i],i===idx);
+    }else if(mode==='beatjump'){
+      for(let i=0;i<8;i++)dim(D.padsJump[i]);
+    }
+  },
+  repaint(force){
+    if(!this.want||!this.output)return;
+    const s=this.snapshot();
+    if(!force&&s===this.last)return;
+    this.last=s;
+    const C=this.cfg.channels,Ls=this.cfg.leds;
+    ['A','B'].forEach(L=>{
+      const dk=this.dk(L),ch=L==='A'?this.num(C.deckA):this.num(C.deckB),pad=L==='A'?this.num(C.padA):this.num(C.padB);
+      const cfg=this.dcfg(L);
+      const led=(n,on)=>this.sendNote(ch,this.num(n),on?Ls.on:Ls.off);
+      led(cfg.play,dk.playing);
+      led(cfg.cue,dk.cueSet);
+      led(cfg.sync,this.synced(dk));
+      led(cfg.loopIn,dk.loop.in>=0);
+      led(cfg.loopOut,dk.loop.out>=0);
+      led(cfg.loopExit,dk.loop.on);
+      led(cfg.pfl,dk.pfl);
+      for(const k in cfg.padMode)led(cfg.padMode[k],k===this.mode[L]);
+      const fxCh=L==='A'?this.num(C.fxA):this.num(C.fxB);
+      this.sendNote(fxCh,this.num(this.cfg.fx.on),dk.fx[FLX_FX[this.fx[L]]].isEnabled()?Ls.on:Ls.off);
+      if(force)this.clearPads(pad);
+      this.paintPads(pad,this.mode[L],dk);
+    });
+    this.sendNote(this.num(C.mixer),this.num(this.cfg.mixer.masterCue),(deckA.pfl||deckB.pfl)?Ls.on:Ls.off);
+  },
+  allOff(){
+    if(!this.output)return;
+    const C=this.cfg.channels,Ls=this.cfg.leds;
+    ['A','B'].forEach(L=>{
+      const ch=L==='A'?this.num(C.deckA):this.num(C.deckB),pad=L==='A'?this.num(C.padA):this.num(C.padB);
+      const cfg=this.dcfg(L);
+      [cfg.play,cfg.cue,cfg.sync,cfg.loopIn,cfg.loopOut,cfg.loopExit,cfg.pfl].forEach(n=>this.sendNote(ch,this.num(n),Ls.off));
+      for(const k in cfg.padMode)this.sendNote(ch,this.num(cfg.padMode[k]),Ls.off);
+      this.clearPads(pad);
+      this.sendNote(L==='A'?this.num(C.fxA):this.num(C.fxB),this.num(this.cfg.fx.on),Ls.off);
+    });
+    this.sendNote(this.num(C.mixer),this.num(this.cfg.mixer.masterCue),Ls.off);
+  },
+  syncLeds(){
+    if(!this.want||!this.output)return;
+    const t=performance.now();
+    if(t-this.lastT<120)return;
+    this.lastT=t;
+    this.repaint(false);
+  },
+  paintMap(){
+    const t=$('#flxMap');
+    if(t)t.value=JSON.stringify(this.cfg,null,2);
+  },
+  applyMap(){
+    try{
+      const o=JSON.parse($('#flxMap').value||'{}');
+      if(!o||typeof o!=='object'||Array.isArray(o))throw new Error('bad');
+      this.cfg=this.merge(FLX_MIDI_CONFIG,o);
+      try{localStorage.setItem('vibedj-flx4-map',JSON.stringify(this.cfg));}catch(e){}
+      this.paintMap();
+      this.refreshOutputs();
+      this.last='';
+      this.repaint(true);
+      toast('FLX4 mapping saved');
+    }catch(e){
+      toast('Invalid FLX4 mapping JSON');
+    }
+  },
+  resetMap(){
+    this.cfg=FLX_MIDI_CONFIG;
+    try{localStorage.removeItem('vibedj-flx4-map');}catch(e){}
+    this.paintMap();
+    this.last='';
+    this.repaint(true);
+    toast('FLX4 mapping reset');
+  }
+};
+FLX.init();
 function activeModalEl(){
   if(!helpModal.hidden)return helpModal;
   if(!libModal.hidden)return libModal;
   if(!infoModal.hidden)return infoModal;
+  if(!$('#flxModal').hidden)return $('#flxModal');
   return null;
 }
 function trapTab(container,e){
@@ -2839,17 +3527,18 @@ window.addEventListener('keydown',e=>{
     if(c){trapTab(c,e);return;}
   }
   const t=e.target;
-  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
   const k=normKey(comboKey(e));
   if(k===SHORTCUT_CONFIG.global.closeModal){
     if(!helpModal.hidden){closeHelp();e.preventDefault();return;}
     if(!libModal.hidden){closeLib();e.preventDefault();return;}
     if(!infoModal.hidden){closeInfo();e.preventDefault();return;}
+    if(!$('#flxModal').hidden){FLX.close();e.preventDefault();return;}
     selectAnalog(null);return;
   }
   if(k===SHORTCUT_CONFIG.global.help){helpModal.hidden?openHelp():closeHelp();e.preventDefault();return;}
   if(k===SHORTCUT_CONFIG.global.library){libModal.hidden?openLib():closeLib();e.preventDefault();return;}
-  const modalOpen=!helpModal.hidden||!libModal.hidden||!infoModal.hidden;
+  const modalOpen=!helpModal.hidden||!libModal.hidden||!infoModal.hidden||!$('#flxModal').hidden;
   if(k===SHORTCUT_CONFIG.global.selectUp||k===SHORTCUT_CONFIG.global.crossfaderRight||k===SHORTCUT_CONFIG.global.selectDown||k===SHORTCUT_CONFIG.global.crossfaderLeft){
     e.preventDefault();
     if(SHORTCUTS.sel)adjustSelected((k===SHORTCUT_CONFIG.global.selectUp||k===SHORTCUT_CONFIG.global.crossfaderRight)?1:-1);
@@ -2865,7 +3554,7 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('keyup',e=>{
   const t=e.target;
-  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;
+  if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.tagName==='SELECT'))return;
   const b=SHORTCUTS.btn[normKey(e.key)];
   if(b&&b.up)b.up();
 });
@@ -3324,6 +4013,7 @@ function frame(){
   mixer.updateMeters();
   mixer.updateRec();
   updateBeatLeds();
+  FLX.syncLeds();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
