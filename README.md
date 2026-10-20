@@ -31,6 +31,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 - [🎯 Loops & hot cues](#-loops--hot-cues)
 - [🎚️ The mixer](#️-the-mixer)
 - [🎙️ Recording](#️-recording)
+- [🎛️ DDJ-FLX4 controller](#️-ddj-flx4-controller)
 - [⌨️ Keyboard shortcuts](#️-keyboard-shortcuts)
 - [🔒 Privacy](#-privacy)
 - [🛠️ Tech stack](#️-tech-stack)
@@ -60,8 +61,9 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 🛡️ | Master **limiter** with a clip indicator |
 | 📂 | Local **folder browser** with sorting, filtering & drag & drop |
 | 🎙️ | **Record** the master output to a file |
+| 🎛️ | **Pioneer DDJ-FLX4** controller support: full bidirectional MIDI mapping, LEDs and master audio routing |
 | ⌨️ | Full **keyboard** control with on-screen tooltips |
-| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (30% → 120%): the layout reflows to always fill the whole window exactly, with no empty margins and nothing cut off (modals, toasts and tooltips zoom too) |
+| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (30% → 120%): every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the interface simply shrinks and leaves unused space at the bottom instead of stretching the waveform (modals, toasts and tooltips zoom too) |
 | 📱 | Installable **PWA** (offline-capable) |
 
 > 💡 Everything happens **in your browser**. VibeDJ never sends your music anywhere. 🔐
@@ -154,7 +156,7 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 | :--- | :--- |
 | ⏮️ **START** | Jump back to the beginning |
 | ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback |
-| 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point — the button shows its amber colour only while a cue is stored, standard grey otherwise |
+| 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point — the button shows its amber colour only while a cue is stored, standard grey otherwise; the CUE text blinks while paused away from the cue point, like a real console |
 | ⚡ **SYNC** | Match the other deck's tempo **and** beat phase |
 | 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**) |
 
@@ -206,14 +208,14 @@ Each effect crossfades **dry/wet** smoothly when toggled. ❇️ Effects chain a
 
 The **STEMS row** (between the FX and bend rows) works exactly like rekordbox's **ACTIVE STEM** controls: 🎚️ all four parts — **VOCAL**, **INST**, **BASS**, **DRUMS** — play by default (full mix) and each button **mutes / unmutes its own part**, so you can cut just the vocals, just the bass, and so on. 🔀 Mute them all and the deck goes silent.
 
-| 🎚️ Stem | 🧪 When the button is off the… |
+| 🎚️ Stem | 🧪 When the stem is muted the… |
 | :--- | :--- |
 | **VOCAL** | …the **centre** of the mix (mid = (L+R)/2) band-passed ≈ 120 Hz – 9 kHz is subtracted from **both** channels, wiping centre-panned vocals across their whole range (fundamental → formants → sibilants); bass/kick below 120 Hz, "air" above 9 kHz and side-panned instruments survive 🎙️ |
 | **INST** | …remaining instruments (everything but vocals, bass and drums) are removed 🎹 |
 | **BASS** | …lows (low-pass ≈ 220 Hz) are removed 🔉 |
 | **DRUMS** | …hats / cymbals and percussion top (high-pass ≈ 3 kHz) are removed 🥁 |
 
-The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Each button is **lit while its part is audible** and **colour-coded like rekordbox** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums.
+The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Buttons are **colour-coded** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums — and their background fills **only while the part is muted** (the mute is engaged); an audible part keeps the neutral button background. 🎛️
 
 > ⚠️ These stems are a **filter-based approximation**, not machine-learning source separation: muting a part carves its frequency range out of the mix (centered vocals are strongly reduced) rather than truly unmixing the track. Measured centre-channel residuals when VOCAL is off: **−33 dB to −70 dB across 300 Hz – 4 kHz** (formants/words), **−11 dB at 150 Hz / −19 dB at 200 Hz** (vocal fundamentals), **−27 dB at 6 kHz** (sibilance) — while bass below 100 Hz stays within ~3 dB and air at 10 kHz within ~6 dB, and side-panned content passes untouched. Bass/drums cuts use the same 2nd-order Butterworth shape.
 
@@ -226,7 +228,7 @@ The stems are applied **after** the effects chain (`… → phaser → bitcrush 
 - ✂️ Manual **IN / OUT / EXIT** for free loop points.
 - 🟢 The active loop highlights and playback wraps seamlessly. 🔄
 
-> 🎯 Turn on **QUANTIZE** (top bar) to snap cue points, loops, hot cues and beat jumps to the nearest beat. ✨
+> 🎯 Turn on **QUANTIZE** (switch next to the PHONES knob in the mixer) to snap cue points, loops, hot cues and beat jumps to the nearest beat. ✨
 
 ### 🎨 Hot cues
 - 🔢 **8 hot cues** per deck, each with its own **color**.
@@ -261,6 +263,40 @@ The central mixer is a classic 2-channel strip. 🎛️
 - 🔴 Hit **RECORD** to start capturing the **master output** (a `MediaRecorder` taps the master bus).
 - ⏱️ A live **timer** shows the elapsed time.
 - ⏹️ Press **RECORD** again to **stop** → the mix is downloaded automatically as `mix_YYYYMMDD_HHMMSS.webm` 📥 (or `.ogg` / `.m4a`, depending on the best codec your browser supports). 🎧
+
+---
+
+## 🎛️ DDJ-FLX4 controller
+
+Press **FLX4** in the top bar to connect a **Pioneer DDJ-FLX4** over USB (Web MIDI, Chrome / Edge). The full surface is mapped and **bidirectional**: moving a control updates the interface, and the interface (including keyboard shortcuts) lights up the controller LEDs. Press the button again to disconnect.
+
+| Control | Action |
+| :--- | :--- |
+| ▶️ PLAY / ⏸ PAUSE | Play / pause |
+| 🔴 CUE | Set (paused) or jump to the cue point; **SHIFT + CUE** clears it |
+| ⚡ BEAT SYNC | Sync the deck to the other one |
+| 🎡 Jog | Outer wheel = pitch bend, platter = scratch when touched / bend otherwise, **SHIFT + jog** = fast seek |
+| 🎚️ TEMPO | Pitch fader (±16%) and on-screen readout |
+| 🔁 IN / OUT / 4 BEAT / ◁ ▷ | Loop in, loop out, 4-beat loop or exit, halve / double the loop |
+| 🔢 Pads (HOT CUE) | Set or jump to hot cue 1-8; **SHIFT** clears it |
+| 🎛️ Pads (PAD FX1 / PAD FX2) | Toggle delay, echo, flanger, reverb, phaser, bitcrush |
+| ⏭️ Pads (BEAT JUMP) | Jump -16 / -8 / -4 / -1 / +1 / +4 / +8 / +16 beats |
+| 🎤 Pads (SAMPLER) | Pads 1-4 mute / unmute vocal, instrumental, bass, drums; pads 5-8 toggle effects |
+| 🎯 Pads (BEAT LOOP) | Set a 1/4 - 32 beat loop |
+| 🎚️ TRIM / EQ / CFX | Trim, 3-band EQ and LP/HP filter (CFX) |
+| 🔊 Channel fader / CH CUE | Volume and exclusive PFL |
+| ↔️ CROSSFADER / MASTER | Crossfader and master level |
+| 🎧 MASTER CUE | Exclusive PFL, mirrored on the master cue LED |
+| 🎧 HEADPHONE MIX / LEVEL | Blend and level of the PFL bus |
+| 🎛️ FX CH / SELECT / ON / LEVEL | CH1 / CH2 picks the deck targeted by FX SELECT, ON toggles its effect, LEVEL sets the shared depth |
+| ◁ ▷ BEAT (FX section) | Beat jump both decks by one beat |
+| 🧠 SMART CFX / SMART FADER | Toggle quantize / unmute all stems |
+| 📂 BROWSE / LOAD | Zoom the waveform; open the library |
+| 💡 LEDs | Play, cue, sync, loops, PFL, pad modes, pads, effects and master cue follow the app |
+
+**Audio routing.** The FLX4's built-in USB audio interface shows up as an extra output: VibeDJ can send the **master + PFL mix** to it with `setSinkId`. A browser can only feed **one stereo stream to one output**, so both the controller's master outputs and its headphone jack carry that single mix, with **HEADPHONE MIX / LEVEL** blending PFL in; there is no separate cue channel. Choose the output in the FLX4 dialog (the controller is detected automatically) or with **CHOOSE…**; the choice is remembered.
+
+**Mapping.** The full MIDI map is a JSON object in the FLX4 dialog: channels are 0-based, values are decimal MIDI notes / CC numbers, and `0x` hex strings are accepted too. Edit it, press **APPLY** (saved in this browser) and **RESET** to restore the built-in map. Close rekordbox and any other app holding the controller's MIDI port before connecting.
 
 ---
 
@@ -355,6 +391,7 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 ## 🌐 Compatibility
 
 - ✅ Best in **Chrome / Edge** (File System Access API, MediaRecorder codecs).
+- 🎛️ The **DDJ-FLX4** needs **Chrome / Edge** (Web MIDI and audio-output routing); other browsers keep mouse and keyboard control.
 - ✅ Works in **Firefox / Safari** with the Library's static-list fallback.
 - 🎧 A **headset** is recommended to use **PFL** headphone monitoring.
 
