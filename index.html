@@ -2016,8 +2016,13 @@ class Deck{
   }
   setLoopIn(){
     if(!this.buffer)return;
-    this.loop.in=this.quant(this.pos());
-    if(this.loop.out>=0&&this.loop.out<=this.loop.in)this.loop.out=-1;
+    const p=this.quant(this.pos());
+    if(this.loop.out>=0&&this.loop.out<=p){this.deactivateLoop();this.loop.out=-1;}
+    this.loop.in=p;
+    if(this.loop.on&&this.src){
+      this.src.loopStart=this.loop.in;
+      this.src.loopEnd=Math.min(this.loop.out,this.buffer.duration);
+    }
     this.updateLoopUI();
   }
   setLoopOut(){
@@ -2029,7 +2034,7 @@ class Deck{
     this.setLoopActive();
   }
   setLoopActive(){
-    if(this.loop.in<0||this.loop.out<=this.loop.in){this.loop.on=false;return;}
+    if(this.loop.in<0||this.loop.out<=this.loop.in){this.deactivateLoop();this.updateLoopUI();return;}
     this.loop.on=true;
     if(this.playing){
       const p=this.pos();
@@ -2042,9 +2047,18 @@ class Deck{
     }
     this.updateLoopUI();
   }
-  clearLoop(){
-    this.loop={in:-1,out:-1,on:false,len:0};
+  deactivateLoop(){
+    if(this.loop.on&&this.buffer){
+      this.offset=this.pos();
+      this.refTime=AC.currentTime;
+    }
+    this.loop.on=false;
     if(this.src)this.src.loop=false;
+  }
+  clearLoop(){
+    this.deactivateLoop();
+    this.loop={in:-1,out:-1,on:false,len:0};
+    this.updatePlayUI();
     this.updateLoopUI();
   }
   setLoopLen(beats){
