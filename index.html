@@ -110,6 +110,9 @@ align-items:center;padding:3px 8px;border-bottom:1px solid #1a1f28;cursor:defaul
 .br-row.dir{cursor:pointer}
 .br-row.loaded{background:linear-gradient(90deg,#3a2a08,#241a06);box-shadow:inset 3px 0 0 #f59e0b}
 .br-row.loaded:hover{background:linear-gradient(90deg,#4a3509,#2c2007)}
+.br-row.sel{background:#152532;box-shadow:inset 3px 0 0 var(--accent)}
+.br-row.sel:hover{background:#1a2d3d}
+.br-row.sel.loaded{background:linear-gradient(90deg,#3a2a08,#14240f);box-shadow:inset 3px 0 0 var(--accent)}
 .br-name{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;color:#cfd6e2}
 .br-row.dir .br-name{color:#9fb4d8;font-weight:600}
 .br-meta{font:600 10px ui-monospace,Menlo,monospace;color:var(--dim);text-align:right}
@@ -402,7 +405,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
 <li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a filter-based approximation, not AI source separation)</li>
 <li><b>Pioneer DDJ-FLX4</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the FLX4 dialog</li>
-<li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (with Chrome/Edge you can enter subfolders and use REFRESH to re-read the files)</li>
+<li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (with Chrome/Edge you can enter subfolders and use REFRESH to re-read the files). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
 <li>SYNC: automatically aligns the other deck's tempo and phase</li>
 <li>3-band EQ with kill, LP/HP filters, trim, channel faders and a constant-power crossfader</li>
 <li>Jog wheel: drag to scratch (while playing) or scrub (while paused)</li>
@@ -467,7 +470,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <button class="btn sm" id="flxReset">RESET</button>
 </div>
 <h3>Mapped controls</h3>
-<p class="note">Transport PLAY / CUE / SYNC, jog (outer = pitch bend, touched platter = scratch, otherwise bend, SHIFT = fast seek), TEMPO fader, loops (IN / OUT / 4 BEAT / CUE LOOP CALL), pads (HOT CUE sets/jumps, SHIFT clears; PAD FX toggles effects; BEAT JUMP and BEAT LOOP; SAMPLER pads 1-4 = stems, 5-8 = effects), TRIM, EQ, CFX = filter, channel fader, CH CUE, CROSSFADER, MASTER, MASTER CUE, headphone mix/level (both blend the PFL bus), FX CH1/CH2 (target deck) / SELECT / ON / LEVEL, BEAT ◁ / ▷ = beat jump, SMART CFX = quantize, SMART FADER = unmute all stems, BROWSE = waveform zoom, BROWSE press and LOAD open the library.</p>
+<p class="note">Transport PLAY / CUE / SYNC, jog (outer = pitch bend, touched platter = scratch, otherwise bend, SHIFT = fast seek), TEMPO fader, loops (IN / OUT / 4 BEAT / CUE LOOP CALL), pads (HOT CUE sets/jumps, SHIFT clears; PAD FX toggles effects; BEAT JUMP and BEAT LOOP; SAMPLER pads 1-4 = stems, 5-8 = effects), TRIM, EQ, CFX = filter, channel fader, CH CUE, CROSSFADER, MASTER, MASTER CUE, headphone mix/level (both blend the PFL bus), FX CH1/CH2 (target deck) / SELECT / ON / LEVEL, BEAT ◁ / ▷ = beat jump, SMART CFX = quantize, SMART FADER = unmute all stems, BROWSE rotary = scroll the Library selection, LOAD ◁ / ▷ = load the selected track onto deck A / B, BROWSE press = open or close the Library.</p>
 </div>
 </div>
 </div>
@@ -3049,6 +3052,7 @@ const FLX={
     b.title='Connect a Pioneer DDJ-FLX4 controller';
     this.restoreSink();
     this.updateStatus();
+    if(window.BR)BR.reapply();
     toast('DDJ-FLX4 disconnected');
   },
   bind(){
@@ -3062,6 +3066,7 @@ const FLX={
       this.output=null;
       this.last='';
       this.updateStatus();
+      if(window.BR)BR.reapply();
       return;
     }
     if(this.input)this.input.onmidimessage=null;
@@ -3074,6 +3079,7 @@ const FLX={
     this.last='';
     this.repaint(true);
     this.updateStatus();
+    if(window.BR)BR.reapply();
     if(re){
       $('#flxBtn').classList.add('on');
       this.audio();
@@ -3242,8 +3248,9 @@ const FLX={
       if(n===this.num(M.masterCue)){this.setPfl(deckA.pfl||deckB.pfl?null:deckA);return;}
       if(n===this.num(M.smartCfx)){this.toggleQuant();return;}
       if(n===this.num(M.smartFader)){this.resetStems();return;}
-      if(n===this.num(M.loadA)||n===this.num(M.loadB)){openLib();return;}
-      if(n===this.num(M.browsePress)){openLib();return;}
+      if(n===this.num(M.loadA)){if(!$('#libModal').hidden)BR.loadSelected(deckA);return;}
+      if(n===this.num(M.loadB)){if(!$('#libModal').hidden)BR.loadSelected(deckB);return;}
+      if(n===this.num(M.browsePress)){$('#libModal').hidden?openLib():closeLib();return;}
       return;
     }
     if(ch===this.num(C.padA)||ch===this.num(C.shiftPadA)||ch===this.num(C.padB)||ch===this.num(C.shiftPadB)){
@@ -3299,7 +3306,7 @@ const FLX={
       if(n===this.num(M.cfxB)){const f=(v-64)/64;deckB.setFilter(f);chanB.fil.set(f,false);return;}
       if(n===this.num(M.browse)){
         const r=v<64?v:v-128;
-        if(r)SV.zoom(Math.pow(1.08,-clamp(r,-8,8)));
+        if(r&&!$('#libModal').hidden)BR.moveSelection(r>0?1:-1);
         return;
       }
     }
@@ -3771,6 +3778,7 @@ const BR={
   sortKey:'name',
   sortDir:1,
   query:'',
+  selId:null,
   curDirs:[],
   curFiles:[],
   init(){
@@ -3921,10 +3929,7 @@ const BR={
       r.querySelector('.br-meta').textContent=f.file?this.fmtSize(f.file.size):'';
       if(this.loadedIds.has(id))r.classList.add('loaded');
       if(!this.fillRow(r,id)&&f.file)this.enqueue(id,f.file);
-      const go=dk=>{
-        if(!f.file){toast('File not readable');return;}
-        dk.loadFile(f.file);
-      };
+      const go=dk=>this.loadFile(f,dk);
       r.addEventListener('dblclick',()=>go(this.smartDeck()));
       r.querySelector('.a').addEventListener('click',()=>go(deckA));
       r.querySelector('.b').addEventListener('click',()=>go(deckB));
@@ -3939,12 +3944,61 @@ const BR={
       }
       el.appendChild(r);
     });
+    this.syncSelection();
     if(!dirs.length&&!files.length){
       const d=document.createElement('div');
       d.className='br-empty';
       d.textContent=q?'No matches':'No audio files in this folder';
       el.appendChild(d);
     }
+  },
+  linked(){
+    return typeof FLX!=='undefined'&&!!FLX.want&&!!FLX.input;
+  },
+  rows(){
+    if(!this.listEl)return [];
+    return [...this.listEl.querySelectorAll('.br-row[data-id]')];
+  },
+  reapply(){
+    const rs=this.rows();
+    if(!rs.length){this.selId=null;return;}
+    if(!this.linked()){
+      this.selId=null;
+      rs.forEach(r=>r.classList.remove('sel'));
+      return;
+    }
+    this.syncSelection();
+  },
+  syncSelection(){
+    const rs=this.rows();
+    if(!rs.length){this.selId=null;return;}
+    if(!this.linked()){rs.forEach(r=>r.classList.remove('sel'));return;}
+    if(!this.selId||!rs.some(r=>r.dataset.id===this.selId))this.selId=rs[0].dataset.id;
+    rs.forEach(r=>r.classList.toggle('sel',r.dataset.id===this.selId));
+  },
+  moveSelection(d){
+    if(!this.linked())return;
+    const rs=this.rows();
+    if(!rs.length)return;
+    let i=rs.findIndex(r=>r.dataset.id===this.selId);
+    if(i<0)i=d>0?-1:rs.length;
+    i=clamp(i+d,0,rs.length-1);
+    this.selId=rs[i].dataset.id;
+    rs.forEach((r,k)=>r.classList.toggle('sel',k===i));
+    rs[i].scrollIntoView({block:'nearest'});
+  },
+  selectedFile(){
+    if(!this.selId)return null;
+    return this.curFiles.find(f=>f.file&&this.fileId(f.file)===this.selId)||null;
+  },
+  loadFile(f,dk){
+    if(!f||!f.file){toast('File not readable');return;}
+    dk.loadFile(f.file);
+  },
+  loadSelected(dk){
+    const f=this.selectedFile();
+    if(!f){toast('No track selected');return;}
+    this.loadFile(f,dk);
   },
   smartDeck(){
     if(!deckA.buffer)return deckA;
