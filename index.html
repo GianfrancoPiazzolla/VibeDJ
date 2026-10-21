@@ -44,6 +44,12 @@ padding:5px 9px;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.05
 display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:border-color .12s,color .12s,background .12s}
 .btn:hover{border-color:#414a5c;color:#fff}
 .btn:active{transform:translateY(1px)}
+.btn.press{animation:btnPress .26s ease-out}
+@keyframes btnPress{
+  0%{transform:translateY(1px) scale(.9);background:var(--accent);border-color:#e6fbff;color:#06151a;box-shadow:0 0 0 2px #22d3eeaa,0 0 16px var(--accent)}
+  55%{transform:translateY(1px) scale(.96);background:var(--accent);border-color:#e6fbff;color:#06151a;box-shadow:0 0 0 2px #22d3ee66,0 0 10px var(--accent)}
+  100%{transform:none;box-shadow:0 0 0 0 transparent}
+}
 .btn.on{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
 .btn.sm{padding:5px 8px;font-size:10px;flex:1;}
 .btn.dis{opacity:.35;pointer-events:none}
@@ -72,7 +78,6 @@ background:#0e1116;border:1px solid var(--acc);color:var(--acc);flex:none}
 .deck-actions{display:flex;gap:6px;flex:none}
 .load{cursor:pointer}
 .syncbar{padding:6px 8px 0;flex:1 1 auto;display:flex;flex-direction:column;min-height:120px}
-html.zoomed.zout .syncbar{flex:0 0 auto;height:var(--sync-h,120px)}
 .sv-wrap{position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column}
 .sv-wrap .zoom{position:absolute;top:6px;right:6px;width:26px;height:20px;padding:0;font-size:13px;line-height:1;z-index:2;
 background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#cfd6e2;border-radius:6px;cursor:pointer;font-weight:700}
@@ -148,7 +153,7 @@ touch-action:none;cursor:grab;background:transparent}
 .t-cue .cue-label{display:inline-block}
 .t-cue.blink .cue-label{animation:cueBlink 1s steps(1,end) infinite}
 @keyframes cueBlink{0%{opacity:1}50%{opacity:.12}100%{opacity:1}}
-@media (prefers-reduced-motion:reduce){.t-cue.blink .cue-label{animation:none}}
+@media (prefers-reduced-motion:reduce){.t-cue.blink .cue-label{animation:none}.btn.press{animation:none}}
 .t-sync.on{background:linear-gradient(#5b21b6,#4c1d95);border-color:#a78bfa;color:#f1e9ff;box-shadow:0 0 12px #a78bfa3d}
 .loops{flex-wrap:wrap;}
 .fx-row{flex-wrap:wrap;justify-content:center}
@@ -391,7 +396,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear)</li>
 <li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
-<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the interface simply shrinks and leaves unused space at the bottom instead of stretching the waveform — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
+<li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the decks and mixer shrink while the waveform strip stretches vertically to fill all the remaining page space, leaving no empty gap at the bottom — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
@@ -407,7 +412,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <p class="note">Deck A uses the left half of the keyboard and deck B mirrors it on the right. Every control shows its key in the tooltip (hover it). Select an analog control with its key, then use the up/down arrows to adjust it.</p>
 <table id="helpKeys"></table>
 <h3>Notes</h3>
-<p class="note">The TEMPO fader also changes the pitch of the track (there is no key lock). Above each jog you can read the total track time, the time left, the current BPM and the harmonic key in Camelot notation (for example 1A). On the overlaid waveform strip the wheel or the +/&#8722; buttons zoom both decks together (shared time axis); clicking seeks the deck of the half you clicked (A on top, B on the bottom). Works best in Chrome/Edge. The recording is saved as a file when recording stops.</p>
+<p class="note">The TEMPO fader also changes the pitch of the track (there is no key lock) and is oriented like the hardware: sliding it up slows the track down, sliding it down speeds it up. Above each jog you can read the total track time, the time left, the current BPM and the harmonic key in Camelot notation (for example 1A). On the overlaid waveform strip the wheel or the +/&#8722; buttons zoom both decks together (shared time axis); clicking seeks the deck of the half you clicked (A on top, B on the bottom). Works best in Chrome/Edge. The recording is saved as a file when recording stops.</p>
 </div>
 </div>
 </div>
@@ -760,7 +765,8 @@ function makeFader(opt){
   el.setAttribute('aria-valuemax',String(max));
   let v=opt.value,dragging=false;
   function render(){
-    const t=(v-min)/(max-min);
+    let t=(v-min)/(max-min);
+    if(opt.invert)t=1-t;
     if(opt.vertical){
       const h=el.clientHeight-18;
       thumb.style.top=Math.round(h*(1-t))+'px';
@@ -788,7 +794,8 @@ function makeFader(opt){
       const dw=Math.max(1,r.width-2*half*zz);
       t=(e.clientX-r.left-half*zz)/dw;
     }
-    set(min+(max-min)*clamp(t,0,1),true);
+    const tt=clamp(t,0,1);
+    set(opt.invert?max-(max-min)*tt:min+(max-min)*tt,true);
   }
   el.addEventListener('pointerdown',e=>{
     dragging=true;
@@ -803,8 +810,9 @@ function makeFader(opt){
   el.addEventListener('pointercancel',end);
   el.addEventListener('keydown',e=>{
     const st=(max-min)/100;
-    if(e.key==='ArrowUp'||e.key==='ArrowRight')set(v+st*(e.shiftKey?0.25:1),true);
-    else if(e.key==='ArrowDown'||e.key==='ArrowLeft')set(v-st*(e.shiftKey?0.25:1),true);
+    const dir=opt.invert?-1:1;
+    if(e.key==='ArrowUp'||e.key==='ArrowRight')set(v+st*dir*(e.shiftKey?0.25:1),true);
+    else if(e.key==='ArrowDown'||e.key==='ArrowLeft')set(v-st*dir*(e.shiftKey?0.25:1),true);
     else if(e.key==='Home')set(min,true);
     else if(e.key==='End')set(max,true);
     else return;
@@ -813,7 +821,7 @@ function makeFader(opt){
   });
   faders.push(render);
   requestAnimationFrame(render);
-  return {el:el,set:set,get:()=>v,render:render};
+  return {el:el,set:set,get:()=>v,render:render,invert:!!opt.invert};
 }
 const AC=new (window.AudioContext||window.webkitAudioContext)();
 let reverbIR=null;
@@ -1489,12 +1497,12 @@ class Deck{
       p.addEventListener('contextmenu',e=>{e.preventDefault();this.clearHot(i);});
     });
     const pf=q('.pitch-fader');
-    this.pitchFader=makeFader({vertical:true,min:-16,max:16,value:0,onChange:v=>this.setPitch(v)});
+    this.pitchFader=makeFader({vertical:true,min:-16,max:16,value:0,invert:true,onChange:v=>this.setPitch(v)});
     pf.appendChild(this.pitchFader.el);
     root.querySelectorAll('.bend').forEach(b=>{
       const m=parseInt(b.dataset.bend,10);
-      b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);this.bend=m>0?1.05:0.95;this.applyRate(true);});
-      const up=()=>{this.bend=1;this.applyRate(true);};
+      b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);this.setBend(m>0?1.05:0.95);});
+      const up=()=>{this.setBend(1);};
       b.addEventListener('pointerup',up);
       b.addEventListener('pointercancel',up);
     });
@@ -1977,6 +1985,8 @@ class Deck{
   }
   setBend(m){
     this.bend=m;
+    if(m>1)flashBtn(this.root.querySelector('.bend[data-bend="1"]'));
+    else if(m<1)flashBtn(this.root.querySelector('.bend[data-bend="-1"]'));
     this.applyRate(true);
   }
   sync(){
@@ -2103,6 +2113,7 @@ class Deck{
     return this.nearestBeat(t);
   }
   beatJump(n){
+    flashBtn(this.root.querySelector('.bj[data-bj="'+n+'"]'));
     if(!this.buffer)return;
     if(n<0&&this.pos()<=0)return;
     const per=60/(this.bpm||120);
@@ -2161,6 +2172,7 @@ class Deck{
   }
   gridAction(a){
     if(!this.buffer){toast('Load a track on deck '+this.L+' first');return;}
+    flashBtn(this.root.querySelector('.gb[data-g="'+a+'"]'));
     if(a==='double')this.scaleBpm(2);
     else if(a==='half')this.scaleBpm(0.5);
     else if(a==='nudge-')this.nudgeGrid(-0.001);
@@ -2666,33 +2678,19 @@ $('#infoClose').addEventListener('click',closeInfo);
 infoModal.addEventListener('click',e=>{if(e.target===infoModal)closeInfo();});
 (function(){
   const inB=$('#uiZoomIn'),outB=$('#uiZoomOut'),pctEl=$('#uiZoomVal');
-  const de=document.documentElement,barEl=document.querySelector('.syncbar');
+  const de=document.documentElement;
   const MIN=0.3,MAX=1.2,STEP=0.1;
-  let z=1,baseBar=0;
+  let z=1;
   try{const s=parseFloat(localStorage.getItem('vibedj-uizoom'));if(isFinite(s)&&s>=MIN&&s<=MAX)z=s;}catch(e){}
   function updateBP(){
     const zz=parseFloat(de.style.getPropertyValue('--zz'))||1;
     de.classList.toggle('znarrow',de.clientWidth/zz<=1100);
     de.classList.toggle('zshort',de.clientHeight/zz<=980);
   }
-  function measureBar(){
-    const prevZ=de.style.getPropertyValue('--zz')||'1';
-    const wasZ=de.classList.contains('zoomed'),wasOut=de.classList.contains('zout');
-    de.classList.remove('zoomed','zout');
-    de.style.setProperty('--zz','1');
-    baseBar=barEl.getBoundingClientRect().height;
-    de.style.setProperty('--zz',prevZ);
-    if(wasZ)de.classList.add('zoomed');
-    if(wasOut)de.classList.add('zout');
-    de.style.setProperty('--sync-h',baseBar+'px');
-  }
   function apply(){
     z=Math.round(Math.min(MAX,Math.max(MIN,z))*100)/100;
-    const zout=z<1-1e-9;
-    if(zout)measureBar();
     de.style.setProperty('--zz',String(z));
     de.classList.toggle('zoomed',Math.abs(z-1)>=1e-9);
-    de.classList.toggle('zout',zout);
     pctEl.textContent=Math.round(z*100)+'%';
     inB.classList.toggle('dis',z>=MAX-1e-9);
     outB.classList.toggle('dis',z<=MIN+1e-9);
@@ -2702,7 +2700,7 @@ infoModal.addEventListener('click',e=>{if(e.target===infoModal)closeInfo();});
   }
   inB.addEventListener('click',()=>{z+=STEP;apply();});
   outB.addEventListener('click',()=>{z-=STEP;apply();});
-  window.addEventListener('resize',()=>{updateBP();measureBar();});
+  window.addEventListener('resize',()=>{updateBP();});
   apply();
 })();
 const KEY_LABEL={' ':'Space',arrowup:'\u2191',arrowdown:'\u2193',arrowleft:'\u2190',arrowright:'\u2192',backspace:'Backspace',enter:'Enter',escape:'Esc','!':'Shift+1','@':'Shift+2','#':'Shift+3','$':'Shift+4','%':'Shift+5','^':'Shift+6',')':'Shift+0','(':'Shift+9','*':'Shift+8','&':'Shift+7','~':'Shift+`','|':'Shift+\\','Z':'Shift+Z','X':'Shift+X','C':'Shift+C','V':'Shift+V','M':'Shift+M','<':'Shift+,','>':'Shift+.','?':'Shift+/','{':'Shift+[','}':'Shift+]',':':'Shift+;','"':'Shift+\'','`':'Backtick'};
@@ -2750,6 +2748,14 @@ function buildHelpTable(){
   if(tbl)tbl.innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('');
 }
 const SHORTCUTS={btn:{},analog:{},sel:null};
+function flashBtn(el){
+  if(!el)return;
+  el.classList.remove('press');
+  void el.offsetWidth;
+  el.classList.add('press');
+  clearTimeout(el._pressT);
+  el._pressT=setTimeout(()=>el.classList.remove('press'),280);
+}
 function regBtn(el,name,key,opts){
   opts=opts||{};
   el.title=name+': '+keyLabel(key);
@@ -2776,7 +2782,8 @@ function selectAnalog(entry){
 function adjustSelected(dir){
   const e=SHORTCUTS.sel;
   if(!e)return false;
-  e.obj.set(e.obj.get()+dir*e.step,true);
+  const dir2=(e.obj.invert?-1:1)*dir;
+  e.obj.set(e.obj.get()+dir2*e.step,true);
   return true;
 }
 const SHORTCUT_CONFIG={
@@ -2825,8 +2832,8 @@ function wireDeck(deck,chanEl,keys){
   const p=deck.L+' \u00b7 ';
   const bySel=s=>deck.root.querySelector(s);
   const kill=band=>chanEl.querySelector('[data-band="'+band+'"]');
-  const bendDown=bm=>()=>{deck.bend=bm>0?1.05:0.95;deck.applyRate(true);};
-  const bendUp=()=>{deck.bend=1;deck.applyRate(true);};
+  const bendDown=bm=>()=>deck.setBend(bm>0?1.05:0.95);
+  const bendUp=()=>deck.setBend(1);
   const list=[
     ['Load track','loadTrack',bySel('.load')],
     ['Loop 1/4','loopQuarter',bySel('.l-len[data-len="0.25"]')],
