@@ -327,6 +327,11 @@ font-size:11px;min-width:150px}
 font-size:11px;min-width:230px;max-width:100%}
 #flxMap{width:100%;min-height:220px;background:#0a0c10;border:1px solid var(--line);border-radius:9px;color:var(--text);
 font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-space:pre;tab-size:2}
+#keyMapJson{width:100%;min-height:180px;background:#0a0c10;border:1px solid var(--line);border-radius:9px;color:var(--text);
+font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-space:pre;tab-size:2}
+#keyMapMsg{margin:6px 0 0;font-size:11.5px}
+#keyMapMsg.err{color:#f87171}
+#keyMapMsg.ok{color:#4ade80}
 .btn.on.flx{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
 </style>
 </head>
@@ -406,6 +411,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a filter-based approximation, not AI source separation)</li>
 <li><b>Pioneer DDJ-FLX4</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the FLX4 dialog</li>
 <li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (with Chrome/Edge you can enter subfolders and use REFRESH to re-read the files). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
+<li><b>Custom key map</b>: the keyboard layout is a JSON map you can edit right here (section <b>Custom key map</b> below) — remap any key, press APPLY and it is stored in this browser and reloaded on every start. A key can only drive one action, so APPLY refuses a map with conflicts and tells you which ones clash</li>
 <li>SYNC: automatically aligns the other deck's tempo and phase</li>
 <li>3-band EQ with kill, LP/HP filters, trim, channel faders and a constant-power crossfader</li>
 <li>Jog wheel: drag to scratch (while playing) or scrub (while paused)</li>
@@ -414,6 +420,15 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <h3>Keyboard shortcuts</h3>
 <p class="note">Deck A uses the left half of the keyboard and deck B mirrors it on the right. Every control shows its key in the tooltip (hover it). Select an analog control with its key, then use the up/down arrows to adjust it.</p>
 <table id="helpKeys"></table>
+<h3>Custom key map</h3>
+<p class="note">Remap the keyboard by editing this JSON and pressing APPLY. It has the same shape as the built-in map (groups <b>deckA</b>, <b>deckB</b>, <b>mixer</b>, <b>global</b>); omit anything you want to keep at the default, or use <b>RESET</b> to restore the whole built-in map. A key cannot be assigned to two actions at once (case matters: <b>z</b> and <b>Z</b> are different keys), and <b>???</b> means unassigned. The map is stored in this browser and loaded on every start.</p>
+<textarea id="keyMapJson" spellcheck="false" aria-label="Custom keyboard mapping JSON"></textarea>
+<div class="flx-row">
+<button class="btn sm" id="keyMapApply">APPLY</button>
+<button class="btn sm" id="keyMapReset">RESET</button>
+<button class="btn sm" id="keyMapDefaults">LOAD DEFAULT</button>
+</div>
+<p id="keyMapMsg" class="note"></p>
 <h3>Notes</h3>
 <p class="note">The TEMPO fader also changes the pitch of the track (there is no key lock) and is oriented like the hardware: sliding it up slows the track down, sliding it down speeds it up. Above each jog you can read the total track time, the time left, the current BPM and the harmonic key in Camelot notation (for example 1A). On the overlaid waveform strip the wheel or the +/&#8722; buttons zoom both decks together (shared time axis); clicking seeks the deck of the half you clicked (A on top, B on the bottom). Works best in Chrome/Edge. The recording is saved as a file when recording stops.</p>
 </div>
@@ -2662,11 +2677,58 @@ function updateBeatLeds(){
   if(ib!==beatLedState.B){beatLedState.B=ib;beatLedEls.B.forEach((e,i)=>e.classList.toggle('on',i===ib));}
 }
 const helpModal=$('#helpModal');
-const openHelp=()=>{helpModal.hidden=false;$('#helpClose').focus();};
+const openHelp=()=>{helpModal.hidden=false;refreshKeyMapEditor();$('#helpClose').focus();};
 const closeHelp=()=>{helpModal.hidden=true;};
 $('#helpBtn').addEventListener('click',openHelp);
 $('#helpClose').addEventListener('click',closeHelp);
 helpModal.addEventListener('click',e=>{if(e.target===helpModal)closeHelp();});
+function refreshKeyMapEditor(){
+  const ta=$('#keyMapJson');
+  if(!ta)return;
+  ta.value=JSON.stringify(collectKeyMap(),null,2);
+  const m=$('#keyMapMsg');
+  if(m){m.textContent='';m.className='note';}
+}
+function keyMapMessage(text,err){
+  const m=$('#keyMapMsg');
+  if(!m)return;
+  m.textContent=text;
+  m.className=err?'note err':'note ok';
+}
+$('#keyMapApply').addEventListener('click',()=>{
+  let obj;
+  try{obj=JSON.parse($('#keyMapJson').value||'{}');}
+  catch(e){keyMapMessage('Invalid JSON: '+e.message,true);return;}
+  if(!obj||typeof obj!=='object'||Array.isArray(obj)){keyMapMessage('The map must be a JSON object.',true);return;}
+  const invalid=keyMapValidate(obj);
+  if(invalid.length){keyMapMessage('Invalid map: '+invalid.join('; ')+'.',true);return;}
+  const merged=mergeKeyMap(cloneKeyMap(SHORTCUT_CONFIG),obj);
+  const dups=keyMapConflicts(merged);
+  const keys=Object.keys(dups);
+  if(keys.length){
+    const parts=keys.map(k=>keyLabel(k)+'\u2192'+dups[k].map(keyMapLabel).join(' / '));
+    keyMapMessage('Conflicting keys: '+parts.join('; ')+'. Fix them and apply again.',true);
+    return;
+  }
+  applyKeyMap(obj);
+  saveKeyMap();
+  refreshKeyMapEditor();
+  keyMapMessage('Saved. The new keys are active.',false);
+  toast('Key map applied');
+});
+$('#keyMapReset').addEventListener('click',()=>{
+  try{localStorage.removeItem(KEYMAP_KEY);}catch(e){}
+  applyKeyMap(cloneKeyMap(KEYMAP_DEFAULT));
+  refreshKeyMapEditor();
+  keyMapMessage('Reset to the built-in key map.',false);
+  toast('Key map reset');
+});
+$('#keyMapDefaults').addEventListener('click',()=>{
+  const ta=$('#keyMapJson');
+  if(ta)ta.value=JSON.stringify(KEYMAP_DEFAULT,null,2);
+  keyMapMessage('Built-in map loaded into the editor \u2014 press APPLY to use it.',false);
+});
+$('#keyMapJson').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeHelp();}});
 const libModal=$('#libModal');
 const openLib=()=>{libModal.hidden=false;$('#libClose').focus();};
 const closeLib=()=>{libModal.hidden=true;};
@@ -2750,7 +2812,12 @@ function buildHelpTable(){
   const tbl=document.getElementById('helpKeys');
   if(tbl)tbl.innerHTML=rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join('');
 }
-const SHORTCUTS={btn:{},analog:{},sel:null};
+const SHORTCUTS={btn:{},analog:{},reg:{},sel:null};
+function keyOf(ref){
+  if(!ref)return '';
+  const g=SHORTCUT_CONFIG[ref.g];
+  return g?g[ref.f]:'';
+}
 function flashBtn(el){
   if(!el)return;
   el.classList.remove('press');
@@ -2759,16 +2826,35 @@ function flashBtn(el){
   clearTimeout(el._pressT);
   el._pressT=setTimeout(()=>el.classList.remove('press'),280);
 }
-function regBtn(el,name,key,opts){
+function regBtn(el,name,key,opts,ref){
   opts=opts||{};
   el.title=name+': '+keyLabel(key);
   SHORTCUTS.btn[key]={name:name,key:key,el:el,down:opts.down||null,up:opts.up||null};
+  if(ref)SHORTCUTS.reg[ref.g+'.'+ref.f]={kind:'btn',name:name,ref:ref,el:el,down:opts.down||null,up:opts.up||null};
 }
-function regAnalog(obj,name,key,step){
+function regAnalog(obj,name,key,step,ref){
   obj.el.title=name+': '+keyLabel(key);
   const sl=obj.el.querySelector('[role="slider"]')||obj.el;
   sl.setAttribute('aria-label',name);
   SHORTCUTS.analog[key]={name:name,key:key,obj:obj,step:step};
+  if(ref)SHORTCUTS.reg[ref.g+'.'+ref.f]={kind:'analog',name:name,ref:ref,obj:obj,step:step};
+}
+function rebuildBindings(){
+  SHORTCUTS.btn={};
+  SHORTCUTS.analog={};
+  for(const id in SHORTCUTS.reg){
+    const e=SHORTCUTS.reg[id];
+    const key=keyOf(e.ref);
+    if(e.kind==='btn'){
+      e.el.title=e.name+': '+keyLabel(key);
+      SHORTCUTS.btn[key]={name:e.name,key:key,el:e.el,down:e.down,up:e.up};
+    }else{
+      e.obj.el.title=e.name+': '+keyLabel(key);
+      const sl=e.obj.el.querySelector('[role="slider"]')||e.obj.el;
+      sl.setAttribute('aria-label',e.name);
+      SHORTCUTS.analog[key]={name:e.name,key:key,obj:e.obj,step:e.step};
+    }
+  }
 }
 function normKey(raw){
   return (SHORTCUTS.btn[raw]||SHORTCUTS.analog[raw])?raw:raw.toLowerCase();
@@ -2812,8 +2898,8 @@ const SHORTCUT_CONFIG={
     loopQuarter:'^',loopHalf:'|',loop1:'6',loop2:'7',loop4:'8',loop8:'9',
     effectDelay:'&',effectEcho:'*',effectFlanger:'(',effectReverb:')',effectPhaser:'N',effectBitcrush:'=',
     stemVocal:'alt+7',stemInst:'alt+8',stemBass:'alt+9',stemDrums:'alt+0',
-    bendMinus:'.',bendPlus:'è',
-    killHighs:'y',killMids:'h',killLows:'n',
+    bendMinus:'r',bendPlus:'è',
+    killHighs:'y',killMids:'u',killLows:'n',
     pitch:'pagedown',volume:'delete',trim:'???',highs:'f8',mids:'f10',lows:'f12',filter:'end',
     beatJumpM16:'U',beatJumpM8:'I',beatJumpM4:'O',beatJumpP4:'P',beatJumpP8:'{',beatJumpP16:'}',
     gridHalf:'J',gridDouble:'K',gridNudgeM:'L',gridNudgeP:';',gridSet:':',gridTap:'"'
@@ -2831,7 +2917,86 @@ const SHORTCUT_CONFIG={
     closeModal:'escape'
   }
 };
-function wireDeck(deck,chanEl,keys){
+const KEYMAP_KEY='vibedj-keymap';
+const KEYMAP_GROUPS=['deckA','deckB','mixer','global'];
+const KEYMAP_DEFAULT=cloneKeyMap(SHORTCUT_CONFIG);
+function cloneKeyMap(src){
+  const out={};
+  KEYMAP_GROUPS.forEach(g=>{out[g]=Object.assign({},src[g]);});
+  return out;
+}
+function mergeKeyMap(base,o){
+  const out={};
+  KEYMAP_GROUPS.forEach(g=>{out[g]=Object.assign({},base[g],(o&&o[g])||{});});
+  return out;
+}
+function collectKeyMap(){
+  return cloneKeyMap(SHORTCUT_CONFIG);
+}
+function keyMapConflicts(map){
+  const seen={},dups={};
+  KEYMAP_GROUPS.forEach(g=>{
+    const grp=map[g]||{};
+    Object.keys(grp).forEach(f=>{
+      const k=grp[f];
+      if(k==='???'||k==null||k==='')return;
+      const id=g+'.'+f;
+      if(seen[k]===undefined)seen[k]=id;
+      else(dups[k]=dups[k]||[seen[k]]).push(id);
+    });
+  });
+  return dups;
+}
+function keyMapLabel(id){
+  const e=SHORTCUTS.reg[id];
+  return e?e.name:id;
+}
+function keyMapValidate(obj){
+  const errs=[];
+  Object.keys(obj).forEach(g=>{
+    if(KEYMAP_GROUPS.indexOf(g)<0){errs.push('unknown group "'+g+'"');return;}
+    const grp=obj[g];
+    if(!grp||typeof grp!=='object'||Array.isArray(grp)){errs.push('"'+g+'" must be an object');return;}
+    Object.keys(grp).forEach(f=>{
+      if(!(f in KEYMAP_DEFAULT[g])){errs.push('unknown key "'+g+'.'+f+'"');return;}
+      if(typeof grp[f]!=='string')errs.push('"'+g+'.'+f+'" must be a string');
+    });
+  });
+  return errs;
+}
+function sanitizeKeyMap(obj){
+  const out={};
+  KEYMAP_GROUPS.forEach(g=>{
+    const src=(obj&&obj[g])||{};
+    Object.keys(src).forEach(f=>{
+      if(f in KEYMAP_DEFAULT[g]&&typeof src[f]==='string')out[g]=out[g]||{},out[g][f]=src[f];
+    });
+  });
+  return out;
+}
+function applyKeyMap(map){
+  const merged=mergeKeyMap(SHORTCUT_CONFIG,map);
+  KEYMAP_GROUPS.forEach(g=>{SHORTCUT_CONFIG[g]=merged[g];});
+  rebuildBindings();
+  buildHelpTable();
+  const q=$('#quantBtn');
+  if(q)q.title='Quantize \u2014 snap cue points, loops, hot cues and beat jumps to the beatgrid ('+keyLabel(SHORTCUT_CONFIG.global.quantize)+')';
+  const hb=$('#helpBtn');
+  if(hb)hb.title='Help: '+keyLabel(SHORTCUT_CONFIG.global.help);
+  const lb=$('#libBtn');
+  if(lb)lb.title='Library: '+keyLabel(SHORTCUT_CONFIG.global.library);
+}
+function loadKeyMap(){
+  let saved=null;
+  try{saved=JSON.parse(localStorage.getItem(KEYMAP_KEY)||'null');}catch(e){}
+  if(!saved||typeof saved!=='object'||Array.isArray(saved))return;
+  const clean=sanitizeKeyMap(saved);
+  if(Object.keys(keyMapConflicts(mergeKeyMap(cloneKeyMap(SHORTCUT_CONFIG),clean))).length===0)applyKeyMap(clean);
+}
+function saveKeyMap(){
+  try{localStorage.setItem(KEYMAP_KEY,JSON.stringify(collectKeyMap()));}catch(e){}
+}
+function wireDeck(deck,chanEl,keys,group){
   const p=deck.L+' \u00b7 ';
   const bySel=s=>deck.root.querySelector(s);
   const kill=band=>chanEl.querySelector('[data-band="'+band+'"]');
@@ -2890,29 +3055,30 @@ function wireDeck(deck,chanEl,keys){
     ['Set BPM','gridSet',bySel('.gb[data-g="set"]')],
     ['Tap tempo','gridTap',bySel('.gb[data-g="tap"]')],
   ];
-  list.forEach(d=>regBtn(d[2],p+d[0],keys[d[1]],d[3]));
+  list.forEach(d=>regBtn(d[2],p+d[0],keys[d[1]],d[3],{g:group,f:d[1]}));
 }
-function wireDeckAnalog(deck,chan,keys){
+function wireDeckAnalog(deck,chan,keys,group){
   const p=deck.L+' \u00b7 ';
-  regAnalog(deck.pitchFader,p+'Pitch',keys.pitch,0.1);
-  regAnalog(chan.fader,p+'Volume',keys.volume,0.02);
-  regAnalog(chan.trim,p+'Trim',keys.trim,0.5);
-  regAnalog(chan.hi,p+'Highs',keys.highs,0.5);
-  regAnalog(chan.mid,p+'Mids',keys.mids,0.5);
-  regAnalog(chan.low,p+'Lows',keys.lows,0.5);
-  regAnalog(chan.fil,p+'Filter',keys.filter,0.02);
+  regAnalog(deck.pitchFader,p+'Pitch',keys.pitch,0.1,{g:group,f:'pitch'});
+  regAnalog(chan.fader,p+'Volume',keys.volume,0.02,{g:group,f:'volume'});
+  regAnalog(chan.trim,p+'Trim',keys.trim,0.5,{g:group,f:'trim'});
+  regAnalog(chan.hi,p+'Highs',keys.highs,0.5,{g:group,f:'highs'});
+  regAnalog(chan.mid,p+'Mids',keys.mids,0.5,{g:group,f:'mids'});
+  regAnalog(chan.low,p+'Lows',keys.lows,0.5,{g:group,f:'lows'});
+  regAnalog(chan.fil,p+'Filter',keys.filter,0.02,{g:group,f:'filter'});
 }
 const chanRoots=document.querySelectorAll('.mx-chans .chan');
-wireDeck(deckA,chanRoots[0],SHORTCUT_CONFIG.deckA);
-wireDeck(deckB,chanRoots[1],SHORTCUT_CONFIG.deckB);
-wireDeckAnalog(deckA,chanA,SHORTCUT_CONFIG.deckA);
-wireDeckAnalog(deckB,chanB,SHORTCUT_CONFIG.deckB);
-regBtn($('#recBtn'),'Record',SHORTCUT_CONFIG.mixer.record);
-regAnalog(mixer.masterKnob,'Master',SHORTCUT_CONFIG.mixer.master,0.02);
-regAnalog(mixer.hpKnob,'Phones',SHORTCUT_CONFIG.mixer.phones,0.02);
-regBtn($('#zoomIn'),'Zoom in',SHORTCUT_CONFIG.global.zoomIn);
-regBtn($('#zoomOut'),'Zoom out',SHORTCUT_CONFIG.global.zoomOut);
-regBtn($('#quantBtn'),'Quantize',SHORTCUT_CONFIG.global.quantize);
+loadKeyMap();
+wireDeck(deckA,chanRoots[0],SHORTCUT_CONFIG.deckA,'deckA');
+wireDeck(deckB,chanRoots[1],SHORTCUT_CONFIG.deckB,'deckB');
+wireDeckAnalog(deckA,chanA,SHORTCUT_CONFIG.deckA,'deckA');
+wireDeckAnalog(deckB,chanB,SHORTCUT_CONFIG.deckB,'deckB');
+regBtn($('#recBtn'),'Record',SHORTCUT_CONFIG.mixer.record,null,{g:'mixer',f:'record'});
+regAnalog(mixer.masterKnob,'Master',SHORTCUT_CONFIG.mixer.master,0.02,{g:'mixer',f:'master'});
+regAnalog(mixer.hpKnob,'Phones',SHORTCUT_CONFIG.mixer.phones,0.02,{g:'mixer',f:'phones'});
+regBtn($('#zoomIn'),'Zoom in',SHORTCUT_CONFIG.global.zoomIn,null,{g:'global',f:'zoomIn'});
+regBtn($('#zoomOut'),'Zoom out',SHORTCUT_CONFIG.global.zoomOut,null,{g:'global',f:'zoomOut'});
+regBtn($('#quantBtn'),'Quantize',SHORTCUT_CONFIG.global.quantize,null,{g:'global',f:'quantize'});
 $('#quantBtn').title='Quantize \u2014 snap cue points, loops, hot cues and beat jumps to the beatgrid ('+keyLabel(SHORTCUT_CONFIG.global.quantize)+')';
 $('#zoomIn').addEventListener('click',()=>SV.zoom(1/1.35));
 $('#zoomOut').addEventListener('click',()=>SV.zoom(1.35));
