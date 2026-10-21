@@ -291,7 +291,7 @@ Press **FLX4** in the top bar to connect a **Pioneer DDJ-FLX4** over USB (Web MI
 | 🎛️ FX CH / SELECT / ON / LEVEL | CH1 / CH2 picks the deck targeted by FX SELECT, ON toggles its effect, LEVEL sets the shared depth |
 | ◁ ▷ BEAT (FX section) | Beat jump both decks by one beat |
 | 🧠 SMART CFX / SMART FADER | Toggle quantize / unmute all stems |
-| 📂 BROWSE rotary | Scroll the selection through the Library track list (when the Library is open) |
+| 📂 BROWSE rotary | Scroll the selection through the Library track list (highlighted only while the controller is connected) |
 | 📂 LOAD ◁ / ▷ | Load the selected Library track onto deck A / B (when the Library is open) |
 | 📂 BROWSE press | Open or close the Library |
 | 💡 LEDs | Play, cue, sync, loops, PFL, pad modes, pads, effects and master cue follow the app |
