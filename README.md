@@ -63,7 +63,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 🎙️ | **Record** the master output to a file |
 | 🎛️ | **Pioneer DDJ-FLX4** controller support: full bidirectional MIDI mapping, LEDs and master audio routing |
 | ⌨️ | Full **keyboard** control with on-screen tooltips |
-| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (30% → 120%): every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the interface simply shrinks and leaves unused space at the bottom instead of stretching the waveform (modals, toasts and tooltips zoom too) |
+| 🔍 | **UI zoom** — `−` / `+` buttons in the top bar resize the whole interface (30% → 120%): every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the decks and mixer shrink while the waveform strip stretches vertically to fill all the remaining page space, leaving no empty gap at the bottom (modals, toasts and tooltips zoom too) |
 | 📱 | Installable **PWA** (offline-capable) |
 
 > 💡 Everything happens **in your browser**. VibeDJ never sends your music anywhere. 🔐
@@ -158,7 +158,7 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 | ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback |
 | 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point — the button shows its amber colour only while a cue is stored, standard grey otherwise; the CUE text blinks while paused away from the cue point, like a real console |
 | ⚡ **SYNC** | Match the other deck's tempo **and** beat phase |
-| 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**) |
+| 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**); oriented like the hardware, so sliding up slows down and sliding down speeds up |
 
 ### ⏭️ Beat jump & 🎚️ BPM/grid tools
 - ⏭️ **Beat jump** — buttons `−16 · −8 · −4 · +4 · +8 · +16` jump whole beats (uses the detected BPM, defaults to 120 if none); with **QUANTIZE** on, the landing position snaps to the beatgrid.
