@@ -291,7 +291,9 @@ Press **FLX4** in the top bar to connect a **Pioneer DDJ-FLX4** over USB (Web MI
 | 🎛️ FX CH / SELECT / ON / LEVEL | CH1 / CH2 picks the deck targeted by FX SELECT, ON toggles its effect, LEVEL sets the shared depth |
 | ◁ ▷ BEAT (FX section) | Beat jump both decks by one beat |
 | 🧠 SMART CFX / SMART FADER | Toggle quantize / unmute all stems |
-| 📂 BROWSE / LOAD | Zoom the waveform; open the library |
+| 📂 BROWSE rotary | Scroll the selection through the Library track list (when the Library is open) |
+| 📂 LOAD ◁ / ▷ | Load the selected Library track onto deck A / B (when the Library is open) |
+| 📂 BROWSE press | Open or close the Library |
 | 💡 LEDs | Play, cue, sync, loops, PFL, pad modes, pads, effects and master cue follow the app |
 
 **Audio routing.** The FLX4's built-in USB audio interface shows up as an extra output: VibeDJ can send the **master + PFL mix** to it with `setSinkId`. A browser can only feed **one stereo stream to one output**, so both the controller's master outputs and its headphone jack carry that single mix, with **HEADPHONE MIX / LEVEL** blending PFL in; there is no separate cue channel. Choose the output in the FLX4 dialog (the controller is detected automatically) or with **CHOOSE…**; the choice is remembered.
