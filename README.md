@@ -326,12 +326,12 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 | 🎯 Hot cues 5–8 | `Shift+Z X C V` | `Shift+/ . , m` |
 | 🔁 Loop in / out / exit | `Q W E` | `I O P` |
 | 🔢 Loop 1/4 · 1/2 · 1 · 2 · 4 · 8 | `Shift+5 ~ 2 3 4 5` | `Shift+6 \| 6 7 8 9` |
-| ↘️↗️ Bend − / + (hold) | `-` / `+` | `.` / `è` |
+| ↘️↗️ Bend − / + (hold) | `-` / `+` | `r` / `è` |
 | 🔊 Effects: delay / echo / flanger / reverb / phaser / bitcrush | `Shift+1..4` · `Shift+B` · `Backtick` | `Shift+7..0` · `Shift+N` · `=` |
 | 🎤 Stems: vocal / instrumental / bass / drums | `Alt+1..4` | `Alt+7..0` |
 | ⏭️ Beat jump −16 · −8 · −4 · +4 · +8 · +16 | `Shift+Q W E R T Y` | `Shift+U I O P { }` |
 | 🎚️ Grid ÷2 · ×2 · nudge ◀ · ▶ · SET · TAP | `Shift+A S D F G H` | `Shift+J K L ; : "` |
-| 🔇 Kill highs / mids / lows | `T G B` | `Y H N` |
+| 🔇 Kill highs / mids / lows | `T G B` | `Y U N` |
 | 🎚️ Pitch | `PageUp` | `PageDown` |
 | 📉 Volume | `Insert` | `Delete` |
 | 🎼 Highs / Mids / Lows | `F7 F9 F11` | `F8 F10 F12` |
@@ -352,8 +352,8 @@ VibeDJ is fully playable from the keyboard. ⌨️🎉
 | 🎯 Select control | `↑` / `↓` |
 | ❌ Close modal / deselect | `Esc` |
 
-> 🛠️ The whole keymap lives in a single **`SHORTCUT_CONFIG`** object in `index.html` — swap any key to build your own layout. ✏️
-> ℹ️ Some slots (like **PFL** and **Trim**) may be left unassigned in the current layout.
+> 🛠️ The whole keymap lives in a single **`SHORTCUT_CONFIG`** object in `index.html` — swap any key to build your own layout. ✏️ You can also remap everything **in-app**: open **How to use** (F2) and edit the **Custom key map** JSON (same shape: `deckA`, `deckB`, `mixer`, `global`), then press **APPLY**. The map is saved in `localStorage` and reloaded on every start; **APPLY** is blocked if a key is assigned to two actions (case matters), so you always get a conflict-free layout. **RESET** restores the built-in map.
+> ℹ️ Some slots (like **PFL** and **Trim**) are unassigned and shown as **`???`**; multiple `???` are allowed. In the deck-B layout **Kill mids** is `u` and **Bend −** is `r`.
 > ♿ Knobs and faders are **keyboard-focusable** (Tab) and respond to **↑ / ↓ / Home / End**; every slider exposes its value to screen readers.
 
 ---
