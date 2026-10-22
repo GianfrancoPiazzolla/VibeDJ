@@ -110,8 +110,8 @@ Each deck shows the **file name**, **duration**, **mono/stereo** and **sample ra
 
 Open the **Library** with the top-bar **LIBRARY** button or the **F3** shortcut. 🗂️
 
-- 📂 **SELECT FOLDER** — uses the modern **File System Access API** to browse a real folder, enter **subfolders** (double-click a `DIR` row, or `.. go up`) and **REFRESH**. 🔄
-- 🗃️ In browsers without that API, it falls back to a **static list** from a folder input (works in Chrome/Edge). 🧩
+- 📂 **SELECT FOLDER** — uses the modern **File System Access API** to browse a real folder and **REFRESH** it. 🔄 The list shows **only the playable audio files that sit directly in the selected folder**: subfolders are never listed and their content is not scanned.
+- 🗃️ In browsers without that API, it falls back to a **static list** from a folder input (works in Chrome/Edge). 🧩 Same rule: only the files directly inside the picked folder are listed.
 
 Every audio row shows 🏷️:
 
@@ -178,12 +178,13 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 
 - 🔍 **Zoom**: mouse **wheel**, the **−** / **+** buttons, or the **`[` / `]`** shortcuts → both decks zoom together.
 - 🖱️ **Click to seek**: clicking the **top half** seeks deck **A**, the **bottom half** seeks deck **B**.
-- 🎨 Each half renders a **3-band colored waveform** (low / mid / high).
+- 🎨 Each half renders a **3-band colored waveform** (low / mid / high); the per-column height is smoothed across five neighbouring columns with a Gaussian-like kernel, blended with a small share of the raw peak so short transients stay visible — the strip reads as a soft continuous contour instead of a row of separate sticks. While playing, each sample is binned by its absolute time (so the content of a column never changes as the window scrolls) and every bar is snapped to whole device pixels, so the shape slides smoothly with no shimmer.
+- 📊 **Track progress**: a thin strip along the top of each half shows the elapsed time over the whole track in the deck colour, with a bright cursor on the leading edge; it follows the real playback position (so it rewinds with a loop) and is display-only — seeking stays on the waveform below.
 - 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the marked bar is the **downbeat** (every 4 bars).
 - 📏 Each half displays the **phase offset in ms** against the beat — nudge the **TEMPO** fader until both grids stay locked. 🔒
 - 🧭 A small **graphical phase meter** compares both decks' phase (it turns the deck color when the beats are aligned). 🎯
 
-Each deck additionally has its own **overview waveform** canvas you can click to seek. 📊
+Each deck additionally has its own **overview waveform** canvas you can click to seek. 📊 On long tracks the colors come from the **average** band balance of each column (not the per-column peak): the hue follows the **spectral centroid** smoothly (warm amber for bass-driven passages, green through the mids, azure for hi-hat/sibilance sections) with a soft, saturated HSL mapping instead of additive RGB. The height follows the **average energy** of the column, smoothed across neighbouring columns, and is drawn with generous headroom, so loud passages no longer merge into a solid saturated block: the overview keeps an alternating, coherent palette and a readable envelope even when the whole track is squeezed into a few hundred pixels, and never clips to white.
 
 ---
 
@@ -227,6 +228,7 @@ The stems are applied **after** the effects chain (`… → phaser → bitcrush 
 - 🎚️ Quick presets: **1/4 · 1/2 · 1 · 2 · 4 · 8** beats (auto-sized from the detected BPM).
 - ✂️ Manual **IN / OUT / EXIT** for free loop points.
 - 🟢 The active loop highlights and playback wraps seamlessly. 🔄
+- 📌 Changing the loop length of an **existing** loop (preset buttons, FLX4 pads or knob) keeps the original **IN** point and only moves the **OUT** — the loop grows or shrinks around its own start instead of jumping to the current position.
 
 > 🎯 Turn on **QUANTIZE** (switch next to the PHONES knob in the mixer) to snap cue points, loops, hot cues and beat jumps to the nearest beat. ✨
 
@@ -281,7 +283,7 @@ Press **FLX4** in the top bar to connect a **Pioneer DDJ-FLX4** over USB (Web MI
 | 🔢 Pads (HOT CUE) | Set or jump to hot cue 1-8; **SHIFT** clears it |
 | 🎛️ Pads (PAD FX1 / PAD FX2) | Toggle delay, echo, flanger, reverb, phaser, bitcrush |
 | ⏭️ Pads (BEAT JUMP) | Jump -16 / -8 / -4 / -1 / +1 / +4 / +8 / +16 beats |
-| 🎤 Pads (SAMPLER) | Pads 1-4 mute / unmute vocal, instrumental, bass, drums; pads 5-8 toggle effects |
+| 🎤 Pads (SAMPLER) | Pads 1-4 mute / unmute vocal, instrumental, bass, drums in the same left-to-right order as the on-screen STEMS row; pads 5-8 toggle effects |
 | 🎯 Pads (BEAT LOOP) | Set a 1/4 - 32 beat loop |
 | 🎚️ TRIM / EQ / CFX | Trim, 3-band EQ and LP/HP filter (CFX) |
 | 🔊 Channel fader / CH CUE | Volume and exclusive PFL |
