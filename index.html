@@ -27,7 +27,8 @@ button,input,label{font-family:inherit}
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 12px;
 background:#101319e6;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;backdrop-filter:blur(6px)}
 .brand{font-size:14px;font-weight:800;letter-spacing:.08em}
-.brand b{color:var(--accent)}
+.brand .brandDA{color:var(--a)}
+.brand .brandDB{color:var(--b)}
 .brand em{font-style:normal;font-weight:400;font-size:11px;color:var(--dim);margin-left:10px;letter-spacing:0}
 .top-right{display:flex;gap:8px;align-items:center}
 .top-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;z-index:1}
@@ -342,7 +343,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <body>
 <div id="ui">
 <header class="top">
-<div class="brand">Vibe<b>DJ</b><em>Mix your tracks right in the browser!</em></div>
+<div class="brand">Vibe<span class="brandDA">D</span><span class="brandDB">J</span><em>Mix your tracks right in the browser!</em></div>
 <div class="top-center">
 <button class="btn zc" id="uiZoomOut" title="Zoom out the interface (30%)">&#8722;</button>
 <span class="z-pct" id="uiZoomVal">100%</span>
