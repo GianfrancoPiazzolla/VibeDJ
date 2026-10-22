@@ -37,8 +37,8 @@ background:#101319e6;border-bottom:1px solid var(--line);position:sticky;top:0;z
 html.zoomed #ui{zoom:var(--zz,1);width:100%;min-height:calc(100vh / var(--zz,1));min-height:calc(100dvh / var(--zz,1))}
 html.zoomed .modal,html.zoomed #dropOverlay,html.zoomed #toasts,html.zoomed .tt{zoom:var(--zz,1)}
 html.zoomed .modal-card{max-height:calc(86vh / var(--zz,1))}
-html.zoomed .lib-card{max-width:calc(50vw / var(--zz,1));width:calc(50vw / var(--zz,1));
-max-height:calc(90vh / var(--zz,1));height:calc(50vh / var(--zz,1))}
+html.zoomed .lib-card{max-width:calc(75vw / var(--zz,1));width:calc(75vw / var(--zz,1));
+max-height:calc(90vh / var(--zz,1));height:calc(75vh / var(--zz,1))}
 .btn{background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#cfd6e2;border-radius:7px;
 padding:5px 9px;cursor:pointer;font-weight:700;font-size:11px;letter-spacing:.05em;text-align:center;
 display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:border-color .12s,color .12s,background .12s}
@@ -79,11 +79,11 @@ background:#0e1116;border:1px solid var(--acc);color:var(--acc);flex:none}
 .load{cursor:pointer}
 .syncbar{padding:6px 8px 0;flex:1 1 auto;display:flex;flex-direction:column;min-height:120px}
 .sv-wrap{position:relative;flex:1 1 0;min-height:0;display:flex;flex-direction:column}
-.sv-wrap .zoom{position:absolute;top:6px;right:6px;width:26px;height:20px;padding:0;font-size:13px;line-height:1;z-index:2;
+.sv-wrap .zoom{position:absolute;top:10px;right:6px;width:26px;height:20px;padding:0;font-size:13px;line-height:1;z-index:2;
 background:linear-gradient(#232833,#181b22);border:1px solid #2d3340;color:#cfd6e2;border-radius:6px;cursor:pointer;font-weight:700}
 .sv-wrap .zoom:hover{color:#fff;border-color:#414a5c}
 .sv-wrap .zoom-out{right:37px}
-#syncWave{position:absolute;inset:0;width:100%;height:100%;border-radius:11px;background:#0a0c10;border:1px solid var(--line);
+#syncWave{position:absolute;inset:0;width:100%;height:100%;border-radius:0;background:#0a0c10;border:1px solid var(--line);
 display:block;touch-action:none;cursor:crosshair}
 .browse{margin:0 8px 6px;background:linear-gradient(#151920,#11141a);border:1px solid var(--line);
 border-radius:14px;padding:6px;box-shadow:0 10px 30px #00000055}
@@ -91,18 +91,22 @@ border-radius:14px;padding:6px;box-shadow:0 10px 30px #00000055}
 .br-t{font-size:10px;letter-spacing:.14em;color:#8b95a7;font-weight:800;flex:none}
 .br-path{flex:1;min-width:120px;font:600 11px ui-monospace,Menlo,monospace;color:var(--accent);
 white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.br-list{flex:1;min-height:0;overflow:auto;scrollbar-gutter:stable;border:1px solid var(--line);border-radius:9px;background:#0d1015}
-.br-head{display:grid;grid-template-columns:33px minmax(0,1fr) 50px 55px 55px 40px 55px 70px 0px;
-padding:2px 8px 4px;font-size:9px;font-weight:800;letter-spacing:.1em;color:var(--dim);text-align:left;
-overflow-y:auto;scrollbar-gutter:stable}
+.br-list{--br-cols:56px minmax(0,1fr) 70px 58px 54px 64px 64px 28px 28px;--br-gap:16px;
+flex:1;min-height:0;overflow:auto;scrollbar-gutter:stable;border:1px solid var(--line);border-radius:9px;background:#0d1015}
+.br-head{display:grid;grid-template-columns:var(--br-cols);column-gap:var(--br-gap);align-items:center;
+padding:3px 12px;font-size:9px;font-weight:800;letter-spacing:.1em;
+color:var(--dim);text-align:left;position:sticky;top:0;z-index:2;background:#0d1015;
+border-bottom:1px solid #1a1f28;user-select:none}
 .br-head span{text-align:left}
-.br-head span:nth-child(8){grid-column:8/10}
+.br-head span:nth-child(3){text-align:right}
+.br-head span:nth-child(n+4):nth-child(-n+7){text-align:center}
+.br-head span:nth-child(8){grid-column:8/10;text-align:center}
 .br-row .br-name{text-align:left}
 .br-row .br-meta{text-align:right}
 .br-bpm,.br-key,.br-energy{text-align:center}
 .br-name,.br-tag,.br-meta{white-space:nowrap}
-.br-row{display:grid;grid-template-columns:24px minmax(0,1fr) 58px 46px 45px 58px 35px 28px 28px;column-gap:8px;
-align-items:center;padding:3px 8px;border-bottom:1px solid #1a1f28;cursor:default;text-align:left}
+.br-row{display:grid;grid-template-columns:var(--br-cols);column-gap:var(--br-gap);
+align-items:center;padding:3px 12px;border-bottom:1px solid #1a1f28;cursor:default;text-align:left}
 .br-row .br-name{text-align:left}
 .br-row .br-meta{text-align:right}
 .br-row:last-child{border-bottom:0}
@@ -246,7 +250,7 @@ justify-content:center;z-index:50;padding:18px}
 .modal[hidden]{display:none}
 .modal-card{background:#14171d;border:1px solid #2a303c;border-radius:14px;width:100%;max-width:740px;
 max-height:86vh;overflow:auto;box-shadow:0 30px 90px #000000cc;user-select:text}
-.lib-card{max-width:50vw;width:50vw;max-height:90vh;height:50vh;display:flex;flex-direction:column}
+.lib-card{max-width:75vw;width:75vw;max-height:90vh;height:75vh;display:flex;flex-direction:column}
 .lib-card .modal-body{padding:14px 16px 16px;flex:1;min-height:0;display:flex;flex-direction:column}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);
 position:sticky;top:0;background:#14171d}
@@ -318,7 +322,7 @@ transform:translateX(-50%);opacity:0;transition:opacity .1s;max-width:280px;whit
 .br-head span.sorted-asc::after{content:" \25B2"}
 .br-head span.sorted-desc::after{content:" \25BC"}
 #brSearch{background:#0d1015;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:5px 9px;
-font-size:11px;min-width:150px}
+font-size:11px;min-width:250px}
 #brSearch:focus{outline:none;border-color:var(--accent)}
 .flx-row{display:flex;align-items:center;gap:8px;margin:7px 0;flex-wrap:wrap}
 .flx-row label{font-size:10px;letter-spacing:.1em;color:var(--dim);font-weight:800;text-transform:uppercase}
@@ -375,12 +379,12 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <div class="browse-head">
 <span class="br-t">BROWSE · Local folder:</span>
 <span class="br-path" id="brPath">no folder selected</span>
+<input type="search" id="brSearch" placeholder="Filter by name…" spellcheck="false">
 <button class="btn sm" id="brPick">SELECT FOLDER</button>
 <button class="btn sm" id="brRefresh">REFRESH</button>
-<input type="search" id="brSearch" placeholder="Filter by name…" spellcheck="false">
 </div>
-<div class="br-head"><span>FMT</span><span data-sort="name">FILE NAME</span><span data-sort="size">SIZE</span><span data-sort="time">TIME</span><span data-sort="bpm">BPM</span><span data-sort="key">KEY</span><span data-sort="nrg">ENERGY</span><span>&nbsp;&nbsp;&nbsp;&nbsp;< DECK ></span></div>
 <div class="br-list" id="brList">
+<div class="br-head"><span>FORMAT</span><span data-sort="name">FILE NAME</span><span data-sort="size">SIZE</span><span data-sort="time">TIME</span><span data-sort="bpm">BPM</span><span data-sort="key">KEY</span><span data-sort="nrg">ENERGY</span><span>< DECK ></span></div>
 <div class="br-empty">Pick a folder to browse your audio files. Double-click loads the first free deck, the A / B buttons pick the deck, or drag a row onto a deck.</div>
 </div>
 <input type="file" id="brInput" webkitdirectory hidden>
@@ -402,7 +406,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Overlaid waveforms in a single strip with a shared time axis and zoom: deck A on top, deck B on the bottom, so the two tracks can really be compared</li>
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
-<li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear)</li>
+<li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear) — changing the length of a loop that already exists keeps its <b>IN</b> point and only moves the <b>OUT</b>: the loop expands or contracts around its own start instead of jumping to the current position</li>
 <li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
 <li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the decks and mixer shrink while the waveform strip stretches vertically to fill all the remaining page space, leaving no empty gap at the bottom — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
@@ -410,7 +414,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
 <li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a filter-based approximation, not AI source separation)</li>
 <li><b>Pioneer DDJ-FLX4</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the FLX4 dialog</li>
-<li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (with Chrome/Edge you can enter subfolders and use REFRESH to re-read the files). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
+<li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (the list shows only the playable audio files sitting directly in the selected folder — subfolders are not listed — and REFRESH re-reads them). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
 <li><b>Custom key map</b>: the keyboard layout is a JSON map you can edit right here (section <b>Custom key map</b> below) — remap any key, press APPLY and it is stored in this browser and reloaded on every start. A key can only drive one action, so APPLY refuses a map with conflicts and tells you which ones clash</li>
 <li>SYNC: automatically aligns the other deck's tempo and phase</li>
 <li>3-band EQ with kill, LP/HP filters, trim, channel faders and a constant-power crossfader</li>
@@ -485,7 +489,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <button class="btn sm" id="flxReset">RESET</button>
 </div>
 <h3>Mapped controls</h3>
-<p class="note">Transport PLAY / CUE / SYNC, jog (outer = pitch bend, touched platter = scratch, otherwise bend, SHIFT = fast seek), TEMPO fader, loops (IN / OUT / 4 BEAT / CUE LOOP CALL), pads (HOT CUE sets/jumps, SHIFT clears; PAD FX toggles effects; BEAT JUMP and BEAT LOOP; SAMPLER pads 1-4 = stems, 5-8 = effects), TRIM, EQ, CFX = filter, channel fader, CH CUE, CROSSFADER, MASTER, MASTER CUE, headphone mix/level (both blend the PFL bus), FX CH1/CH2 (target deck) / SELECT / ON / LEVEL, BEAT ◁ / ▷ = beat jump, SMART CFX = quantize, SMART FADER = unmute all stems, BROWSE rotary = scroll the Library selection (highlighted only while the controller is connected), LOAD ◁ / ▷ = load the selected track onto deck A / B, BROWSE press = open or close the Library.</p>
+<p class="note">Transport PLAY / CUE / SYNC, jog (outer = pitch bend, touched platter = scratch, otherwise bend, SHIFT = fast seek), TEMPO fader, loops (IN / OUT / 4 BEAT / CUE LOOP CALL), pads (HOT CUE sets/jumps, SHIFT clears; PAD FX toggles effects; BEAT JUMP and BEAT LOOP; SAMPLER pads 1-4 = the four stems in the same left-to-right order as the on-screen STEMS row (VOCAL, INST, BASS, DRUMS), 5-8 = effects), TRIM, EQ, CFX = filter, channel fader, CH CUE, CROSSFADER, MASTER, MASTER CUE, headphone mix/level (both blend the PFL bus), FX CH1/CH2 (target deck) / SELECT / ON / LEVEL, BEAT ◁ / ▷ = beat jump, SMART CFX = quantize, SMART FADER = unmute all stems, BROWSE rotary = scroll the Library selection (highlighted only while the controller is connected), LOAD ◁ / ▷ = load the selected track onto deck A / B, BROWSE press = open or close the Library.</p>
 </div>
 </div>
 </div>
@@ -955,8 +959,15 @@ function makeEffect(kind){
     }
   };
 }
+const STEMS=[
+  {name:'vocal',label:'VOCAL',title:'Vocal stem: mute / unmute'},
+  {name:'inst',label:'INST',title:'Instrumental stem: mute / unmute'},
+  {name:'bass',label:'BASS',title:'Bass stem: mute / unmute'},
+  {name:'drums',label:'DRUMS',title:'Drums stem: mute / unmute'}
+];
+const STEM_NAMES=STEMS.map(s=>s.name);
 function makeStems(){
-  const names=['vocal','inst','bass','drums'];
+  const names=STEM_NAMES.slice();
   const on={vocal:true,inst:true,bass:true,drums:true};
   const input=AC.createGain();
   const output=AC.createGain();
@@ -1344,10 +1355,7 @@ function deckHTML(L){
       '</div>'+
       '<div class="row stems-row">'+
         '<span class="lab">stems</span>'+
-        '<button class="btn sm stem on" data-stem="vocal" title="Vocal stem: mute / unmute">VOCAL</button>'+
-        '<button class="btn sm stem on" data-stem="inst" title="Instrumental stem: mute / unmute">INST</button>'+
-        '<button class="btn sm stem on" data-stem="bass" title="Bass stem: mute / unmute">BASS</button>'+
-        '<button class="btn sm stem on" data-stem="drums" title="Drums stem: mute / unmute">DRUMS</button>'+
+        STEMS.map(s=>'<button class="btn sm stem on" data-stem="'+s.name+'" title="'+s.title+'">'+s.label+'</button>').join('')+
       '</div>'+
       '<div class="row bend-row">'+
         '<span class="lab">bend</span>'+
@@ -1952,9 +1960,14 @@ class Deck{
     }
     this.updatePlayUI();
   }
+  rawPos(){
+    if(!this.buffer)return 0;
+    const p=this.playing?this.offset+(AC.currentTime-this.refTime)*this.rate:this.offset;
+    return clamp(p,0,this.buffer.duration);
+  }
   pos(){
     if(!this.buffer)return 0;
-    let p=this.playing?this.offset+(AC.currentTime-this.refTime)*this.rate:this.offset;
+    let p=this.rawPos();
     if(this.loop.on&&this.loop.out>this.loop.in){
       const L=this.loop.out-this.loop.in;
       if(p>=this.loop.out)p=this.loop.in+((p-this.loop.in)%L);
@@ -2093,11 +2106,19 @@ class Deck{
     if(!this.buffer||!this.bpm)return;
     const per=60/this.bpm;
     const len=beats*per;
-    let inP=this.quant(this.pos());
-    if(inP+len>this.buffer.duration)inP=Math.max(0,this.buffer.duration-len);
+    const keepIn=this.loop.in>=0&&this.loop.out>this.loop.in;
+    let inP=this.loop.in;
+    if(!keepIn){
+      inP=this.quant(this.pos());
+      if(inP+len>this.buffer.duration)inP=Math.max(0,this.buffer.duration-len);
+    }
     this.loop.in=inP;
     this.loop.out=Math.min(inP+len,this.buffer.duration);
     this.loop.len=beats;
+    if(this.loop.on&&this.playing){
+      const raw=this.rawPos();
+      if(raw<this.loop.in||raw>=this.loop.out)this.seek(this.loop.in);
+    }
     this.setLoopActive();
     if(this.playing&&this.pos()<inP)this.seek(inP);
   }
@@ -2250,52 +2271,132 @@ class Deck{
     this.cueSend.gain.setTargetAtTime(on?1:0,AC.currentTime,0.01);
   }
   ensureCols(W){
-    if(!this.colLo||this.colLo.length<W){
-      this.colLo=new Float32Array(W);
-      this.colMid=new Float32Array(W);
-      this.colHi=new Float32Array(W);
+    const n=W+8;
+    if(!this.colLo||this.colLo.length<n){
+      this.colLo=new Float32Array(n);
+      this.colMid=new Float32Array(n);
+      this.colHi=new Float32Array(n);
+      this.colSL=new Float32Array(n);
+      this.colSM=new Float32Array(n);
+      this.colSH=new Float32Array(n);
+      this.colN=new Float32Array(n);
     }
   }
   fillCols(t0,viewSec,W){
+    const pad=3,n=W+6;
     const cl=this.colLo,cm=this.colMid,ch=this.colHi;
-    cl.fill(0,0,W);
-    cm.fill(0,0,W);
-    ch.fill(0,0,W);
+    const sl=this.colSL,sm=this.colSM,sh=this.colSH,cn=this.colN;
+    cl.fill(0,0,n);
+    cm.fill(0,0,n);
+    ch.fill(0,0,n);
+    sl.fill(0,0,n);
+    sm.fill(0,0,n);
+    sh.fill(0,0,n);
+    cn.fill(0,0,n);
     const P=this.peaks;
     const pr=this.peakRate;
     const np=P.lo.length;
     const spx=viewSec/W;
-    const i0=Math.max(0,Math.floor(t0*pr));
-    const i1=Math.min(np-1,Math.ceil((t0+viewSec)*pr));
+    const cps=1/spx;
+    const js=Math.floor(t0/spx)-pad;
+    this.colOff=t0/spx-js;
+    const i0=Math.max(0,Math.floor(js*spx*pr));
+    const i1=Math.min(np-1,Math.ceil((js+n)*spx*pr));
     for(let i=i0;i<=i1;i++){
-      const x=Math.floor(((i/pr)-t0)/spx);
-      if(x<0||x>=W)continue;
+      const k=Math.floor((i/pr)*cps)-js;
+      if(k<0||k>=n)continue;
       const a=P.lo[i];
-      if(a>cl[x])cl[x]=a;
+      if(a>cl[k])cl[k]=a;
       const b=P.mid[i];
-      if(b>cm[x])cm[x]=b;
+      if(b>cm[k])cm[k]=b;
       const c=P.hi[i];
-      if(c>ch[x])ch[x]=c;
+      if(c>ch[k])ch[k]=c;
+      sl[k]+=a;
+      sm[k]+=b;
+      sh[k]+=c;
+      cn[k]++;
     }
   }
-  paintCols(g,W,H,cy){
+  paintCols(g,W,H,cy,ov){
+    const n=W+6,off=this.colOff||0;
+    const dpr=g.getTransform().a||1;
     const cl=this.colLo,cm=this.colMid,ch=this.colHi;
+    const sl=this.colSL,sm=this.colSM,sh=this.colSH,cn=this.colN;
+    let dense=!!ov;
+    if(!dense){
+      let tc=0;
+      for(let k=0;k<n;k++)tc+=cn[k];
+      dense=tc/n>6;
+    }
+    let env=null,ref=1;
+    if(dense){
+      if(!this.ovEnv||this.ovEnv.length<n)this.ovEnv=new Float32Array(n);
+      if(!this.ovEnv2||this.ovEnv2.length<n)this.ovEnv2=new Float32Array(n);
+      env=this.ovEnv;
+      for(let k=0;k<n;k++){
+        const c=cn[k]||1;
+        env[k]=0.82*(sl[k]+sm[k]+sh[k])/(3*c)+0.18*Math.max(cl[k],cm[k],ch[k]);
+      }
+      const sm2=this.ovEnv2;
+      for(let k=0;k<n;k++){
+        let s=0;
+        for(let j=-2;j<=2;j++){
+          const kk=k+j;
+          if(kk<0||kk>=n)continue;
+          s+=env[kk]*(3-Math.abs(j));
+        }
+        sm2[k]=s/9;
+      }
+      env=sm2;
+      ref=0;
+      for(let k=0;k<n;k++)if(env[k]>ref)ref=env[k];
+      if(ref<0.02)ref=1;
+    }
     const hh=H/2-Math.max(4,H*0.09);
-    for(let x=0;x<W;x++){
-      const lo=cl[x],md=cm[x],hi=ch[x];
+    if(!dense){
+      if(!this.wvH||this.wvH.length<n)this.wvH=new Float32Array(n);
+      for(let k=0;k<n;k++)this.wvH[k]=Math.max(cl[k],cm[k],ch[k]);
+    }
+    for(let k=0;k<n;k++){
+      const x=k-off;
+      if(x<-1||x>W+1)continue;
+      const lo=cl[k],md=cm[k],hi=ch[k];
       const m=Math.max(lo,md,hi);
-      if(m<0.004)continue;
-      const h=m*hh;
-      let r=35,gc=70,bc=95;
-      r+=lo*220;
-      gc+=md*230;
-      bc+=hi*250;
-      if(lo>md&&lo>hi)r=Math.min(255,r+30);
-      if(hi>lo&&hi>md)bc=Math.min(255,bc+40);
-      if(md>=lo&&md>=hi)gc=Math.min(255,gc+25);
-      r=Math.min(255,r); gc=Math.min(255,gc); bc=Math.min(255,bc);
-      g.fillStyle='rgb('+r+','+gc+','+bc+')';
-      g.fillRect(x,cy-h,1.12,2*h);
+      let amp;
+      if(dense)amp=Math.min(1,env[k]/ref);
+      else{
+        const wv=this.wvH,v=wv[k];
+        const l1=k>0?wv[k-1]:v,l2=k>1?wv[k-2]:l1;
+        const r1=k<n-1?wv[k+1]:v,r2=k<n-2?wv[k+2]:r1;
+        amp=Math.min(1,0.8*(l2+4*l1+6*v+4*r1+r2)/16+0.2*v);
+      }
+      if(amp<0.004)continue;
+      const h=amp*hh;
+      if(dense){
+        const c=cn[k]||1;
+        const al=sl[k]/c,am=sm[k]/c,ah=sh[k]/c;
+        const tot=al+am+ah;
+        let hue=115;
+        if(tot>1e-6){
+          const cc=Math.min(2,(am+2*ah)/tot);
+          hue=20+190*(0.5-0.5*Math.cos(Math.PI*cc/2));
+        }
+        const light=0.26+0.36*amp;
+        g.fillStyle='hsl('+Math.round(hue)+',72%,'+Math.round(light*100)+'%)';
+      }else{
+        let r=35,gc=70,bc=95;
+        r+=lo*220;
+        gc+=md*230;
+        bc+=hi*250;
+        if(lo>md&&lo>hi)r=Math.min(255,r+30);
+        if(hi>lo&&hi>md)bc=Math.min(255,bc+40);
+        if(md>=lo&&md>=hi)gc=Math.min(255,gc+25);
+        r=Math.min(255,r); gc=Math.min(255,gc); bc=Math.min(255,bc);
+        g.fillStyle='rgb('+r+','+gc+','+bc+')';
+      }
+      const x0=Math.round(x*dpr),x1=Math.max(x0+1,Math.round((x+1)*dpr));
+      const y0=Math.round((cy-h)*dpr),y1=Math.max(y0+1,Math.round((cy+h)*dpr));
+      g.fillRect(x0/dpr,y0/dpr,(x1-x0)/dpr,(y1-y0)/dpr);
     }
   }
   drawMarkers(g,W,H,t0,spx,playAtCenter,oy){
@@ -2380,7 +2481,7 @@ class Deck{
       const cy=H/2;
       this.ensureCols(W);
       this.fillCols(0,dur,W);
-      this.paintCols(cg,W,H,cy);
+      this.paintCols(cg,W,H,cy,true);
       cg.fillStyle='rgba(255,255,255,.08)';
       cg.fillRect(0,cy-0.5,W,1);
       this.ovDirty=false;
@@ -3531,7 +3632,7 @@ const FLX={
   },
   resetStems(){
     [deckA,deckB].forEach(dk=>{
-      ['vocal','inst','bass','drums'].forEach(n=>dk.stems.setActive(n,true));
+      STEM_NAMES.forEach(n=>dk.stems.setActive(n,true));
       dk.stemBtns.forEach(b=>b.classList.add('on'));
     });
     this.repaint(true);
@@ -3559,16 +3660,14 @@ const FLX={
   },
   padAction(L,n,shifted){
     ensureAudio();
-    const dk=this.dk(L);
+    const dk=this.dk(L),D=this.dcfg(L);
     if(n>=0&&n<=7){if(shifted)dk.clearHot(n);else dk.hotcue(n);this.repaint(true);return;}
     if(n>=16&&n<=23){this.toggleFxIndex(L,n-16);return;}
     if(n>=32&&n<=39){dk.beatJump(FLX_JUMP[n-32]);return;}
-    if(n>=48&&n<=55){
-      const i=n-48;
-      if(i<4)this.toggleStem(L,['vocal','inst','bass','drums'][i]);
-      else this.toggleFxIndex(L,i-4);
-      return;
-    }
+    const si=D.padsStem.indexOf(n);
+    if(si>=0&&STEM_NAMES[si]){this.toggleStem(L,STEM_NAMES[si]);return;}
+    const fi=D.padsSampler.indexOf(n);
+    if(fi>=0){this.toggleFxIndex(L,fi);return;}
     if(n>=96&&n<=103){dk.setLoopLen(FLX_LOOPS[n-96]);this.repaint(true);return;}
   },
   synced(dk){
@@ -3591,7 +3690,7 @@ const FLX={
       s+=this.fx[L];
       s+=FLX_FX.map(n=>dk.fx[n].isEnabled()?1:0).join('');
       s+=dk.hotcues.map(c=>c!==null?'1':'0').join('');
-      s+=['vocal','inst','bass','drums'].map(n=>dk.stems.isActive(n)?'1':'0').join('');
+      s+=STEM_NAMES.map(n=>dk.stems.isActive(n)?'1':'0').join('');
       s+=dk.loop.len;
     });
     s+=(deckA.pfl||deckB.pfl)?1:0;
@@ -3610,13 +3709,13 @@ const FLX={
     for(let n=112;n<=119;n++)this.sendNote(ch,n,0);
   },
   paintPads(ch,mode,dk){
-    const D=this.cfg.deck,Ls=this.cfg.leds;
+    const D=this.dcfg(dk.L),Ls=this.cfg.leds;
     const set=(n,v)=>this.sendNote(ch,this.num(n),v?Ls.on:Ls.off);
     const dim=n=>this.sendNote(ch,this.num(n),Ls.dim);
     if(mode==='hotcue'){
       for(let i=0;i<8;i++)set(D.padsHot[i],dk.hotcues[i]!==null);
     }else if(mode==='sampler'){
-      ['vocal','inst','bass','drums'].forEach((n,i)=>set(D.padsStem[i],dk.stems.isActive(n)));
+      STEM_NAMES.forEach((n,i)=>set(D.padsStem[i],dk.stems.isActive(n)));
       for(let i=0;i<4;i++)set(D.padsSampler[i],dk.fx[FLX_FX[i]].isEnabled());
     }else if(mode==='padfx1'||mode==='padfx2'){
       for(let i=0;i<6;i++)set(D.padsFx[i],dk.fx[FLX_FX[i]].isEnabled());
@@ -3827,7 +3926,33 @@ const SV={
       }
     }
   },
+  drawProgress(g,dk,y0,bh,W){
+    g.fillStyle='rgba(255,255,255,.06)';
+    g.fillRect(0,y0,W,bh);
+    const dur=dk.buffer&&dk.buffer.duration;
+    if(!dur||dur<=0)return;
+    const dpr=g.getTransform().a||1;
+    const f=clamp((dk.pNow||0)/dur,0,1);
+    const xe=Math.round(f*W*dpr)/dpr;
+    if(xe>0){
+      g.save();
+      g.globalAlpha=.9;
+      g.fillStyle=dk.accent;
+      g.fillRect(0,y0,xe,bh);
+      g.restore();
+    }
+    const cw=Math.max(1,Math.round(2*dpr))/dpr;
+    const cxp=clamp(xe-cw/2,0,W-cw);
+    g.fillStyle='rgba(255,255,255,.92)';
+    g.fillRect(cxp,y0,cw,bh);
+  },
   drawHalf(g,dk,ot,y0,h,W){
+    const dpr=g.getTransform().a||1;
+    const ye=Math.round((y0+h)*dpr)/dpr;
+    y0=Math.round(y0*dpr)/dpr;
+    const bh=Math.round(clamp(Math.round(h*0.07),4,6)*dpr)/dpr;
+    this.drawProgress(g,dk,y0,bh,W);
+    y0+=bh; h=ye-y0;
     const cy=y0+h/2;
     if(!dk.peaks||!dk.buffer){
       g.fillStyle='#39415a';
@@ -3881,6 +4006,8 @@ const SV={
     g.textAlign='left';
     g.textBaseline='top';
     g.fillText(dk.L,7,y0+5);
+    g.fillStyle='#ff3b3b';
+    g.fillRect(W/2-1.5,y0+2,3,h-2);
   },
   draw(){
     const cv=this.cv;
@@ -3891,19 +4018,21 @@ const SV={
     g.fillStyle='#0a0c10';
     g.fillRect(0,0,W,H);
     const gap=2,hh=(H-gap)/2;
-    this.drawHalf(g,deckA,deckB,0,hh,W);
-    this.drawHalf(g,deckB,deckA,hh+gap,hh,W);
+    const dpr=g.getTransform().a||1;
+    const yb=Math.round((hh+gap)*dpr)/dpr;
+    this.drawHalf(g,deckA,deckB,0,yb-gap,W);
+    this.drawHalf(g,deckB,deckA,yb,H-yb,W);
     g.fillStyle='rgba(255,255,255,.1)';
-    g.fillRect(0,hh,W,gap);
-    g.fillStyle='#ff3b3b';
-    g.fillRect(W/2-1.5,0,3,H);
+    g.fillRect(0,yb-gap,W,gap);
   },
   attach(){
     const cv=this.cv;
     let drag=false,dk=null,x0=0,p0=0;
     cv.addEventListener('pointerdown',e=>{
       const r=cv.getBoundingClientRect();
-      dk=(e.clientY-r.top)<r.height/2?deckA:deckB;
+      const hh=(r.height-2)/2,bh=clamp(Math.round(hh*0.07),4,6),yy=e.clientY-r.top;
+      if(yy<=bh||(yy>=hh+2&&yy<=hh+2+bh))return;
+      dk=yy<r.height/2?deckA:deckB;
       if(!dk.buffer)return;
       drag=true;
       x0=e.clientX-r.left;
@@ -3945,7 +4074,6 @@ const BR={
   sortDir:1,
   query:'',
   selId:null,
-  curDirs:[],
   curFiles:[],
   init(){
     this.listEl=$('#brList');
@@ -3962,11 +4090,12 @@ const BR={
     $('#brPick').addEventListener('click',()=>this.pick());
     $('#brRefresh').addEventListener('click',()=>this.refresh());
     $('#brInput').addEventListener('change',e=>{
-      const files=Array.from(e.target.files||[]).filter(f=>AUDIO_RE.test(f.name));
+      const files=Array.from(e.target.files||[]).filter(f=>AUDIO_RE.test(f.name)&&this.inTopLevel(f));
       this.fallback=true;
       this.stack=[];
-      this.pathEl.textContent='folder selected (static list)';
-      this.paint([],files.map(f=>({name:f.name,file:f})));
+      const rp=files.length&&files[0].webkitRelativePath?files[0].webkitRelativePath.split('/')[0]:'';
+      this.pathEl.textContent=rp?rp+' (static list)':'folder selected (static list)';
+      this.paint(files.map(f=>({name:f.name,file:f})));
       e.target.value='';
     });
   },
@@ -3997,31 +4126,33 @@ const BR={
     if(b>=1024)return Math.round(b/1024)+' KB';
     return b+' B';
   },
+  inTopLevel(f){
+    const rp=(f&&f.webkitRelativePath)||'';
+    if(!rp)return true;
+    return rp.split('/').filter(Boolean).length<=2;
+  },
   async render(){
     const cur=this.stack[this.stack.length-1].handle;
     this.pathEl.textContent=this.crumb();
-    const dirs=[],files=[];
+    const files=[];
     try{
       for await (const ent of cur.values()){
         const name=ent.name;
         if(name.charAt(0)==='.')continue;
-        if(ent.kind==='directory')dirs.push({name:name,handle:ent});
-        else if(AUDIO_RE.test(name))files.push({name:name,handle:ent});
+        if(ent.kind==='file'&&AUDIO_RE.test(name))files.push({name:name,handle:ent});
       }
     }catch(err){
       toast('Error reading the folder');
       return;
     }
-    dirs.sort((a,b)=>a.name.localeCompare(b.name));
     files.sort((a,b)=>a.name.localeCompare(b.name));
     const list=await Promise.all(files.map(async f=>{
       try{return {name:f.name,file:await f.handle.getFile()};}
       catch(err){return {name:f.name,file:null};}
     }));
-    this.paint(dirs,list);
+    this.paint(list);
   },
-  paint(dirs,files){
-    this.curDirs=dirs;
+  paint(files){
     this.curFiles=files;
     this.build();
   },
@@ -4038,10 +4169,9 @@ const BR={
     });
   },
   build(){
-    let dirs=this.curDirs,files=this.curFiles;
+    let files=this.curFiles.filter(f=>{const m=this.metaOf(f);return !(m&&m.bad);});
     const q=(this.query||'').trim().toLowerCase();
     if(q){
-      dirs=dirs.filter(d=>d.name.toLowerCase().indexOf(q)>=0);
       files=files.filter(f=>f.name.toLowerCase().indexOf(q)>=0);
     }
     const k=this.sortKey,dir=this.sortDir;
@@ -4063,22 +4193,7 @@ const BR={
     });
     this.updateSortUI();
     const el=this.listEl;
-    el.innerHTML='';
-    if(this.stack.length>1){
-      const up=document.createElement('div');
-      up.className='br-row dir';
-      up.innerHTML='<span class="br-tag">DIR</span><span class="br-name">.. go up</span>';
-      up.addEventListener('click',()=>this.up());
-      el.appendChild(up);
-    }
-    dirs.forEach(d=>{
-      const r=document.createElement('div');
-      r.className='br-row dir';
-      r.innerHTML='<span class="br-tag">DIR</span><span class="br-name"></span>';
-      r.querySelector('.br-name').textContent=d.name;
-      r.addEventListener('dblclick',()=>this.enter(d.name));
-      el.appendChild(r);
-    });
+    el.querySelectorAll('.br-row,.br-empty').forEach(n=>n.remove());
     files.forEach(f=>{
       const id=f.file?this.fileId(f.file):('name:'+f.name);
       const r=document.createElement('div');
@@ -4111,10 +4226,10 @@ const BR={
       el.appendChild(r);
     });
     this.syncSelection();
-    if(!dirs.length&&!files.length){
+    if(!files.length){
       const d=document.createElement('div');
       d.className='br-empty';
-      d.textContent=q?'No matches':'No audio files in this folder';
+      d.textContent=q?'No matches':'No playable audio files in this folder';
       el.appendChild(d);
     }
   },
@@ -4215,7 +4330,7 @@ const BR={
         const res=await Meta.run(mono,buf.sampleRate);
         this.meta.set(j.id,{bpm:(res&&res.bpm)||0,key:detectKey(buf),energy:energyOf(buf),dur:buf.duration});
       }catch(err){
-        this.meta.set(j.id,{bpm:0,key:'',energy:0,dur:0});
+        this.meta.set(j.id,{bad:1});
       }
       this.queued.delete(j.id);
       this.refreshRow(j.id);
@@ -4226,23 +4341,20 @@ const BR={
     if(!this.listEl)return;
     const r=this.listEl.querySelector('.br-row[data-id="'+CSS.escape(id)+'"]');
     if(!r)return;
+    const m=this.meta.get(id);
+    if(m&&m.bad){
+      r.remove();
+      if(!this.rows().length){
+        const d=document.createElement('div');
+        d.className='br-empty';
+        d.textContent=(this.query||'').trim()?'No matches':'No playable audio files in this folder';
+        this.listEl.appendChild(d);
+      }
+      this.syncSelection();
+      return;
+    }
     this.fillRow(r,id);
     if(this.loadedIds.has(id))r.classList.add('loaded');
-  },
-  async enter(name){
-    if(this.fallback)return;
-    try{
-      const h=await this.stack[this.stack.length-1].handle.getDirectoryHandle(name);
-      this.stack.push({handle:h,name:name});
-      await this.render();
-    }catch(err){
-      toast('Cannot open: '+name);
-    }
-  },
-  async up(){
-    if(this.fallback||this.stack.length<=1)return;
-    this.stack.pop();
-    await this.render();
   }
 };
 BR.init();
