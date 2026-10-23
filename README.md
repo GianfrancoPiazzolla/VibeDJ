@@ -127,7 +127,7 @@ Every audio row shows 🏷️:
 
 - 🟡 **Loaded tracks** are highlighted in **amber**.
 - 🖱️ **Double-click** → loads the first **free** deck (or the one not playing).
-- 🅰️🅱️ **A / B** buttons → send the track to a chosen deck.
+- 🅰️🅱️ **A / B** buttons → send the track to a chosen deck. The button stays lit in that deck's colour while the track is loaded there (and blinks while it is playing), so you always see where each track currently sits.
 - 🪂 **Drag a row** → drop it onto a deck.
 - ⏳ Analysis (BPM/key/energy) runs **in the background** in a **Web Worker**, so the UI never freezes. 🧵
 - 🔃 **Sort** by clicking a column header (name / size / time / BPM / key / energy) — click again to flip the order.
@@ -207,18 +207,18 @@ Each effect crossfades **dry/wet** smoothly when toggled. ❇️ Effects chain a
 
 ## 🎤 Stems
 
-The **STEMS row** (between the FX and bend rows) works exactly like rekordbox's **ACTIVE STEM** controls: 🎚️ all four parts — **VOCAL**, **INST**, **BASS**, **DRUMS** — play by default (full mix) and each button **mutes / unmutes its own part**, so you can cut just the vocals, just the bass, and so on. 🔀 Mute them all and the deck goes silent.
+The **STEMS row** (between the FX and bend rows) works like rekordbox's **ACTIVE STEM** controls: 🎚️ all four parts — **VOCAL**, **INST**, **BASS**, **DRUMS** — play by default (full mix) and each button **mutes / unmutes its own part**, so you can cut just the vocals, just the bass, and so on. 🔀 Mute them all and the deck goes silent.
 
 | 🎚️ Stem | 🧪 When the stem is muted the… |
 | :--- | :--- |
-| **VOCAL** | …the **centre** of the mix (mid = (L+R)/2) band-passed ≈ 120 Hz – 9 kHz is subtracted from **both** channels, wiping centre-panned vocals across their whole range (fundamental → formants → sibilants); bass/kick below 120 Hz, "air" above 9 kHz and side-panned instruments survive 🎙️ |
-| **INST** | …remaining instruments (everything but vocals, bass and drums) are removed 🎹 |
-| **BASS** | …lows (low-pass ≈ 220 Hz) are removed 🔉 |
-| **DRUMS** | …hats / cymbals and percussion top (high-pass ≈ 3 kHz) are removed 🥁 |
+| **VOCAL** | …the **centre** of the mix (mid = (L+R)/2) inside the **180 Hz – 4 kHz** band is removed from both channels through a dynamic **centre-dominance** mask: it only engages where the mid energy clearly exceeds the side energy and excludes drum transients, so centred vocals (fundamental → formants) drop while side-panned instruments, sibilants and air survive 🎙️ |
+| **INST** | …the rest is removed: side content, non-centred mid and the band above 4 kHz, minus drum transients 🎹 |
+| **BASS** | …the band below **180 Hz** is removed, except for drum attacks (the kick transient belongs to DRUMS) 🔉 |
+| **DRUMS** | …drum transients are removed: the kick attack from the low band plus snare / hats / cymbals from the mid-high bands, leaving the kick body and sustain in BASS 🥁 |
 
 The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Buttons are **colour-coded** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums — and their background fills **only while the part is muted** (the mute is engaged); an audible part keeps the neutral button background. 🎛️
 
-> ⚠️ These stems are a **filter-based approximation**, not machine-learning source separation: muting a part carves its frequency range out of the mix (centered vocals are strongly reduced) rather than truly unmixing the track. Measured centre-channel residuals when VOCAL is off: **−33 dB to −70 dB across 300 Hz – 4 kHz** (formants/words), **−11 dB at 150 Hz / −19 dB at 200 Hz** (vocal fundamentals), **−27 dB at 6 kHz** (sibilance) — while bass below 100 Hz stays within ~3 dB and air at 10 kHz within ~6 dB, and side-panned content passes untouched. Bass/drums cuts use the same 2nd-order Butterworth shape.
+> ⚠️ These stems are a **frequency + transient approximation**, not machine-learning source separation. The signal is split into three bands with **4th-order Linkwitz-Riley** crossovers at **180 Hz** and **4 kHz**; the four stems are then derived with time-varying gains (centre-dominance for VOCAL, fast/slow envelope transient masks for DRUMS, kick attack vs bass sustain) and **sum back to the dry signal** — no inverted-cancellation comb filtering. The gains run at audio rate in an **AudioWorklet** (zero added latency, no model downloads), with the old biquad chain kept only as a fallback. With all stems on the deck is transparent (±0.1 dB). Measured with test tones: **BASS off** −21 dB at 100 Hz while 1 / 6 / 8 kHz stay at 0 dB; **VOCAL off** −34 dB at 1 kHz (centred) while air at 8 kHz moves −0.4 dB; **INST off** removes a side-panned 6 kHz tone entirely and −28 dB of centred air; **DRUMS off** on a kick removes the attack (1–16 ms) by −11.5 dB while the sustain (60–100 ms) stays within 0.7 dB and a steady bassline within 0.2 dB. On a **mono** track there is no centre to extract, so VOCAL mute is a no-op (INST/BASS/DRUMS still work); sibilance above 4 kHz is never assigned to VOCAL, which is why muting vocals leaves the "sss" in INST.
 
 ---
 
