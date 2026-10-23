@@ -132,9 +132,13 @@ align-items:center;padding:3px 12px;border-bottom:1px solid #1a1f28;cursor:defau
 .br-energy.lv5{background:#ef4444;color:#fff}
 .br-tag{font-size:9px;font-weight:800;letter-spacing:.06em;color:var(--dim);border:1px solid #2b3240;
 border-radius:4px;padding:1px 5px;text-align:center;display:flex;align-items:center;justify-content:center;height:18px}
-.br-load{width:28px;height:22px;padding:0;font-size:10px;font-weight:800;border-radius:5px}
+.br-load{width:28px;height:22px;padding:0;font-size:10px;font-weight:800;border-radius:5px;transition:none}
 .br-load.a{color:var(--a);border-color:#1e4a63}
 .br-load.b{color:var(--b);border-color:#632649}
+.br-load.on.a{background:var(--a);border-color:var(--a);color:#0b0d11}
+.br-load.on.b{background:var(--b);border-color:var(--b);color:#0b0d11}
+.br-load.blink{animation:brblink 1s ease-in-out infinite}
+@keyframes brblink{0%,100%{filter:brightness(1)}50%{filter:brightness(1.65)}}
 .br-empty{padding:10px;text-align:center;color:var(--dim);font-size:11.5px}
 .br-row.dragging{opacity:.45}
 .ov{width:100%;flex:1 1 0;min-height:70px;height:auto;border-radius:7px;background:#0a0c10;border:1px solid var(--line);
@@ -413,7 +417,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
-<li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a filter-based approximation, not AI source separation)</li>
+<li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a Linkwitz-Riley band split with dynamic centre and transient masks, not AI source separation)</li>
 <li><b>Pioneer DDJ-FLX4</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the FLX4 dialog</li>
 <li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (the list shows only the playable audio files sitting directly in the selected folder — subfolders are not listed — and REFRESH re-reads them). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
 <li><b>Custom key map</b>: the keyboard layout is a JSON map you can edit right here (section <b>Custom key map</b> below) — remap any key, press APPLY and it is stored in this browser and reloaded on every start. A key can only drive one action, so APPLY refuses a map with conflicts and tells you which ones clash</li>
@@ -967,12 +971,173 @@ const STEMS=[
   {name:'drums',label:'DRUMS',title:'Drums stem: mute / unmute'}
 ];
 const STEM_NAMES=STEMS.map(s=>s.name);
+const STEM_DSP_SRC=`
+class StemDSP extends AudioWorkletProcessor{
+  constructor(opts){
+    super();
+    this.on={vocal:true,inst:true,bass:true,drums:true};
+    if(opts&&opts.on)for(const k in this.on)if(k in opts.on)this.on[k]=!!opts.on[k];
+    this.g={vocal:1,inst:1,bass:1,drums:1};
+    this.port.onmessage=e=>{
+      const d=e.data||{};
+      if(d.on)for(const k in this.on)if(k in d.on)this.on[k]=!!d.on[k];
+    };
+    const fs=sampleRate;
+    this.st=[];
+    for(let i=0;i<16;i++)this.st.push({x1:0,x2:0,y1:0,y2:0});
+    const mk=(type,fc)=>{
+      const w=2*Math.PI*fc/fs,cs=Math.cos(w),sn=Math.sin(w),al=sn/(2*0.70710678),a0=1+al;
+      const b0=(type==='lp'?(1-cs)/2:(1+cs)/2)/a0;
+      const b1=(type==='lp'?(1-cs):-(1+cs))/a0;
+      return {b0:b0,b1:b1,b2:b0,a1:-2*cs/a0,a2:(1-al)/a0};
+    };
+    this.cL=mk('lp',180);
+    this.cH=mk('hp',180);
+    this.fL=mk('lp',4000);
+    this.fH=mk('hp',4000);
+    const k=t=>1-Math.exp(-1/(t*fs));
+    this.kE=k(0.025);
+    this.kCA=k(0.005);
+    this.kCR=k(0.120);
+    this.kFA=k(0.0003);
+    this.kFR=k(0.020);
+    this.kSA=k(0.015);
+    this.kSR=k(0.200);
+    this.kDA=k(0.0003);
+    this.kDR=k(0.025);
+    this.kG=k(0.008);
+    this.kW=k(0.800);
+    this.em=0;
+    this.es=0;
+    this.cm=0;
+    this.emAll=0;
+    this.esAll=0;
+    this.fF=0;
+    this.fS=0;
+    this.dL=0;
+    this.tF=0;
+    this.tS=0;
+    this.dT=0;
+  }
+  process(inputs,outputs){
+    const inp=inputs[0],out=outputs[0];
+    const OL=out[0],OR=out[1]||out[0];
+    if(!inp||!inp.length){OL.fill(0);OR.fill(0);return true;}
+    const IL=inp[0],IR=inp[1]||inp[0],n=IL.length;
+    const st=this.st,cL=this.cL,cH=this.cH,fL=this.fL,fH=this.fH,g=this.g,on=this.on;
+    const kE=this.kE,kCA=this.kCA,kCR=this.kCR,kFA=this.kFA,kFR=this.kFR,kSA=this.kSA,kSR=this.kSR,kDA=this.kDA,kDR=this.kDR,kG=this.kG,kW=this.kW;
+    const bq=(o,c,x)=>{
+      const y=c.b0*x+c.b1*o.x1+c.b2*o.x2-c.a1*o.y1-c.a2*o.y2;
+      o.x2=o.x1;o.x1=x;o.y2=o.y1;o.y1=y;
+      return y;
+    };
+    for(let i=0;i<n;i++){
+      const m=(IL[i]+IR[i])*0.5,s=(IL[i]-IR[i])*0.5;
+      let hM=bq(st[0],cH,m);hM=bq(st[1],cH,hM);
+      let lM=bq(st[2],cL,m);lM=bq(st[3],cL,lM);
+      let mM=bq(st[4],fL,hM);mM=bq(st[5],fL,mM);
+      let tM=bq(st[6],fH,hM);tM=bq(st[7],fH,tM);
+      let hS=bq(st[8],cH,s);hS=bq(st[9],cH,hS);
+      let lS=bq(st[10],cL,s);lS=bq(st[11],cL,lS);
+      let mS=bq(st[12],fL,hS);mS=bq(st[13],fL,mS);
+      let tS=bq(st[14],fH,hS);tS=bq(st[15],fH,tS);
+      this.emAll+=(mM*mM+tM*tM-this.emAll)*kW;
+      this.esAll+=(mS*mS+tS*tS-this.esAll)*kW;
+      let w=(this.esAll/(this.emAll+this.esAll+1e-12)-0.03)/0.07;
+      w=w<0?0:w>1?1:w;
+      this.em+=(mM*mM-this.em)*kE;
+      this.es+=(mS*mS-this.es)*kE;
+      let c=(this.em-1.5*this.es)/(this.em+1.5*this.es+1e-12);
+      c=c<0?0:c>1?1:c;
+      c*=w;
+      this.cm+=(c-this.cm)*(c>this.cm?kCA:kCR);
+      const eL=m*m+s*s;
+      this.fF+=(eL-this.fF)*(eL>this.fF?kFA:kFR);
+      this.fS+=(eL-this.fS)*(eL>this.fS?kSA:kSR);
+      let dL=(this.fF-1.4*this.fS)/(this.fF+1e-9);
+      dL=dL<0?0:dL>1?1:dL;
+      this.dL+=(dL-this.dL)*(dL>this.dL?kDA:kDR);
+      const eT=tM*tM+tS*tS;
+      this.tF+=(eT-this.tF)*(eT>this.tF?kFA:kFR);
+      this.tS+=(eT-this.tS)*(eT>this.tS?kSA:kSR);
+      let dT=(this.tF-1.8*this.tS)/(this.tF+1e-9);
+      dT=dT<0?0:dT>1?1:dT;
+      this.dT+=(dT-this.dT)*(dT>this.dT?kDA:kDR);
+      const cv=this.cm*(1-this.dT),inv=1-this.dT;
+      g.vocal+=((on.vocal?1:0)-g.vocal)*kG;
+      g.inst+=((on.inst?1:0)-g.inst)*kG;
+      g.bass+=((on.bass?1:0)-g.bass)*kG;
+      g.drums+=((on.drums?1:0)-g.drums)*kG;
+      const iM=inv*(1-cv)*mM,iS=inv*mS,iTM=inv*tM,iTS=inv*tS;
+      const dM=this.dT*(1-cv)*mM,dS=this.dT*mS,dTM=this.dT*tM,dTS=this.dT*tS;
+      const bM=(1-this.dL)*lM,bS=(1-this.dL)*lS,kM=this.dL*lM,kS=this.dL*lS;
+      const outM=g.vocal*cv*mM+g.inst*(iM+iTM)+g.drums*(dM+dTM+kM)+g.bass*bM;
+      const outS=g.inst*(iS+iTS)+g.drums*(dS+dTS+kS)+g.bass*bS;
+      OL[i]=outM+outS;
+      OR[i]=outM-outS;
+    }
+    return true;
+  }
+}
+registerProcessor('stem-dsp',StemDSP);
+`;
+let STEM_READY=Promise.resolve(false);
+try{
+  if(AC.audioWorklet){
+    const dataURL='data:text/javascript;charset=utf-8,'+encodeURIComponent(STEM_DSP_SRC);
+    STEM_READY=AC.audioWorklet.addModule(URL.createObjectURL(new Blob([STEM_DSP_SRC],{type:'application/javascript'})))
+      .then(()=>true)
+      .catch(()=>AC.audioWorklet.addModule(dataURL).then(()=>true))
+      .catch(()=>false);
+  }
+}catch(e){}
 function makeStems(){
-  const names=STEM_NAMES.slice();
-  const on={vocal:true,inst:true,bass:true,drums:true};
   const input=AC.createGain();
   const output=AC.createGain();
   input.connect(output);
+  const on={vocal:true,inst:true,bass:true,drums:true};
+  let node=null,legacy=null;
+  const push=()=>{if(node)node.port.postMessage({on:on});};
+  const setOn=(n,v)=>{
+    if(!(n in on))return;
+    on[n]=!!v;
+    if(node)push();
+    else if(legacy)legacy.refresh();
+  };
+  const api={
+    input:input,
+    output:output,
+    stems:STEM_NAMES,
+    isActive:n=>!!on[n],
+    setActive:(n,v)=>setOn(n,!!v),
+    toggle:n=>{
+      if(!(n in on))return false;
+      setOn(n,!on[n]);
+      return on[n];
+    }
+  };
+  STEM_READY.then(ok=>{
+    let n=null;
+    if(ok){
+      try{
+        n=new AudioWorkletNode(AC,'stem-dsp',{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[2],channelCount:2,channelCountMode:'explicit',channelInterpretation:'speakers'});
+      }catch(e){n=null;}
+    }
+    if(n){
+      input.disconnect();
+      input.connect(n);
+      n.connect(output);
+      node=n;
+      push();
+    }else{
+      input.disconnect();
+      legacy=buildLegacyStems(input,output,on);
+    }
+  });
+  return api;
+}
+function buildLegacyStems(input,output,on){
+  const names=STEM_NAMES.slice();
   const cuts={};
   names.forEach(n=>{
     const g=AC.createGain();
@@ -1045,19 +1210,8 @@ function makeStems(){
     const now=AC.currentTime;
     names.forEach(n=>cuts[n].gain.setTargetAtTime(on[n]?0:-1,now,0.02));
   };
-  return {
-    input:input,
-    output:output,
-    stems:names,
-    isActive:n=>!!on[n],
-    setActive:(n,v)=>{if(n in on){on[n]=!!v;refresh();}},
-    toggle:n=>{
-      if(!(n in on))return false;
-      on[n]=!on[n];
-      refresh();
-      return on[n];
-    }
-  };
+  refresh();
+  return {refresh:refresh};
 }
 function ensureAudio(){
   if(AC.state==='suspended')AC.resume();
@@ -4200,6 +4354,7 @@ const BR={
       const r=document.createElement('div');
       r.className='br-row';
       r.dataset.id=id;
+      r.dataset.name=f.name;
       r.innerHTML='<span class="br-tag"></span><span class="br-name"></span><span class="br-meta"></span>'+
         '<span class="br-time">--</span>'+
         '<span class="br-bpm">--</span><span class="br-key">--</span><span class="br-energy">--</span>'+
@@ -4213,8 +4368,10 @@ const BR={
       if(!this.fillRow(r,id)&&f.file)this.enqueue(id,f.file);
       const go=dk=>this.loadFile(f,dk);
       r.addEventListener('dblclick',()=>go(this.smartDeck()));
-      r.querySelector('.a').addEventListener('click',()=>go(deckA));
-      r.querySelector('.b').addEventListener('click',()=>go(deckB));
+      r._ba=r.querySelector('.a');
+      r._bb=r.querySelector('.b');
+      r._ba.addEventListener('click',()=>go(deckA));
+      r._bb.addEventListener('click',()=>go(deckB));
       if(f.file){
         r.draggable=true;
         r.addEventListener('dragstart',e=>{
@@ -4227,6 +4384,7 @@ const BR={
       el.appendChild(r);
     });
     this.syncSelection();
+    this.paintState();
     if(!files.length){
       const d=document.createElement('div');
       d.className='br-empty';
@@ -4302,6 +4460,17 @@ const BR={
     this.listEl.querySelectorAll('.br-row[data-id]').forEach(r=>{
       r.classList.toggle('loaded',this.loadedIds.has(r.dataset.id));
     });
+    this.paintState();
+  },
+  paintState(){
+    for(const r of this.rows()){
+      const n=r.dataset.name||'';
+      const onA=!!deckA.buffer&&deckA.fileName===n,onB=!!deckB.buffer&&deckB.fileName===n;
+      r._ba.classList.toggle('on',onA);
+      r._ba.classList.toggle('blink',onA&&!!deckA.playing);
+      r._bb.classList.toggle('on',onB);
+      r._bb.classList.toggle('blink',onB&&!!deckB.playing);
+    }
   },
   fillRow(r,id){
     const m=this.meta.get(id);
@@ -4368,6 +4537,7 @@ function frame(){
   mixer.updateRec();
   updateBeatLeds();
   FLX.syncLeds();
+  if(!libModal.hidden)BR.paintState();
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
