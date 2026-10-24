@@ -2407,6 +2407,17 @@ class Deck{
     if(!this.stems)return false;
     return this.stems.toggle(name);
   }
+  peakGains(){
+    const s=this.stems;
+    if(!s)return null;
+    const v=s.isActive('vocal')?1:0,i=s.isActive('inst')?1:0,b=s.isActive('bass')?1:0,d=s.isActive('drums')?1:0;
+    if(v&&i&&b&&d)return null;
+    const o=this._pkGains||(this._pkGains={lo:1,mid:1,hi:1});
+    o.lo=0.88*b+0.12*d;
+    o.mid=0.5*v+0.32*i+0.18*d;
+    o.hi=0.45*i+0.55*d;
+    return o;
+  }
   setFilter(v){
     this.filterVal=clamp(v,-1,1);
     const now=AC.currentTime;
@@ -2472,9 +2483,62 @@ class Deck{
       cn[k]++;
     }
   }
-  paintCols(g,W,H,cy,ov){
+  fillColsAt(t0,viewSec,W){
+    const n=W+8;
+    this.ensureCols(W);
+    const cl=this.colLo,cm=this.colMid,ch=this.colHi;
+    const sl=this.colSL,sm=this.colSM,sh=this.colSH,cn=this.colN;
+    cl.fill(0,0,n);
+    cm.fill(0,0,n);
+    ch.fill(0,0,n);
+    sl.fill(0,0,n);
+    sm.fill(0,0,n);
+    sh.fill(0,0,n);
+    cn.fill(1,0,n);
+    this.colOff=0;
+    if(!this.peaks||!this.buffer)return;
+    const P=this.peaks,pr=this.peakRate,np=P.lo.length,spx=viewSec/W;
+    const i0=Math.max(0,Math.floor(t0*pr)-4);
+    const i1=Math.min(np-1,Math.ceil((t0+viewSec)*pr)+4);
+    const m=i1-i0+1;
+    if(m<2)return;
+    if(!this.envS||this.envS.length<m*3)this.envS=new Float32Array(m*3);
+    const E=this.envS;
+    for(let j=0;j<m;j++){
+      const i=i0+j;
+      let a=0,b=0,c=0;
+      for(let d=-2;d<=2;d++){
+        const ii=i+d;
+        if(ii<0||ii>=np)continue;
+        const x=P.lo[ii],y=P.mid[ii],z=P.hi[ii];
+        if(x>a)a=x;
+        if(y>b)b=y;
+        if(z>c)c=z;
+      }
+      E[j]=a;
+      E[m+j]=b;
+      E[2*m+j]=c;
+    }
+    for(let k=0;k<n;k++){
+      const f=(t0+(k+0.5)*spx)*pr-i0;
+      if(f<=0||f>=m-1)continue;
+      const i=Math.floor(f),u=f-i;
+      const lo=E[i]+(E[i+1]-E[i])*u;
+      const md=E[m+i]+(E[m+i+1]-E[m+i])*u;
+      const hi=E[2*m+i]+(E[2*m+i+1]-E[2*m+i])*u;
+      cl[k]=lo;
+      cm[k]=md;
+      ch[k]=hi;
+      sl[k]=lo;
+      sm[k]=md;
+      sh[k]=hi;
+    }
+  }
+  paintCols(g,W,H,cy,ov,gains){
     const n=W+6,off=this.colOff||0;
     const dpr=g.getTransform().a||1;
+    const gl=gains?gains.lo:1,gm=gains?gains.mid:1,gh=gains?gains.hi:1;
+    if(gl<=0&&gm<=0&&gh<=0)return;
     const cl=this.colLo,cm=this.colMid,ch=this.colHi;
     const sl=this.colSL,sm=this.colSM,sh=this.colSH,cn=this.colN;
     let dense=!!ov;
@@ -2490,7 +2554,7 @@ class Deck{
       env=this.ovEnv;
       for(let k=0;k<n;k++){
         const c=cn[k]||1;
-        env[k]=0.82*(sl[k]+sm[k]+sh[k])/(3*c)+0.18*Math.max(cl[k],cm[k],ch[k]);
+        env[k]=0.82*(sl[k]*gl+sm[k]*gm+sh[k]*gh)/(3*c)+0.18*Math.max(cl[k]*gl,cm[k]*gm,ch[k]*gh);
       }
       const sm2=this.ovEnv2;
       for(let k=0;k<n;k++){
@@ -2507,48 +2571,107 @@ class Deck{
       for(let k=0;k<n;k++)if(env[k]>ref)ref=env[k];
       if(ref<0.02)ref=1;
     }
+    const hsl2rgb=(hu,s,l)=>{
+      const f=c=>{
+        const k=(c+hu/30)%12;
+        return l-s*Math.min(l,1-l)*Math.max(-1,Math.min(k-3,9-k,1));
+      };
+      return [f(0),f(8),f(4)];
+    };
     const hh=H/2-Math.max(4,H*0.09);
-    if(!dense){
-      if(!this.wvH||this.wvH.length<n)this.wvH=new Float32Array(n);
-      for(let k=0;k<n;k++)this.wvH[k]=Math.max(cl[k],cm[k],ch[k]);
+    if(!this.wvH||this.wvH.length<n)this.wvH=new Float32Array(n);
+    if(!this.colAmp||this.colAmp.length<n)this.colAmp=new Float32Array(n);
+    if(!this.colVX||this.colVX.length<n){
+      this.colVX=new Float32Array(n);
+      this.colVY=new Float32Array(n);
     }
+    const A=this.colAmp,VX=this.colVX,VY=this.colVY;
+    if(!dense)for(let k=0;k<n;k++)this.wvH[k]=Math.max(cl[k]*gl,cm[k]*gm,ch[k]*gh);
     for(let k=0;k<n;k++){
-      const x=k-off;
-      if(x<-1||x>W+1)continue;
-      const lo=cl[k],md=cm[k],hi=ch[k];
-      const m=Math.max(lo,md,hi);
-      let amp;
-      if(dense)amp=Math.min(1,env[k]/ref);
+      const c=cn[k]||1;
+      if(dense)A[k]=Math.min(1,env[k]/ref);
       else{
         const wv=this.wvH,v=wv[k];
         const l1=k>0?wv[k-1]:v,l2=k>1?wv[k-2]:l1;
         const r1=k<n-1?wv[k+1]:v,r2=k<n-2?wv[k+2]:r1;
-        amp=Math.min(1,0.8*(l2+4*l1+6*v+4*r1+r2)/16+0.2*v);
+        A[k]=Math.min(1,0.8*(l2+4*l1+6*v+4*r1+r2)/16+0.2*v);
       }
+      const bl=sl[k]*gl/(0.95*c),bm=sm[k]*gm/(1.25*c),bh=sh[k]*gh/(1.55*c);
+      VX[k]=bl*0.985-bm*0.342-bh*0.906;
+      VY[k]=bl*0.174+bm*0.940-bh*0.423;
+    }
+    const smooth=!ov;
+    if(smooth&&(!this.colAmpS||this.colAmpS.length<n))this.colAmpS=new Float32Array(n);
+    const S=smooth?this.colAmpS:null;
+    if(S){
+      for(let k=0;k<n;k++){
+        const a=k>0?A[k-1]:A[k],b=k<n-1?A[k+1]:A[k];
+        S[k]=(a+2*A[k]+b)/4;
+      }
+    }
+    const ampAt=k=>S?S[k]:A[k];
+    const colAt=k=>{
+      let vx=VX[k],vy=VY[k];
+      if(S){
+        vx=0;vy=0;
+        for(let j=-3;j<=3;j++){
+          const kk=k+j;
+          if(kk<0||kk>=n)continue;
+          const w=4-Math.abs(j);
+          vx+=VX[kk]*w;
+          vy+=VY[kk]*w;
+        }
+      }
+      const amp=ampAt(k);
+      let hue=118;
+      if(vx*vx+vy*vy>1e-9)hue=(Math.atan2(vy,vx)*57.2957795+360)%360;
+      const yt=0.42+0.34*amp;
+      let l=yt;
+      let cr=hsl2rgb(hue,0.8,l);
+      const y=0.2126*cr[0]+0.7152*cr[1]+0.0722*cr[2];
+      if(y>1e-6)l=clamp(l*yt/y,0.12,0.74);
+      cr=hsl2rgb(hue,0.8,l);
+      return [cr[0]*255|0,cr[1]*255|0,cr[2]*255|0];
+    };
+    if(S){
+      const k0=Math.max(0,Math.floor(off)),k1=Math.min(n-1,Math.ceil(off+W));
+      const wd=Math.max(1,W);
+      if(k1>k0){
+        if(!this.colImg||this.colImg.width<n){
+          this.colImg=document.createElement('canvas');
+          this.colImg.width=n;
+          this.colImg.height=1;
+          this.colImgCtx=this.colImg.getContext('2d');
+          this.colImgData=this.colImgCtx.createImageData(n,1);
+        }
+        const D=this.colImgData.data;
+        for(let k=k0;k<=k1;k++){
+          const c=colAt(k),b=k*4;
+          D[b]=c[0];D[b+1]=c[1];D[b+2]=c[2];D[b+3]=255;
+        }
+        this.colImgCtx.putImageData(this.colImgData,0,0);
+        const px=v=>Math.round(v*dpr)/dpr;
+        g.save();
+        g.beginPath();
+        g.moveTo(px(k0-off+0.5),cy-S[k0]*hh);
+        for(let k=k0+1;k<=k1;k++)g.lineTo(px(k-off+0.5),cy-S[k]*hh);
+        for(let k=k1;k>=k0;k--)g.lineTo(px(k-off+0.5),cy+S[k]*hh);
+        g.closePath();
+        g.clip();
+        g.imageSmoothingEnabled=false;
+        g.drawImage(this.colImg,k0,0,k1-k0+1,1,k0-off,cy-hh,k1-k0+1,hh*2);
+        g.restore();
+      }
+      return;
+    }
+    for(let k=0;k<n;k++){
+      const x=k-off;
+      if(x<-1||x>W+1)continue;
+      const amp=A[k];
       if(amp<0.004)continue;
       const h=amp*hh;
-      if(dense){
-        const c=cn[k]||1;
-        const al=sl[k]/c,am=sm[k]/c,ah=sh[k]/c;
-        const tot=al+am+ah;
-        let hue=115;
-        if(tot>1e-6){
-          const cc=Math.min(2,(am+2*ah)/tot);
-          hue=20+190*(0.5-0.5*Math.cos(Math.PI*cc/2));
-        }
-        const light=0.26+0.36*amp;
-        g.fillStyle='hsl('+Math.round(hue)+',72%,'+Math.round(light*100)+'%)';
-      }else{
-        let r=35,gc=70,bc=95;
-        r+=lo*220;
-        gc+=md*230;
-        bc+=hi*250;
-        if(lo>md&&lo>hi)r=Math.min(255,r+30);
-        if(hi>lo&&hi>md)bc=Math.min(255,bc+40);
-        if(md>=lo&&md>=hi)gc=Math.min(255,gc+25);
-        r=Math.min(255,r); gc=Math.min(255,gc); bc=Math.min(255,bc);
-        g.fillStyle='rgb('+r+','+gc+','+bc+')';
-      }
+      const c=colAt(k);
+      g.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')';
       const x0=Math.round(x*dpr),x1=Math.max(x0+1,Math.round((x+1)*dpr));
       const y0=Math.round((cy-h)*dpr),y1=Math.max(y0+1,Math.round((cy+h)*dpr));
       g.fillRect(x0/dpr,y0/dpr,(x1-x0)/dpr,(y1-y0)/dpr);
@@ -4118,9 +4241,8 @@ const SV={
       return;
     }
     const vs=this.viewSec*(120/(dk.bpm||120)),pos=dk.pNow,spx=vs/W,t0=pos-vs/2;
-    dk.ensureCols(W);
-    dk.fillCols(t0,vs,W);
-    dk.paintCols(g,W,h,cy);
+    dk.fillColsAt(t0,vs,W);
+    dk.paintCols(g,W,h,cy,false,dk.peakGains());
     g.fillStyle='rgba(255,255,255,.06)';
     g.fillRect(0,cy-0.5,W,1);
     this.drawGrid(g,ot,ot.pNow,y0,h,W,true);
