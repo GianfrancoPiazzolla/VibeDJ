@@ -50,7 +50,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 🎵 | Two independent decks with full transport control |
 | 🌀 | Scratch / scrub via a draggable jog wheel |
 | ⚡ | One-tap **SYNC** (tempo + beat phase alignment) |
-| 🌊 | Shared overlaid waveform with zoomable time axis |
+| 🌊 | Shared overlaid waveform with zoomable time axis, coloured by frequency band and following the stem mutes |
 | 🥁 | Automatic **beatgrid** with downbeats |
 | 🧠 | **BPM**, **harmonic key (Camelot)** & **energy** detection |
 | 🎚️ | 3-band EQ + kill, LP/HP filter, trim, faders, crossfader |
@@ -138,7 +138,7 @@ Every audio row shows 🏷️:
 - 🥁 **BPM + beatgrid** — an onset envelope is autocorrelated to find the tempo (≈70–180 BPM with octave correction and fractional refinement), then the beat phase is locked with a linear regression to build the **beatgrid**.
 - 🎼 **Key** — a chromagram (Goertzel-style resonator bank) is matched against **Krumhansl–Schmuckler** major/minor profiles and mapped to **Camelot** notation.
 - ⚡ **Energy** — derived from the coarse **RMS level** and quantized to a 1–5 scale.
-- 🌈 **Waveform peaks** — the audio is split into **low / mid / high** bands for the colored overview.
+- 🌈 **Waveform peaks** — the audio is split into **low / mid / high** bands, used both for the shared waveform strip and for the colored deck overview.
 
 ---
 
@@ -178,13 +178,16 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 
 - 🔍 **Zoom**: mouse **wheel**, the **−** / **+** buttons, or the **`[` / `]`** shortcuts → both decks zoom together.
 - 🖱️ **Click to seek**: clicking the **top half** seeks deck **A**, the **bottom half** seeks deck **B**.
-- 🎨 Each half renders a **3-band colored waveform** (low / mid / high); the per-column height is smoothed across five neighbouring columns with a Gaussian-like kernel, blended with a small share of the raw peak so short transients stay visible — the strip reads as a soft continuous contour instead of a row of separate sticks. While playing, each sample is binned by its absolute time (so the content of a column never changes as the window scrolls) and every bar is snapped to whole device pixels, so the shape slides smoothly with no shimmer.
+- 🎨 Each half renders a **3-band colored waveform** (low / mid / high). The **hue follows the real band balance** — red for bass-driven passages, amber when bass and mids share the energy, green through the mids, cyan for mids + highs, blue for treble, violet when bass and highs dominate together — and every hue is lifted to the same **perceived brightness**, so low-frequency red sections are as readable as the mids and highs.
+- 🪶 The strip is one **continuous filled contour**: the top and bottom edges are joined into a single path and the per-column colours are stretched underneath it as a 1-pixel colour row, instead of a row of separate bars. There are no flat-topped steps, the outline keeps its transients, and the per-column colours stay exact.
+- 🎤 The strip follows the **stem mutes** (see [Stems](#-stems)): muting a stem attenuates the bands it belongs to, so the contour shows what you actually hear. The per-deck overview above the jog wheel always keeps the full mix.
+- 💫 **No shimmer while playing**: the envelope is built from the peaks once and then **sampled with linear interpolation** at every column centre, so heights and hues are continuous functions of the playhead rather than being re-quantised for each frame. The whole contour simply slides with the track — frame-to-frame colour difference is ≈0.2 RGB units, against ≈9–16 when the columns were resampled every frame.
 - 📊 **Track progress**: a thin strip along the top of each half shows the elapsed time over the whole track in the deck colour, with a bright cursor on the leading edge; it follows the real playback position (so it rewinds with a loop) and is display-only — seeking stays on the waveform below.
 - 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the marked bar is the **downbeat** (every 4 bars).
 - 📏 Each half displays the **phase offset in ms** against the beat — nudge the **TEMPO** fader until both grids stay locked. 🔒
 - 🧭 A small **graphical phase meter** compares both decks' phase (it turns the deck color when the beats are aligned). 🎯
 
-Each deck additionally has its own **overview waveform** canvas you can click to seek. 📊 On long tracks the colors come from the **average** band balance of each column (not the per-column peak): the hue follows the **spectral centroid** smoothly (warm amber for bass-driven passages, green through the mids, azure for hi-hat/sibilance sections) with a soft, saturated HSL mapping instead of additive RGB. The height follows the **average energy** of the column, smoothed across neighbouring columns, and is drawn with generous headroom, so loud passages no longer merge into a solid saturated block: the overview keeps an alternating, coherent palette and a readable envelope even when the whole track is squeezed into a few hundred pixels, and never clips to white.
+Each deck additionally has its own **overview waveform** canvas you can click to seek. 📊 On long tracks the colors come from the **average** band balance of each column (not the per-column peak): the hue is the **weighted mean of the three band colours** (red low, green mid, blue high), so warm amber marks bass-driven passages, green the mids, azure the hi-hat/sibilance sections and violet the parts where bass and treble carry the energy together without mids — a bass + treble column is never misread as green. Brightness is equalised per hue, so the low-frequency reds stay visible instead of sinking into a dark brown, and the height follows the **average energy** of the column, smoothed across neighbouring columns and drawn with generous headroom: the overview keeps a coherent palette and a readable envelope even when the whole track is squeezed into a few hundred pixels, and never clips to white.
 
 ---
 
@@ -217,6 +220,17 @@ The **STEMS row** (between the FX and bend rows) works like rekordbox's **ACTIVE
 | **DRUMS** | …drum transients are removed: the kick attack from the low band plus snare / hats / cymbals from the mid-high bands, leaving the kick body and sustain in BASS 🥁 |
 
 The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Buttons are **colour-coded** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums — and their background fills **only while the part is muted** (the mute is engaged); an audible part keeps the neutral button background. 🎛️
+
+**🔁 Waveform feedback.** The shared **`syncWave`** strip redraws from what is still audible: each muted stem attenuates the bands it owns, so cutting the bass removes the low-frequency body of the contour while the kick transients survive in DRUMS, and cutting the drums flattens the transients and the air. The weights are a **frequency approximation** of the stem split, not the DSP gains:
+
+| 🎚️ Stem muted (others on) | 🔉 Lows | 🎼 Mids | 🎼 Highs |
+| :--- | :---: | :---: | :---: |
+| **VOCAL** | 1.00 | 0.50 | 1.00 |
+| **INST** | 1.00 | 0.68 | 0.55 |
+| **BASS** | 0.12 | 1.00 | 1.00 |
+| **DRUMS** | 0.88 | 0.82 | 0.45 |
+
+With all four stems on, the strip shows the full mix exactly as before. The per-deck overview above the jog wheel stays on the full mix, so the two views answer different questions: "what does the track look like" and "what am I hearing right now". 👀
 
 > ⚠️ These stems are a **frequency + transient approximation**, not machine-learning source separation. The signal is split into three bands with **4th-order Linkwitz-Riley** crossovers at **180 Hz** and **4 kHz**; the four stems are then derived with time-varying gains (centre-dominance for VOCAL, fast/slow envelope transient masks for DRUMS, kick attack vs bass sustain) and **sum back to the dry signal** — no inverted-cancellation comb filtering. The gains run at audio rate in an **AudioWorklet** (zero added latency, no model downloads), with the old biquad chain kept only as a fallback. With all stems on the deck is transparent (±0.1 dB). Measured with test tones: **BASS off** −21 dB at 100 Hz while 1 / 6 / 8 kHz stay at 0 dB; **VOCAL off** −34 dB at 1 kHz (centred) while air at 8 kHz moves −0.4 dB; **INST off** removes a side-panned 6 kHz tone entirely and −28 dB of centred air; **DRUMS off** on a kick removes the attack (1–16 ms) by −11.5 dB while the sustain (60–100 ms) stays within 0.7 dB and a steady bassline within 0.2 dB. On a **mono** track there is no centre to extract, so VOCAL mute is a no-op (INST/BASS/DRUMS still work); sibilance above 4 kHz is never assigned to VOCAL, which is why muting vocals leaves the "sss" in INST.
 
