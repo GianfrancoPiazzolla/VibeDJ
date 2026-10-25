@@ -135,7 +135,7 @@ Supported formats include **MP3, WAV, OGG, M4A, FLAC, AAC** (whatever your brows
 - ❌ **EJECT** (the `✕` button in the deck header) unloads the track and clears its cue point, loops, hot cues and analysis.
 - ⏳ Progress arrives as toasts — *decoding…* → *loaded — analyzing BPM…* → *`124.0 BPM · beatgrid ready`* (or *BPM not detected*). Tracks shorter than **8 s** get no beatgrid, and key detection needs at least **2 s** of audio.
 
-Each deck shows the **file name**, **duration**, **mono/stereo** and **sample rate**; while playing, the line under the name becomes a live `elapsed / -remaining · stereo|mono · kHz` readout. 📊
+Each deck shows the **file name** with its **mono/stereo** and **sample rate** — nothing more: the times (`⏱️ total` and `⌛ left`) live in the jog readout above, so the line under the name stays still while playing. 📊
 
 ---
 
@@ -184,16 +184,18 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 ### 🕹️ Jog wheel
 - 🌀 **Drag while playing** → scratch like vinyl (with inertia/momentum).
 - ✋ **Drag while paused** → scrub through the track.
+- 📍 The **rotating cursor** on the platter is **phase-locked to the beatgrid**: it turns once per **bar** (4 beats), so it points straight up at **12 o'clock on every downbeat** — exactly where the thick grid lines are — and slows down or speeds up with the tempo. A track whose beatgrid was not detected falls back to a fixed turn every 1.8 s.
 - 💡 Shows the deck letter, a **beat-flash ring** and a scratch ring while scratching.
 
 ### 🚦 Transport
 | 🎛️ Control | 🎬 Action |
 | :--- | :--- |
 | ⏮️ **START** | Jump back to the beginning |
-| ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback (the label follows the state) |
+| ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback (the label follows the state; while the deck is stopped the **PLAY** label is green, and it lights up the whole button only during playback) |
 | 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point — the button shows its amber colour only while a cue is stored, standard grey otherwise; the CUE text blinks while paused away from the cue point, like a real console |
-| ⚡ **SYNC** | Match the other deck's tempo **and** beat phase (both decks need a detected BPM; a target outside the ±16% fader range is clamped and announced) |
-| 🎚️ **TEMPO** fader | Change the tempo ±16% (also changes pitch — **no key lock**); oriented like the hardware, so sliding up slows down and sliding down speeds up |
+| ⚡ **SYNC** | Match the other deck's tempo **and** beat phase (both decks need a detected BPM). The BPMs are matched **even when the target needs more pitch than the current range allows**: the fader cursor simply saturates at its own limit, the `pitch` readout shows the real value and the **`Out of TEMPO fader range (±8% / ±16%)`** toast still warns you |
+| 🎚️ **TEMPO** fader | Change the tempo inside the selected range (also changes pitch — **no key lock**); oriented like the hardware, so sliding up slows down and sliding down speeds up |
+| ↔️ **Range switch** (under the `TEMPO` label) | Shows the fader's current maximum travel (`±8%` / `±16%`): click it to jump between **±8%** (default, knob left) and **±16%** (knob right, highlighted); switching back to ±8% pulls any larger pitch into range and the tempo follows immediately. **SYNC** is the only thing allowed to go past it |
 | ↘️↗️ **BEND − / +** | **Hold** for a temporary pitch bend (∓5%) that springs back to the fader value on release |
 | ❌ **EJECT** | Unload the track (`✕` in the deck header) and clear its cue, loops and hot cues |
 
@@ -205,7 +207,7 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 ### 📟 Deck readouts (above the jog)
 `⏱️ total` · `⌛ left` (turns **red and blinks** under 30 s) · `🥁 BPM` · `🎼 key`
 
-The deck header also shows the **effective BPM** (base BPM adjusted by the tempo fader) and a **BPM badge**. 🏷️
+The deck header carries the **BPM badge** (the track's base tempo); the **effective BPM** (base tempo adjusted by the tempo fader) is the `🥁 BPM` readout in the jog info above, so it is not repeated in the header. 🏷️
 
 ---
 
@@ -215,10 +217,12 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 
 - 🔍 **Zoom**: mouse **wheel**, the **−** / **+** buttons, or the **`[` / `]`** shortcuts → both decks zoom together. The window is **beat-locked**: the same number of beats stays visible at any tempo (the default 8 s window holds 16 beats at 120 BPM), clamped between 0.5 s and the longest loaded track (never below 2 s).
 - 🖱️ **Click to seek**: clicking the **top half** seeks deck **A**, the **bottom half** seeks deck **B**; **dragging** left or right scrubs that deck continuously.
-- 🎨 Each half renders a **3-band colored waveform** (low / mid / high). The **hue follows the real band balance** — red for bass-driven passages, amber when bass and mids share the energy, green through the mids, cyan for mids + highs, blue for treble, violet when bass and highs dominate together — and every hue is lifted to the same **perceived brightness**, so low-frequency red sections are as readable as the mids and highs.
-- 🪶 The strip is one **continuous filled contour**: the top and bottom edges are joined into a single path and the per-column colours are stretched underneath it as a 1-pixel colour row, instead of a row of separate bars. There are no flat-topped steps, the outline keeps its transients, and the per-column colours stay exact.
+- 🎨 Each half renders a **3-band waveform**, every band in its **own fixed colour** — 🔴 **lows `#FF3B3B`**, 🟢 **mids `#16A34A`**, 🔵 **highs `#2563EB`** — as **three filled contours stacked from the loudest band down to the quietest**: the weakest layer is drawn **last**, so it sits in the **foreground** and stays readable even when the bass or the treble is much louder than it. The layers are **semi-transparent** (≈45 %), so where two or three bands overlap the colours blend instead of covering each other and every component stays visible. The **stacking order is fixed for the whole track** — it is computed once over all the peaks (and again only when the track or the stem mutes change), never from the moving window — so no part of the waveform ever flips to another colour while it plays. The outer edge of every column always follows the loudest band, so the silhouette keeps its shape.
+- 🪶 Each layer is a **single continuous contour** — the top and bottom edges are joined into one closed path per band and filled in one go, so the whole strip costs **three fills per deck** instead of thousands of bars, keeps its transients and stays perfectly smooth while it scrolls.
+- 🧊 **Only what changed is redrawn**: the strip is skipped entirely when the playhead, the zoom, the size, the stem mutes or the markers have not moved (the check is a single 32-bit hash, no strings, so nothing is allocated per frame), so a paused interface costs no rendering at all and every other moving element keeps its framerate.
+- 🧈 **Nothing heavy runs on the audio thread's tab**: canvas sizes are cached and refreshed by a `ResizeObserver` instead of being measured every frame (no forced layout inside the animation loop), the jog wheel's disc and grooves are rendered once per size and blitted, the level meters refresh at 30 Hz and the time / tempo / key labels at ~11 Hz — the frame body during playback stays around **1–2 ms** and allocates nothing.
 - 🎤 The strip follows the **stem mutes** (see [Stems](#-stems)): muting a stem attenuates the bands it belongs to, so the contour shows what you actually hear. The per-deck overview above the jog wheel always keeps the full mix.
-- 💫 **No shimmer while playing**: the envelope is built from the peaks once and then **sampled with linear interpolation** at every column centre, so heights and hues are continuous functions of the playhead rather than being re-quantised for each frame. The whole contour simply slides with the track — frame-to-frame colour difference is ≈0.2 RGB units, against ≈9–16 when the columns were resampled every frame.
+- 💫 **No shimmer while playing**: the envelope is built from the peaks once and then **sampled with linear interpolation** at every column centre, so the three contours are continuous functions of the playhead instead of being re-quantised for each frame, and the whole waveform simply slides with the track.
 - 📊 **Track progress**: a thin strip along the top of each half shows the elapsed time over the whole track in the deck colour, with a bright cursor on the leading edge; it follows the real playback position (so it rewinds with a loop) and is display-only — seeking stays on the waveform below.
 - 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the thick bar is the **downbeat**, every **4 beats** (one bar), and the active deck's grid prints its `bar.beat` number next to each line.
 - 🚩 A thin **red playhead** runs down the centre of each half, where the waveform scrolls past.
@@ -226,7 +230,7 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 - 📏 Each half displays the **phase offset in ms** against the beat — nudge the **TEMPO** fader until both grids stay locked. 🔒
 - 🧭 A small **graphical phase meter** compares both decks' phase (amber while they drift, deck colour once they are within ±8% of half a beat). 🎯
 
-Each deck additionally has its own **overview waveform** canvas you can click (or drag) to seek. 📊 On long tracks the colors come from the **average** band balance of each column (not the per-column peak): the hue is the **weighted mean of the three band colours** (red low, green mid, blue high), so warm amber marks bass-driven passages, green the mids, azure the hi-hat/sibilance sections and violet the parts where bass and treble carry the energy together without mids — a bass + treble column is never misread as green. Brightness is equalised per hue, so the low-frequency reds stay visible instead of sinking into a dark brown, and the height follows the **average energy** of the column, smoothed across neighbouring columns and drawn with generous headroom: the overview keeps a coherent palette and a readable envelope even when the whole track is squeezed into a few hundred pixels, and never clips to white.
+Each deck additionally has its own **overview waveform** canvas you can click (or drag) to seek. 📊 On long tracks the contour heights come from the **average** band energy (not the per-column peak) and every band keeps its **own colour and its own shape** (🔴 lows, 🟢 mids, 🔵 highs), stacked from the loudest down to the quietest so the weak components stay in front even when the whole track is squeezed into a few hundred pixels. The envelope is smoothed across neighbouring columns and drawn with generous headroom, so the overview keeps a readable shape and never clips to white.
 
 ---
 
@@ -258,7 +262,7 @@ The **STEMS row** (between the FX and bend rows) works like rekordbox's **ACTIVE
 | **BASS** | …the band below **180 Hz** is removed, except for drum attacks (the kick transient belongs to DRUMS), and while BASS is muted the drums' low end is cut by a further **90 %**, so the mute really empties the bottom instead of leaving the kick body behind 🔉 |
 | **DRUMS** | …drum transients are removed: the kick attack from the low band plus snare / hats / cymbals from the mid-high bands, caught by a **more sensitive treble detector** (threshold 1.30, expanded, 8 ms release), leaving the kick body and sustain in BASS 🥁 |
 
-The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Buttons are **colour-coded** — 🟣 vocal, 🟢 instrumental, 🔵 bass, 🟠 drums — and their background fills **only while the part is muted** (the mute is engaged); an audible part keeps the neutral button background. 🎛️
+The stems are applied **after** the effects chain (`… → phaser → bitcrush → stems → channel`). 🔗 Buttons are **colour-coded** — 🟢 vocal `#16A34A`, 🔵 instrumental `#2563EB`, 🔴 bass `#DC2626`, 🟠 drums `#EA580C` — and their background fills **only while the part is muted** (the mute is engaged); an audible part keeps the neutral button background. 🎛️
 
 **🔁 Waveform feedback.** The shared **`syncWave`** strip redraws from what is still audible: each muted stem attenuates the bands it owns, so cutting the bass removes the low-frequency body of the contour while the kick transients survive in DRUMS, and cutting the drums flattens the transients and the air. The weights are a **frequency approximation** of the stem split, not the DSP gains:
 
@@ -269,9 +273,11 @@ The stems are applied **after** the effects chain (`… → phaser → bitcrush 
 | **BASS** | 0.12 | 1.00 | 1.00 |
 | **DRUMS** | 0.88 | 0.82 | 0.45 |
 
+🎨 The waveform uses the same three bands the filters work on, each in its **own colour and its own layer**: 🔴 **lows `#FF3B3B`**, 🟢 **mids `#16A34A`**, 🔵 **highs `#2563EB`**, the weakest of the three always in front and all of them **semi-transparent** so overlaps show every component at once. Muting a stem attenuates the bands it owns, so the layer it holds literally shrinks — cut the bass and the red body of the contour collapses while the green mids and the blue air stay, cut the drums and the blue transients flatten. The strip and the per-deck overview share the same layers, so the region you are about to cut is easy to find in both. 🎯
+
 With all four stems on, the strip shows the full mix exactly as before. The per-deck overview above the jog wheel stays on the full mix, so the two views answer different questions: "what does the track look like" and "what am I hearing right now". 👀
 
-> ⚠️ These stems are a **frequency + transient approximation**, not machine-learning source separation. The signal is split into three bands with **8th-order Linkwitz-Riley** crossovers at **180 Hz** and **4 kHz** — steeper than the previous 4th order, so a single mute leaks ~**24 dB less** of the other stems' share around the crossover — and the four stems are derived with time-varying gains (centre-dominance for VOCAL, fast/slow envelope transient masks for DRUMS, kick attack vs bass sustain) that **sum back to the dry signal** — no inverted-cancellation comb filtering. The **mute notches** above are the only part outside that partition and they engage only while a stem is muted. The gains run at audio rate in an **AudioWorklet** (zero added latency, no model downloads, ~3.5 % of a core per deck), with the old biquad chain kept only as a fallback. With all stems on the deck is transparent (**−0.01 dB**). Measured on a busy mix (centred voice with sibilance and reverb + wide pad + kick / snare / hats + bass): **VOCAL off** drops **440–1760 Hz by −23 dB**, the 220 Hz harmonic by −13 dB and the 6.5 kHz sibilance by −9 dB (previously −15 dB, −7 dB and −1 dB), while the wide pad loses 7.5 dB and the bass stays at 0 dB; **INST off** on a pure instrumental takes a wide pad down −10 dB, a centred lead −6 dB and 8 kHz air −64 dB; **BASS off** pushes a 90 Hz tone and the kick body to **−48 dB** (previously −25 / −28 dB); **DRUMS off** removes the kick attack (0–16 ms) by **−15 dB** while the sustain (60–100 ms) stays within 1 dB. On a **mono** track there is no centre to extract, so VOCAL mute is a no-op (INST/BASS/DRUMS still work); content below 180 Hz never belongs to VOCAL, so a deep male fundamental stays in BASS.
+> ⚠️ These stems are a **frequency + transient approximation**, not machine-learning source separation. The signal is split into three bands with **8th-order Linkwitz-Riley** crossovers at **180 Hz** and **4 kHz** — steeper than the previous 4th order, so a single mute leaks ~**24 dB less** of the other stems' share around the crossover — and the four stems are derived with time-varying gains (centre-dominance for VOCAL, fast/slow envelope transient masks for DRUMS, kick attack vs bass sustain) that **sum back to the dry signal** — no inverted-cancellation comb filtering. The **mute notches** above are the only part outside that partition and they engage only while a stem is muted. The gains run at audio rate in an **AudioWorklet** (zero added latency, no model downloads, ~3.7 % of a core per deck while a stem is muted), with the old biquad chain kept only as a fallback. ⚡ With all four parts audible the worklet does **no filtering at all**: the stems add back up to the dry signal, so the input is copied straight through (≈**0,3 %** of a core per deck) — the switch is crossfaded over ~12 ms and the filter states are reset while the output is still fully dry, so pressing the first mute never clicks. With all stems on the deck is transparent (**−0.01 dB**). Measured on a busy mix (centred voice with sibilance and reverb + wide pad + kick / snare / hats + bass): **VOCAL off** drops **440–1760 Hz by −23 dB**, the 220 Hz harmonic by −13 dB and the 6.5 kHz sibilance by −9 dB (previously −15 dB, −7 dB and −1 dB), while the wide pad loses 7.5 dB and the bass stays at 0 dB; **INST off** on a pure instrumental takes a wide pad down −10 dB, a centred lead −6 dB and 8 kHz air −64 dB; **BASS off** pushes a 90 Hz tone and the kick body to **−48 dB** (previously −25 / −28 dB); **DRUMS off** removes the kick attack (0–16 ms) by **−15 dB** while the sustain (60–100 ms) stays within 1 dB. On a **mono** track there is no centre to extract, so VOCAL mute is a no-op (INST/BASS/DRUMS still work); content below 180 Hz never belongs to VOCAL, so a deep male fundamental stays in BASS.
 
 ---
 
@@ -282,9 +288,10 @@ With all four stems on, the strip shows the full mix exactly as before. The per-
 - ✂️ Manual **IN / OUT / EXIT** for free loop points.
 - 🟢 The active loop highlights and playback wraps seamlessly. 🔄
 - 📌 Changing the loop length of an **existing** loop (preset buttons, FLX4 pads or knob) keeps the original **IN** point and only moves the **OUT** — the loop grows or shrinks around its own start instead of jumping to the current position.
+- ⏳ While the loop is **playing** the new width is **armed, not immediate**: the pass in progress runs to the OUT it had when you pressed — shorter *or* longer — and the following pass starts with the new width. The playhead is never yanked back to IN in the middle of a cycle, and nothing restarts mid-audio. Only when the deck is paused does the new length apply at once.
 - 🛡️ **OUT** needs a valid **IN** first and a position after it, otherwise a toast tells you what is missing.
 
-> 🎯 Turn on **QUANTIZE** (switch next to the PHONES knob in the mixer) to snap cue points, loops, hot cues and beat jumps to the nearest beat. ✨
+> 🎯 **QUANTIZE** (switch next to the PHONES knob in the mixer) is **on by default** and snaps cue points, loops, hot cues and beat jumps to the nearest beat; switch it off when you want the raw positions. ✨
 
 ### 🎨 Hot cues
 - 🔢 **8 hot cues** per deck, each with its own **color**.
@@ -306,15 +313,15 @@ The central mixer is a classic 2-channel strip. 🎛️
 | **FILTER** 🌊 | Bipolar **LP / HP** filter (low-pass down to ~200 Hz, high-pass up to ~2 kHz); LP values of 1 kHz or more are shown compactly, e.g. `18.2k` |
 | **Channel faders** 📉 | Smooth `gain^1.6` curve per channel |
 | **CROSSFADER** ↔️ | **Constant-power** curve (cosine/sine) between A and B |
-| **MASTER** 🔊 | Master output level (`gain^1.5`, 80% by default) |
+| **MASTER** 🔊 | Master output level (`gain^1.5`, **50% by default**) |
 | **Limiter** 🛡️ | Master limiter before the output/recording with a **clip LED** that stays lit for 1.5 s after an overload |
-| **PHONES** 🎧 | Headphone / cue-bus level (70% by default) |
+| **PHONES** 🎧 | Headphone / cue-bus level (**50% by default**) |
 | **Meters** 📊 | 14-segment per-channel + stereo master meters with **peak hold** |
 | **Beat LEDs** 🥁 | Two rows of 4 LEDs in the mixer header follow the beat position (1–4) of deck **A** and **B** in each deck's colour, with the first LED of the bar brighter |
 | **PFL** 🎧 | Exclusive headphone monitoring of one deck (pre-fader) |
-| **QUANTIZE** 🎯 | Toggle switch next to the PHONES knob: snaps cue points, hot cues, loops and beat jumps to the beatgrid |
+| **QUANTIZE** 🎯 | Toggle switch next to the PHONES knob, **on by default**: snaps cue points, hot cues, loops and beat jumps to the beatgrid |
 
-🎛️ **Knob & fader gestures** — drag a knob **vertically** (hold **Shift** for fine steps) and **double-click** it to snap back to its default (trim / EQ / filter centred, master 80%, phones 70%); faders follow the pointer. Every knob and fader is keyboard-focusable and responds to `↑` / `↓` / `Home` / `End`.
+🎛️ **Knob & fader gestures** — drag a knob **vertically** (hold **Shift** for fine steps) and **double-click** it to snap back to its default (trim / EQ / filter centred, master 50%, phones 50%); faders follow the pointer. Every knob and fader is keyboard-focusable and responds to `↑` / `↓` / `Home` / `End`.
 
 ---
 
@@ -340,7 +347,7 @@ Press **MIDI** in the top bar to connect a **Pioneer DDJ-FLX4** over USB (Web MI
 | 🔴 CUE | Set (paused) or jump to the cue point; **SHIFT + CUE** clears it |
 | ⚡ BEAT SYNC | Sync the deck to the other one |
 | 🎡 Jog | Outer wheel = pitch bend, platter = scratch when touched / bend otherwise, **SHIFT + jog** = fast seek |
-| 🎚️ TEMPO | Pitch fader (±16%) and on-screen readout |
+| 🎚️ TEMPO | Pitch fader and on-screen readout; the on-screen RANGE switch (±8% default / ±16%) also sets how far the hardware fader travels |
 | 🔁 IN / OUT / 4 BEAT / ◁ ▷ | Loop in, loop out; **4 BEAT** exits an active loop (or sets a 4-beat one); **◁ ▷** halve / double the current loop |
 | 🔢 Pads (HOT CUE) | Set or jump to hot cue 1-8; **SHIFT** clears it |
 | 🎛️ Pads (PAD FX1 / PAD FX2) | Toggle delay, echo, flanger, reverb, phaser, bitcrush |
@@ -362,7 +369,7 @@ Press **MIDI** in the top bar to connect a **Pioneer DDJ-FLX4** over USB (Web MI
 
 **Audio routing.** Every audio output of the system is listed in the dialog (the controller's USB interface is detected automatically and selected when found, **System default** is always available): VibeDJ sends the **master + PFL mix** there with `setSinkId`. A browser can only feed **one stereo stream to one output**, so both the controller's master outputs and its headphone jack carry that single mix, with **HEADPHONE MIX / LEVEL** blending PFL in; there is no separate cue channel. **REFRESH** re-reads the devices, **CHOOSE…** opens the browser's output picker, and the choice is remembered.
 
-**Mapping.** The full MIDI map is a JSON object in the dialog: channels are 0-based (0 = MIDI channel 1), numbers are decimal MIDI notes / CC values, `0x` hex strings are accepted too, and every section can be overridden — `device` (name fragments), `channels`, `deck` (plus an optional `deckB` override), `fx`, `mixer`, `tempoRange`, `jogScale` and `leds` (`on` / `off` / `dim`). Edit it, press **APPLY** (saved in this browser) and **RESET** to restore the built-in map; invalid JSON is rejected with a toast.
+**Mapping.** The full MIDI map is a JSON object in the dialog: channels are 0-based (0 = MIDI channel 1), numbers are decimal MIDI notes / CC values, `0x` hex strings are accepted too, and every section can be overridden — `device` (name fragments), `channels`, `deck` (plus an optional `deckB` override), `fx`, `mixer`, `jogScale` and `leds` (`on` / `off` / `dim`). Edit it, press **APPLY** (saved in this browser) and **RESET** to restore the built-in map; invalid JSON is rejected with a toast.
 
 ---
 
