@@ -75,7 +75,6 @@ background:#0e1116;border:1px solid var(--acc);color:var(--acc);flex:none}
 .d-sub{font-size:10px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpm-badge{min-width:58px;text-align:center;flex:none}
 .bpm-main{font:700 15px/1.1 ui-monospace,Menlo,monospace;color:#eaf1fb}
-.bpm-eff{font-size:9px;color:var(--dim);letter-spacing:.04em}
 .deck-actions{display:flex;gap:6px;flex:none}
 .load{cursor:pointer}
 .syncbar{padding:6px 8px 0;flex:1 1 auto;display:flex;flex-direction:column;min-height:120px}
@@ -159,6 +158,7 @@ touch-action:none;cursor:grab;background:transparent}
 .sel{outline:2px solid #fbbf24;outline-offset:2px;border-radius:10px}
 .row{display:flex;gap:6px;align-items:center}
 .transport .btn{flex:1;padding:5px 3px;font-size:11px}
+.t-play:not(.on){color:#86efac}
 .t-play.on{background:linear-gradient(#15803d,#166534);border-color:#4ade80;color:#eafff1;box-shadow:0 0 12px #4ade803d}
 .t-cue.set{background:linear-gradient(#3a2f14,#2a220f);border-color:#6b5a24;color:#f5e7b0}
 .t-cue.on{background:linear-gradient(#7c5d16,#5c460f);border-color:#fbbf24;color:#fff5d6;box-shadow:0 0 12px #fbbf243d}
@@ -173,15 +173,15 @@ touch-action:none;cursor:grab;background:transparent}
 .fx-row .fx.on{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
 .stems-row{flex-wrap:wrap;justify-content:center}
 .stems-row .stem{flex:1 1 0;min-width:0;padding:5px 4px;font-size:9px;letter-spacing:.04em}
-.stem[data-stem="vocal"]{border-color:#7c3aed;color:#d8b4fe}
-.stem[data-stem="inst"]{border-color:#16a34a;color:#86efac}
-.stem[data-stem="bass"]{border-color:#2563eb;color:#93c5fd}
-.stem[data-stem="drums"]{border-color:#ca8a04;color:#fde047}
+.stem[data-stem="vocal"]{border-color:#16a34a;color:#86efac}
+.stem[data-stem="inst"]{border-color:#2563eb;color:#93c5fd}
+.stem[data-stem="bass"]{border-color:#dc2626;color:#fca5a5}
+.stem[data-stem="drums"]{border-color:#ea580c;color:#fdba74}
 .stem.on{background:linear-gradient(#232833,#181b22)}
-.stem[data-stem="vocal"]:not(.on){background:linear-gradient(#7c3aed,#5b21b6);border-color:#c4b5fd;color:#faf5ff;box-shadow:0 0 12px #7c3aed55}
-.stem[data-stem="inst"]:not(.on){background:linear-gradient(#16a34a,#14532d);border-color:#4ade80;color:#f0fdf4;box-shadow:0 0 12px #16a34a55}
-.stem[data-stem="bass"]:not(.on){background:linear-gradient(#2563eb,#1e3a8a);border-color:#60a5fa;color:#eff6ff;box-shadow:0 0 12px #2563eb55}
-.stem[data-stem="drums"]:not(.on){background:linear-gradient(#ca8a04,#854d0e);border-color:#fde047;color:#fffbe8;box-shadow:0 0 12px #ca8a0455}
+.stem[data-stem="vocal"]:not(.on){background:linear-gradient(#16a34a,#14532d);border-color:#4ade80;color:#f0fdf4;box-shadow:0 0 12px #16a34a55}
+.stem[data-stem="inst"]:not(.on){background:linear-gradient(#2563eb,#1e3a8a);border-color:#60a5fa;color:#eff6ff;box-shadow:0 0 12px #2563eb55}
+.stem[data-stem="bass"]:not(.on){background:linear-gradient(#dc2626,#7f1d1d);border-color:#f87171;color:#fef2f2;box-shadow:0 0 12px #dc262655}
+.stem[data-stem="drums"]:not(.on){background:linear-gradient(#ea580c,#7c2d12);border-color:#fb923c;color:#fff7ed;box-shadow:0 0 12px #ea580c55}
 .lab{font-size:9px;letter-spacing:.1em;color:var(--dim);font-weight:700;text-transform:uppercase}
 .pads{gap:5px}
 .pad{flex:1;height:24px;border-radius:6px;background:#1b2029;border:1px solid #2b3240;color:#6b7686;
@@ -189,7 +189,7 @@ font-weight:800;font-size:11px;cursor:pointer}
 .pad:hover{border-color:#3d4658;color:#aab4c5}
 .pad.set{color:#0b0d11}
 .pitch-box{flex:none;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 0px}
-.pitch-val{font:700 11px ui-monospace,Menlo,monospace;color:var(--accent);width:52px;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pitch-val{font:700 11px ui-monospace,Menlo,monospace;width:52px;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
 .pitch-fader{flex:1;min-height:0;width:32px;display:flex}
 .pitch-box .pitch-fader .fader{height:100%}
 .bend-row .bend{flex:1}
@@ -312,6 +312,11 @@ background:linear-gradient(#67718a,#3b4252);transition:left .12s,background .12s
 .qsw.on .qsw-track i{left:16px;background:#e6fbff;box-shadow:0 0 5px #22d3ee}
 .qsw.on .qsw-lab{color:var(--accent)}
 .qsw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.pitch-box .qsw{align-self:center;margin-top:0;gap:2px;padding:0 2px}
+.pitch-box .qsw-track{width:26px;height:14px;border-radius:8px}
+.pitch-box .qsw-track i{width:8px;height:8px;left:2px;top:2px}
+.pitch-box .qsw.on .qsw-track i{left:14px}
+.pitch-box .qsw-lab{font-size:7.5px;line-height:1;letter-spacing:.04em;white-space:nowrap}
 .bj-row .bj,.grid-row .gb{flex:1 1 0;min-width:0;padding:5px 2px;font-size:9px}
 .mx-right{align-items:center;gap:10px}
 .clip{width:12px;height:12px;border-radius:3px;background:#3a1d1d;border:1px solid #55242a;display:block;
@@ -411,7 +416,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Overlaid waveforms in a single strip with a shared time axis and zoom: deck A on top, deck B on the bottom, so the two tracks can really be compared</li>
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
-<li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear) — changing the length of a loop that already exists keeps its <b>IN</b> point and only moves the <b>OUT</b>: the loop expands or contracts around its own start instead of jumping to the current position</li>
+<li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear) — changing the length of a loop that already exists keeps its <b>IN</b> point and only moves the <b>OUT</b>: the loop expands or contracts around its own start instead of jumping to the current position — and while the loop is playing the change is <b>armed for the next pass</b>, so the cycle in progress always finishes at the OUT it had when you pressed</li>
 <li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
 <li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the decks and mixer shrink while the waveform strip stretches vertically to fill all the remaining page space, leaving no empty gap at the bottom — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
@@ -609,7 +614,7 @@ function analyze(x,sr,peakRate){
 const $=s=>document.querySelector(s);
 const clamp=(v,a,b)=>v<a?a:(v>b?b:v);
 const HC=['#38bdf8','#34d399','#fbbf24','#f472b6','#a78bfa','#fb923c','#4ade80','#e879f9'];
-const QZ={on:false};
+const QZ={on:true};
 function fmtTime(s){
   s=Math.max(0,s);
   const m=Math.floor(s/60),ss=Math.floor(s%60);
@@ -715,14 +720,28 @@ function toast(msg){
   $('#toasts').appendChild(t);
   setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),320);},3400);
 }
-function prep(cv){
-  const r=cv.getBoundingClientRect();
-  const dpr=Math.min(2,window.devicePixelRatio||1);
-  const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
+const _cvRO=(typeof ResizeObserver!=='undefined')?new ResizeObserver(list=>{
+  for(let i=0;i<list.length;i++){
+    const cv=list[i].target,r=cv.getBoundingClientRect();
+    cv._W=r.width;cv._H=r.height;cv._D=Math.min(2,window.devicePixelRatio||1);
+  }
+}):null;
+function prep(cv,opaque){
+  let dpr=Math.min(2,window.devicePixelRatio||1);
+  if(cv._W===undefined){
+    const r=cv.getBoundingClientRect();
+    cv._W=r.width;cv._H=r.height;cv._D=dpr;
+    if(_cvRO)_cvRO.observe(cv);
+  }else if(cv._D!==dpr){
+    cv._D=dpr;
+  }else{
+    dpr=cv._D;
+  }
+  const w=Math.max(1,Math.round(cv._W*dpr)),h=Math.max(1,Math.round(cv._H*dpr));
   if(cv.width!==w||cv.height!==h){cv.width=w;cv.height=h;}
-  const g=cv.getContext('2d');
+  const g=cv._ctx||(cv._ctx=opaque?cv.getContext('2d',{alpha:false}):cv.getContext('2d'));
   g.setTransform(dpr,0,0,dpr,0,0);
-  return {g:g,W:r.width,H:r.height,dpr:dpr};
+  return {g:g,W:cv._W,H:cv._H,dpr:dpr};
 }
 const faders=[];
 function makeKnob(opt){
@@ -782,8 +801,8 @@ function makeFader(opt){
   el.className='fader'+(opt.vertical?'':' h')+(opt.cls?' '+opt.cls:'');
   el.innerHTML='<div class="track"></div><div class="thumb"></div>';
   const thumb=el.querySelector('.thumb');
-  const min=opt.min!==undefined?opt.min:0;
-  const max=opt.max!==undefined?opt.max:1;
+  let min=opt.min!==undefined?opt.min:0;
+  let max=opt.max!==undefined?opt.max:1;
   const half=opt.cls==='xf'?16:11;
   el.tabIndex=0;
   el.setAttribute('role','slider');
@@ -808,6 +827,13 @@ function makeFader(opt){
   function set(nv,fire){
     nv=clamp(nv,min,max);
     if(nv!==v){v=nv;if(fire&&opt.onChange)opt.onChange(v);}
+    render();
+  }
+  function setRange(a,b){
+    min=a;max=b;
+    v=clamp(v,min,max);
+    el.setAttribute('aria-valuemin',String(min));
+    el.setAttribute('aria-valuemax',String(max));
     render();
   }
   function fromEvent(e){
@@ -848,7 +874,7 @@ function makeFader(opt){
   });
   faders.push(render);
   requestAnimationFrame(render);
-  return {el:el,set:set,get:()=>v,render:render,invert:!!opt.invert};
+  return {el:el,set:set,get:()=>v,render:render,setRange:setRange,invert:!!opt.invert};
 }
 const AC=new (window.AudioContext||window.webkitAudioContext)();
 let reverbIR=null;
@@ -1042,12 +1068,29 @@ const STEM_DSP_SRC=`class StemDSP extends AudioWorkletProcessor{
     this.tF=0;
     this.tS=0;
     this.dT=0;
+    this.bm=1;
+    this.kB=k(0.012);
+  }
+  rst(){
+    for(let i=0;i<32;i++){const o=this.st[i];o.x1=0;o.x2=0;o.y1=0;o.y2=0;}
+    this.em=0;this.es=0;this.emT=0;this.esT=0;this.cm=0;this.ct=0;this.emAll=0;this.esAll=0;
+    this.fF=0;this.fS=0;this.dL=0;this.gF=0;this.gS=0;this.gU=0;this.tF=0;this.tS=0;this.dT=0;
   }
   process(inputs,outputs){
     const inp=inputs[0],out=outputs[0];
     const OL=out[0],OR=out[1]||out[0];
     if(!inp||!inp.length){OL.fill(0);OR.fill(0);return true;}
     const IL=inp[0],IR=inp[1]||inp[0],n=IL.length;
+    const allOn=this.on.vocal&&this.on.inst&&this.on.bass&&this.on.drums;
+    const tgtB=(allOn&&this.g.vocal>0.999&&this.g.inst>0.999&&this.g.bass>0.999&&this.g.drums>0.999)?1:0;
+    let bmRun=this.bm;
+    if(tgtB===1&&bmRun>=0.99999){
+      this.bm=1;
+      for(let i=0;i<n;i++){OL[i]=IL[i];OR[i]=IR[i];}
+      return true;
+    }
+    if(bmRun>=0.99999&&tgtB===0){this.rst();bmRun=1;this.bm=1;}
+    const kB=this.kB;
     const st=this.st,cL1=this.cL1,cL2=this.cL2,cH1=this.cH1,cH2=this.cH2,fL1=this.fL1,fL2=this.fL2,fH1=this.fH1,fH2=this.fH2,g=this.g,on=this.on;
     const kE=this.kE,kE2=this.kE2,kCA=this.kCA,kCR=this.kCR,kFA=this.kFA,kFR=this.kFR,kSA=this.kSA,kSR=this.kSR,kDA=this.kDA,kDR=this.kDR,kTR=this.kTR,kG=this.kG,kW=this.kW;
     const rhoT=this.rhoT,rhoR=this.rhoR,over=this.over,overT=this.overT,guard=this.guard,sd=this.sd;
@@ -1124,9 +1167,20 @@ const STEM_DSP_SRC=`class StemDSP extends AudioWorkletProcessor{
       const bM=(1-this.dL)*lM,bS=(1-this.dL)*lS,kM=this.dL*lM*qL,kS=this.dL*lS*qL;
       const outM=g.vocal*vM+g.inst*(iM*qM+iTM*qT)+g.drums*(dM+dTM+kM)+g.bass*bM;
       const outS=g.vocal*vS+g.inst*(iS*qS+iTS*qS)+g.drums*(dS+dTS+kS)+g.bass*bS;
-      OL[i]=outM+outS;
-      OR[i]=outM-outS;
+      bmRun+=(tgtB-bmRun)*kB;
+      if(bmRun>0.99999&&tgtB===1)bmRun=1;
+      if(bmRun>=0.99999){
+        OL[i]=IL[i];
+        OR[i]=IR[i];
+      }else if(bmRun>0){
+        OL[i]=(outM+outS)*(1-bmRun)+IL[i]*bmRun;
+        OR[i]=(outM-outS)*(1-bmRun)+IR[i]*bmRun;
+      }else{
+        OL[i]=outM+outS;
+        OR[i]=outM-outS;
+      }
     }
+    this.bm=bmRun;
     return true;
   }
 }
@@ -1331,7 +1385,7 @@ class Mixer{
     this.mr=null;
     this.chunks=[];
     this.recT0=0;
-    this.masterVal=0.8;
+    this.masterVal=0.5;
     this.xfVal=0.5;
     this.xfFader=null;
     this.masterKnob=null;
@@ -1387,6 +1441,9 @@ class Mixer{
   }
   updateMeters(){
     if(!this.meterM)return;
+    const mnow=performance.now();
+    if(mnow-(this._mtT||0)<32)return;
+    this._mtT=mnow;
     const a=deckA?this.lvl(deckA.chAn,deckA.chBuf):[0,0];
     const b=deckB?this.lvl(deckB.chAn,deckB.chBuf):[0,0];
     if(!this.stA)this.stA={l:0,p:0};
@@ -1466,7 +1523,10 @@ class Mixer{
   }
   updateRec(){
     if(!this.recording)return;
-    const s=(performance.now()-this.recT0)/1000;
+    const now=performance.now();
+    if(now-(this._recT||0)<250)return;
+    this._recT=now;
+    const s=(now-this.recT0)/1000;
     const txt=fmtTime(s);
     const el=$('#recTime');
     if(el.textContent!==txt)el.textContent=txt;
@@ -1484,7 +1544,7 @@ function deckHTML(L){
       '<div class="d-title">No track</div>'+
       '<div class="d-sub">Press LOAD TRACK or drop a file here</div>'+
     '</div>'+
-    '<div class="bpm-badge"><div class="bpm-main">--</div><div class="bpm-eff"></div></div>'+
+    '<div class="bpm-badge"><div class="bpm-main">--</div><div class="d-sub">BPM</div></div>'+
     '<div class="deck-actions">'+
       '<label class="btn load">LOAD TRACK<input type="file" accept="audio/mpeg,audio/mp3,audio/*,.mp3" hidden></label>'+
       '<button class="btn eject" title="Unload track">&#10005;</button>'+
@@ -1504,6 +1564,7 @@ function deckHTML(L){
     '<div class="pitch-box">'+
       '<span class="pitch-val">0.00%</span>'+
       '<div class="pitch-fader"></div>'+
+      '<button class="qsw pitch-rng" role="switch" aria-checked="false" aria-label="TEMPO range" title="TEMPO fader range: 8% (default) or 16%"><span class="qsw-track"><i></i></span><span class="qsw-lab">&plusmn;8%</span></button>'+
       '<span class="lab">tempo</span>'+
     '</div>'+
     '<div class="deck-side">'+
@@ -1584,6 +1645,7 @@ class Deck{
     this.refTime=0;
     this.rate=1;
     this.pitch=0;
+    this.pitchRange=8;
     this.bend=1;
     this.scratchRate=null;
     this.scratching=false;
@@ -1594,7 +1656,7 @@ class Deck{
     this.cuePoint=0;
     this.cueSet=false;
     this.cuePreview=false;
-    this.loop={in:-1,out:-1,on:false,len:0};
+    this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.hotcues=[null,null,null,null,null,null,null,null];
     this.bpm=0;
     this.beats=null;
@@ -1609,9 +1671,7 @@ class Deck{
     this.colMid=null;
     this.colHi=null;
     this.pNow=0;
-    this._ts='';
     this._playState=null;
-    this._bpmEff='';
     this._loopState='';
     this.buildAudio();
     this.buildUI();
@@ -1686,7 +1746,6 @@ class Deck{
     this.titleEl=q('.d-title');
     this.subEl=q('.d-sub');
     this.bpmEl=q('.bpm-main');
-    this.bpmEffEl=q('.bpm-eff');
     this.playBtn=q('.t-play');
     this.cueBtn=q('.t-cue');
     this.syncBtn=q('.t-sync');
@@ -1729,8 +1788,11 @@ class Deck{
       p.addEventListener('contextmenu',e=>{e.preventDefault();this.clearHot(i);});
     });
     const pf=q('.pitch-fader');
-    this.pitchFader=makeFader({vertical:true,min:-16,max:16,value:0,invert:true,onChange:v=>this.setPitch(v)});
+    this.pitchFader=makeFader({vertical:true,min:-this.pitchRange,max:this.pitchRange,value:0,invert:true,onChange:v=>this.setPitch(v)});
     pf.appendChild(this.pitchFader.el);
+    this.rngBtn=q('.pitch-rng');
+    this.rngBtn.addEventListener('click',()=>this.setPitchRange(this.pitchRange===16?8:16));
+    this.setPitchRange(this.pitchRange);
     root.querySelectorAll('.bend').forEach(b=>{
       const m=parseInt(b.dataset.bend,10);
       b.addEventListener('pointerdown',e=>{b.setPointerCapture(e.pointerId);this.setBend(m>0?1.05:0.95);});
@@ -1898,7 +1960,7 @@ class Deck{
     this.cuePoint=0;
     this.cuePreview=false;
     this.hotcues=[null,null,null,null,null,null,null,null];
-    this.loop={in:-1,out:-1,on:false,len:0};
+    this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.pitch=0;
     this.bend=1;
     this.scratchRate=null;
@@ -2002,7 +2064,7 @@ class Deck{
     this.cueSet=false;
     this.cuePoint=0;
     this.hotcues=[null,null,null,null,null,null,null,null];
-    this.loop={in:-1,out:-1,on:false,len:0};
+    this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.pitch=0;
     this.bend=1;
     this.ovDirty=true;
@@ -2017,7 +2079,6 @@ class Deck{
       this.titleEl.textContent='No track';
       this.subEl.textContent='Press LOAD TRACK or drop a file here';
       this.bpmEl.textContent='--';
-      this.bpmEffEl.textContent='';
       this.pitchValEl.textContent='0.00%';
       this.jiTotal.textContent='--:--';
       this.jiLeft.textContent='--:--';
@@ -2030,7 +2091,7 @@ class Deck{
     }
     this.titleEl.textContent=this.fileName;
     const b=this.buffer;
-    this.subEl.textContent=fmtTime(b.duration)+' · '+(b.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(b.sampleRate/1000)+' kHz';
+    this.subEl.textContent=(b.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(b.sampleRate/1000)+' kHz';
     this.bpmEl.textContent=this.bpm?this.bpm.toFixed(1):'--';
     this.pitchValEl.textContent=(this.pitch>0?'+':'')+this.pitch.toFixed(2)+'%';
     this.jiTotal.textContent=fmtTime(b.duration);
@@ -2060,7 +2121,7 @@ class Deck{
     });
   }
   updateLoopUI(){
-    const st=(this.loop.in>=0?'i':'')+(this.loop.out>=0?'o':'')+(this.loop.on?'n'+this.loop.len:'');
+    const st=(this.loop.in>=0?1:0)|(this.loop.out>=0?2:0)|(this.loop.on?4:0)|((this.loop.on?Math.round(this.loop.len*100):0)<<4);
     if(st===this._loopState)return;
     this._loopState=st;
     this.root.querySelector('.l-in').classList.toggle('on',this.loop.in>=0);
@@ -2072,7 +2133,7 @@ class Deck{
   updatePlayUI(){
     const atCue=Math.abs(this.pos()-(this.cueSet?this.cuePoint:0))<=0.005;
     const blink=!this.playing&&!this.cuePreview&&!atCue;
-    const s=(this.playing?'p':'')+(this.cuePreview?'c':'')+(this.cueSet?'u':'')+(blink?'b':'');
+    const s=(this.playing?1:0)|(this.cuePreview?2:0)|(this.cueSet?4:0)|(blink?8:0);
     if(s===this._playState)return;
     this._playState=s;
     this.playBtn.classList.toggle('on',this.playing);
@@ -2215,10 +2276,27 @@ class Deck{
     }
     this.updatePlayUI();
   }
-  setPitch(v){
-    this.pitch=clamp(v,-16,16);
+  setPitch(v,force){
+    this.pitch=isFinite(v)?(force?v:clamp(v,-this.pitchRange,this.pitchRange)):this.pitch;
     this.pitchValEl.textContent=(this.pitch>0?'+':'')+this.pitch.toFixed(2)+'%';
     if(!this.scratching)this.applyRate(true);
+  }
+  setPitchRange(r){
+    this.pitchRange=r===16?16:8;
+    if(this.pitchFader)this.pitchFader.setRange(-this.pitchRange,this.pitchRange);
+    if(this.pitch>this.pitchRange||this.pitch<-this.pitchRange){
+      this.pitch=clamp(this.pitch,-this.pitchRange,this.pitchRange);
+      if(!this.scratching)this.applyRate(true);
+    }
+    if(this.pitchFader)this.pitchFader.set(this.pitch,false);
+    if(this.pitchValEl)this.pitchValEl.textContent=(this.pitch>0?'+':'')+this.pitch.toFixed(2)+'%';
+    if(this.rngBtn){
+      const wide=this.pitchRange===16;
+      this.rngBtn.classList.toggle('on',wide);
+      this.rngBtn.setAttribute('aria-checked',String(wide));
+      this.rngBtn.querySelector('.qsw-lab').textContent='\u00b1'+this.pitchRange+'%';
+      this.rngBtn.title='TEMPO fader range \u00b1'+this.pitchRange+'% \u2014 click for \u00b1'+(wide?8:16)+'%';
+    }
   }
   setBend(m){
     this.bend=m;
@@ -2231,12 +2309,9 @@ class Deck{
     if(!this.buffer||!o.buffer){toast('Both decks need a track');return;}
     if(!this.bpm||!o.bpm){toast('BPM not available on one of the decks');return;}
     const target=o.bpm*(1+o.pitch/100);
-    let np=(target/this.bpm-1)*100;
-    if(np<-16||np>16){
-      toast('Out of TEMPO fader range (±16%)');
-      np=clamp(np,-16,16);
-    }
-    this.setPitch(np);
+    const np=(target/this.bpm-1)*100;
+    if(np<-this.pitchRange||np>this.pitchRange)toast('Out of TEMPO fader range (±'+this.pitchRange+'%)');
+    this.setPitch(np,true);
     this.pitchFader.set(np,false);
     if(this.beats&&o.beats){
       const phO=o.beatPhase(o.pos());
@@ -2265,6 +2340,7 @@ class Deck{
     if(!this.buffer)return;
     const p=this.quant(this.pos());
     if(this.loop.out>=0&&this.loop.out<=p){this.deactivateLoop();this.loop.out=-1;}
+    this.loop.nextOut=0;
     this.loop.in=p;
     if(this.loop.on&&this.src){
       this.src.loopStart=this.loop.in;
@@ -2278,6 +2354,7 @@ class Deck{
     if(this.loop.in<0){toast('Set IN first');return;}
     if(p<=this.loop.in+0.05){toast('Invalid loop: OUT before IN');return;}
     this.loop.out=p;
+    this.loop.nextOut=0;
     this.setLoopActive();
   }
   setLoopActive(){
@@ -2300,11 +2377,12 @@ class Deck{
       this.refTime=AC.currentTime;
     }
     this.loop.on=false;
+    this.loop.nextOut=0;
     if(this.src)this.src.loop=false;
   }
   clearLoop(){
     this.deactivateLoop();
-    this.loop={in:-1,out:-1,on:false,len:0};
+    this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.updatePlayUI();
     this.updateLoopUI();
   }
@@ -2318,15 +2396,18 @@ class Deck{
       inP=this.quant(this.pos());
       if(inP+len>this.buffer.duration)inP=Math.max(0,this.buffer.duration-len);
     }
+    const newOut=Math.min(inP+len,this.buffer.duration);
+    const defer=this.loop.on&&this.playing&&this.loop.out>this.loop.in&&newOut>inP;
     this.loop.in=inP;
-    this.loop.out=Math.min(inP+len,this.buffer.duration);
     this.loop.len=beats;
-    if(this.loop.on&&this.playing){
-      const raw=this.rawPos();
-      if(raw<this.loop.in||raw>=this.loop.out)this.seek(this.loop.in);
+    if(defer){
+      this.loop.nextOut=newOut;
+    }else{
+      this.loop.out=newOut;
+      this.loop.nextOut=0;
     }
     this.setLoopActive();
-    if(this.playing&&this.pos()<inP)this.seek(inP);
+    if(this.playing&&!defer&&this.pos()<inP)this.seek(inP);
   }
   hotcue(i){
     if(!this.buffer)return;
@@ -2375,7 +2456,6 @@ class Deck{
     this.beats=arr;
     this.bpm=newBpm;
     this.ovDirty=true;
-    this._bpmEff='';
     this.updateInfo();
     toast(this.L+': BPM '+newBpm.toFixed(1));
   }
@@ -2398,7 +2478,6 @@ class Deck{
     this.bpm=v;
     this.conf=1;
     this.ovDirty=true;
-    this._bpmEff='';
     this.updateInfo();
   }
   tapTempo(){
@@ -2467,6 +2546,23 @@ class Deck{
     o.lo=0.88*b+0.12*d;
     o.mid=0.5*v+0.32*i+0.18*d;
     o.hi=0.45*i+0.55*d;
+    return o;
+  }
+  layerOrder(gl,gm,gh){
+    const P=this.peaks;
+    if(!P)return [0,1,2];
+    const k=this._ordK;
+    if(k&&k.p===P&&k.g0===gl&&k.g1===gm&&k.g2===gh)return k.o;
+    const n=P.lo.length,st=n>4096?Math.floor(n/4096):1;
+    let m0=0,m1=0,m2=0;
+    for(let i=0;i<n;i+=st){m0+=P.lo[i];m1+=P.mid[i];m2+=P.hi[i];}
+    m0*=gl;m1*=gm;m2*=gh;
+    let a=0,b=1,c=2;
+    if(m1>m0){const t=m0;m0=m1;m1=t;const u=a;a=b;b=u;}
+    if(m2>m1){const t=m1;m1=m2;m2=t;const u=b;b=c;c=u;}
+    if(m1>m0){const t=m0;m0=m1;m1=t;const u=a;a=b;b=u;}
+    const o=[a,b,c];
+    this._ordK={p:P,g0:gl,g1:gm,g2:gh,o:o};
     return o;
   }
   setFilter(v){
@@ -2587,7 +2683,6 @@ class Deck{
   }
   paintCols(g,W,H,cy,ov,gains){
     const n=W+6,off=this.colOff||0;
-    const dpr=g.getTransform().a||1;
     const gl=gains?gains.lo:1,gm=gains?gains.mid:1,gh=gains?gains.hi:1;
     if(gl<=0&&gm<=0&&gh<=0)return;
     const cl=this.colLo,cm=this.colMid,ch=this.colHi;
@@ -2598,134 +2693,76 @@ class Deck{
       for(let k=0;k<n;k++)tc+=cn[k];
       dense=tc/n>6;
     }
-    let env=null,ref=1;
+    if(!this.bandCol)this.bandCol=['rgba(255,59,59,.40)','rgba(22,163,74,.40)','rgba(37,99,235,.40)'];
+    const col=this.bandCol;
+    if(!this.bL||this.bL.length<n){
+      this.bL=new Float32Array(n);this.bM=new Float32Array(n);this.bH=new Float32Array(n);
+      this.eL=new Float32Array(n);this.eM=new Float32Array(n);this.eH=new Float32Array(n);
+    }
+    const BL=this.bL,BM=this.bM,BH=this.bH,EL=this.eL,EM=this.eM,EH=this.eH;
+    let ref=1;
     if(dense){
-      if(!this.ovEnv||this.ovEnv.length<n)this.ovEnv=new Float32Array(n);
-      if(!this.ovEnv2||this.ovEnv2.length<n)this.ovEnv2=new Float32Array(n);
-      env=this.ovEnv;
       for(let k=0;k<n;k++){
         const c=cn[k]||1;
-        env[k]=0.82*(sl[k]*gl+sm[k]*gm+sh[k]*gh)/(3*c)+0.18*Math.max(cl[k]*gl,cm[k]*gm,ch[k]*gh);
+        EL[k]=0.82*sl[k]*gl/c+0.18*cl[k]*gl;
+        EM[k]=0.82*sm[k]*gm/c+0.18*cm[k]*gm;
+        EH[k]=0.82*sh[k]*gh/c+0.18*ch[k]*gh;
       }
-      const sm2=this.ovEnv2;
       for(let k=0;k<n;k++){
-        let s=0;
+        let a=0,b=0,c=0;
         for(let j=-2;j<=2;j++){
           const kk=k+j;
           if(kk<0||kk>=n)continue;
-          s+=env[kk]*(3-Math.abs(j));
+          const w=3-Math.abs(j);
+          a+=EL[kk]*w;b+=EM[kk]*w;c+=EH[kk]*w;
         }
-        sm2[k]=s/9;
+        BL[k]=a/9;BM[k]=b/9;BH[k]=c/9;
       }
-      env=sm2;
       ref=0;
-      for(let k=0;k<n;k++)if(env[k]>ref)ref=env[k];
-      if(ref<0.02)ref=1;
-    }
-    const hsl2rgb=(hu,s,l)=>{
-      const f=c=>{
-        const k=(c+hu/30)%12;
-        return l-s*Math.min(l,1-l)*Math.max(-1,Math.min(k-3,9-k,1));
-      };
-      return [f(0),f(8),f(4)];
-    };
-    const hh=H/2-Math.max(4,H*0.09);
-    if(!this.wvH||this.wvH.length<n)this.wvH=new Float32Array(n);
-    if(!this.colAmp||this.colAmp.length<n)this.colAmp=new Float32Array(n);
-    if(!this.colVX||this.colVX.length<n){
-      this.colVX=new Float32Array(n);
-      this.colVY=new Float32Array(n);
-    }
-    const A=this.colAmp,VX=this.colVX,VY=this.colVY;
-    if(!dense)for(let k=0;k<n;k++)this.wvH[k]=Math.max(cl[k]*gl,cm[k]*gm,ch[k]*gh);
-    for(let k=0;k<n;k++){
-      const c=cn[k]||1;
-      if(dense)A[k]=Math.min(1,env[k]/ref);
-      else{
-        const wv=this.wvH,v=wv[k];
-        const l1=k>0?wv[k-1]:v,l2=k>1?wv[k-2]:l1;
-        const r1=k<n-1?wv[k+1]:v,r2=k<n-2?wv[k+2]:r1;
-        A[k]=Math.min(1,0.8*(l2+4*l1+6*v+4*r1+r2)/16+0.2*v);
-      }
-      const bl=sl[k]*gl/(0.95*c),bm=sm[k]*gm/(1.25*c),bh=sh[k]*gh/(1.55*c);
-      VX[k]=bl*0.985-bm*0.342-bh*0.906;
-      VY[k]=bl*0.174+bm*0.940-bh*0.423;
-    }
-    const smooth=!ov;
-    if(smooth&&(!this.colAmpS||this.colAmpS.length<n))this.colAmpS=new Float32Array(n);
-    const S=smooth?this.colAmpS:null;
-    if(S){
       for(let k=0;k<n;k++){
-        const a=k>0?A[k-1]:A[k],b=k<n-1?A[k+1]:A[k];
-        S[k]=(a+2*A[k]+b)/4;
+        if(BL[k]>ref)ref=BL[k];
+        if(BM[k]>ref)ref=BM[k];
+        if(BH[k]>ref)ref=BH[k];
+      }
+      if(ref<0.02)ref=1;
+    }else{
+      for(let k=0;k<n;k++){
+        EL[k]=cl[k]*gl;EM[k]=cm[k]*gm;EH[k]=ch[k]*gh;
+      }
+      for(let b=0;b<3;b++){
+        const src=b===0?EL:b===1?EM:EH,dst=b===0?BL:b===1?BM:BH;
+        for(let k=0;k<n;k++){
+          const v=src[k];
+          const l1=k>0?src[k-1]:v,l2=k>1?src[k-2]:l1;
+          const r1=k<n-1?src[k+1]:v,r2=k<n-2?src[k+2]:r1;
+          dst[k]=Math.min(1,0.8*(l2+4*l1+6*v+4*r1+r2)/16+0.2*v);
+        }
       }
     }
-    const ampAt=k=>S?S[k]:A[k];
-    const colAt=k=>{
-      let vx=VX[k],vy=VY[k];
-      if(S){
-        vx=0;vy=0;
-        for(let j=-3;j<=3;j++){
-          const kk=k+j;
-          if(kk<0||kk>=n)continue;
-          const w=4-Math.abs(j);
-          vx+=VX[kk]*w;
-          vy+=VY[kk]*w;
-        }
+    const hh=H/2-Math.max(4,H*0.09);
+    const k0=Math.max(0,Math.floor(off)-2),k1=Math.min(n-1,Math.ceil(off+W)+2);
+    if(k1<=k0)return;
+    if(ref!==1){
+      const ir=1/ref;
+      for(let k=k0;k<=k1;k++){
+        BL[k]=Math.min(1,BL[k]*ir);BM[k]=Math.min(1,BM[k]*ir);BH[k]=Math.min(1,BH[k]*ir);
       }
-      const amp=ampAt(k);
-      let hue=118;
-      if(vx*vx+vy*vy>1e-9)hue=(Math.atan2(vy,vx)*57.2957795+360)%360;
-      const yt=0.42+0.34*amp;
-      let l=yt;
-      let cr=hsl2rgb(hue,0.8,l);
-      const y=0.2126*cr[0]+0.7152*cr[1]+0.0722*cr[2];
-      if(y>1e-6)l=clamp(l*yt/y,0.12,0.74);
-      cr=hsl2rgb(hue,0.8,l);
-      return [cr[0]*255|0,cr[1]*255|0,cr[2]*255|0];
-    };
-    if(S){
-      const k0=Math.max(0,Math.floor(off)),k1=Math.min(n-1,Math.ceil(off+W));
-      const wd=Math.max(1,W);
-      if(k1>k0){
-        if(!this.colImg||this.colImg.width<n){
-          this.colImg=document.createElement('canvas');
-          this.colImg.width=n;
-          this.colImg.height=1;
-          this.colImgCtx=this.colImg.getContext('2d');
-          this.colImgData=this.colImgCtx.createImageData(n,1);
-        }
-        const D=this.colImgData.data;
-        for(let k=k0;k<=k1;k++){
-          const c=colAt(k),b=k*4;
-          D[b]=c[0];D[b+1]=c[1];D[b+2]=c[2];D[b+3]=255;
-        }
-        this.colImgCtx.putImageData(this.colImgData,0,0);
-        const px=v=>Math.round(v*dpr)/dpr;
-        g.save();
-        g.beginPath();
-        g.moveTo(px(k0-off+0.5),cy-S[k0]*hh);
-        for(let k=k0+1;k<=k1;k++)g.lineTo(px(k-off+0.5),cy-S[k]*hh);
-        for(let k=k1;k>=k0;k--)g.lineTo(px(k-off+0.5),cy+S[k]*hh);
-        g.closePath();
-        g.clip();
-        g.imageSmoothingEnabled=false;
-        g.drawImage(this.colImg,k0,0,k1-k0+1,1,k0-off,cy-hh,k1-k0+1,hh*2);
-        g.restore();
-      }
-      return;
     }
-    for(let k=0;k<n;k++){
-      const x=k-off;
-      if(x<-1||x>W+1)continue;
-      const amp=A[k];
-      if(amp<0.004)continue;
-      const h=amp*hh;
-      const c=colAt(k);
-      g.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')';
-      const x0=Math.round(x*dpr),x1=Math.max(x0+1,Math.round((x+1)*dpr));
-      const y0=Math.round((cy-h)*dpr),y1=Math.max(y0+1,Math.round((cy+h)*dpr));
-      g.fillRect(x0/dpr,y0/dpr,(x1-x0)/dpr,(y1-y0)/dpr);
+    const ord=this.layerOrder(gl,gm,gh),o0=ord[0],o1=ord[1],o2=ord[2];
+    const xa=k1-off,x0=k0-off,odd=(k1-k0)&1;
+    for(let t=0;t<3;t++){
+      const bi=t===0?o0:(t===1?o1:o2);
+      const arr=bi===0?BL:(bi===1?BM:BH);
+      g.beginPath();
+      g.moveTo(x0,cy-arr[k0]*hh);
+      for(let k=k0+2;k<=k1;k+=2)g.lineTo(k-off,cy-arr[k]*hh);
+      if(odd)g.lineTo(xa,cy-arr[k1]*hh);
+      g.lineTo(xa,cy+arr[k1]*hh);
+      for(let k=k1-2;k>=k0;k-=2)g.lineTo(k-off,cy+arr[k]*hh);
+      if(odd)g.lineTo(x0,cy+arr[k0]*hh);
+      g.closePath();
+      g.fillStyle=col[bi];
+      g.fill();
     }
   }
   drawMarkers(g,W,H,t0,spx,playAtCenter,oy){
@@ -2845,28 +2882,50 @@ class Deck{
     const cv=this.jogCv;
     const pr=prep(cv);
     const g=pr.g,W=pr.W,H=pr.H;
-    g.clearRect(0,0,W,H);
     const cx=W/2,cy=H/2,r=Math.min(W,H)/2-2;
-    const grd=g.createRadialGradient(cx-r*0.3,cy-r*0.35,r*0.1,cx,cy,r);
-    grd.addColorStop(0,'#242a34');
-    grd.addColorStop(1,'#101318');
-    g.fillStyle=grd;
-    g.beginPath();
-    g.arc(cx,cy,r,0,Math.PI*2);
-    g.fill();
-    g.strokeStyle='#2c3340';
-    g.lineWidth=1;
-    g.stroke();
-    g.strokeStyle='rgba(255,255,255,.05)';
-    for(let i=1;i<=5;i++){
-      g.beginPath();
-      g.arc(cx,cy,r*i/6,0,Math.PI*2);
-      g.stroke();
+    if(!this._jogBG||this._jogBG.width!==cv.width||this._jogBG.height!==cv.height){
+      const b=document.createElement('canvas');
+      b.width=cv.width;b.height=cv.height;
+      const bg=b.getContext('2d');
+      bg.setTransform(pr.dpr,0,0,pr.dpr,0,0);
+      const grd=bg.createRadialGradient(cx-r*0.3,cy-r*0.35,r*0.1,cx,cy,r);
+      grd.addColorStop(0,'#242a34');
+      grd.addColorStop(1,'#101318');
+      bg.fillStyle=grd;
+      bg.beginPath();
+      bg.arc(cx,cy,r,0,Math.PI*2);
+      bg.fill();
+      bg.strokeStyle='#2c3340';
+      bg.lineWidth=1;
+      bg.stroke();
+      bg.strokeStyle='rgba(255,255,255,.05)';
+      for(let i=1;i<=5;i++){
+        bg.beginPath();
+        bg.arc(cx,cy,r*i/6,0,Math.PI*2);
+        bg.stroke();
+      }
+      bg.fillStyle='#0d1015';
+      bg.beginPath();
+      bg.arc(cx,cy,r*0.26,0,Math.PI*2);
+      bg.fill();
+      bg.strokeStyle='#333b49';
+      bg.stroke();
+      this._jogBG=b;
     }
-    const ang=this.buffer?(this.pNow/this.spinSec)*Math.PI*2:0;
+    g.clearRect(0,0,W,H);
+    g.drawImage(this._jogBG,0,0,W,H);
+    let ang=0;
+    if(this.buffer){
+      if(this.bpm&&this.beats&&this.beats.length){
+        const per=60/this.bpm,bar=per*4,t0=this.beats[0];
+        let ph=(this.pNow-t0)%bar;
+        if(ph<0)ph+=bar;
+        ang=ph/bar*Math.PI*2;
+      }else ang=(this.pNow/this.spinSec)*Math.PI*2;
+    }
     g.save();
     g.translate(cx,cy);
-    g.rotate(ang);
+    g.rotate(ang-Math.PI/2);
     g.strokeStyle=this.accent;
     g.lineWidth=3;
     g.lineCap='round';
@@ -2881,12 +2940,6 @@ class Deck{
     g.fill();
     g.globalAlpha=1;
     g.restore();
-    g.fillStyle='#0d1015';
-    g.beginPath();
-    g.arc(cx,cy,r*0.26,0,Math.PI*2);
-    g.fill();
-    g.strokeStyle='#333b49';
-    g.stroke();
     g.fillStyle=this.playing?this.accent:'#5b6577';
     g.font='bold 17px system-ui';
     g.textAlign='center';
@@ -2925,21 +2978,28 @@ class Deck{
         this.offset=this.buffer.duration;
       }
     }
+    if(this.playing&&this.buffer&&this.loop.on&&this.loop.out>this.loop.in){
+      const raw=this.rawPos();
+      if(raw>=this.loop.out){
+        const L=this.loop.out-this.loop.in;
+        this.offset=this.loop.in+((raw-this.loop.in)%L);
+        this.refTime=AC.currentTime;
+        if(this.loop.nextOut){
+          this.loop.out=this.loop.nextOut;
+          this.loop.nextOut=0;
+          if(this.src)this.src.loopEnd=Math.min(this.loop.out,this.buffer.duration);
+        }
+      }
+    }
     this.drawOv();
     this.drawJog();
     if(!this.buffer)return;
+    const now=performance.now();
+    if(now-(this._uiT||0)<90)return;
+    this._uiT=now;
     const d=this.buffer.duration;
-    const ts=fmtTime(P)+' / -'+fmtTime(d-P);
-    if(ts!==this._ts){
-      this._ts=ts;
-      this.subEl.textContent=ts+' · '+(d>0?(this.buffer.numberOfChannels>1?'stereo':'mono')+' · '+Math.round(this.buffer.sampleRate/1000)+' kHz':'');
-    }
     const eff=this.bpm?this.bpm*(1+this.pitch/100):0;
     const es=eff?eff.toFixed(1):'';
-    if(es!==this._bpmEff){
-      this._bpmEff=es;
-      this.bpmEffEl.textContent=eff?'Eff. '+es:'';
-    }
     if(es!==this._jiBpmEff){
       this._jiBpmEff=es;
       this.jiBpm.textContent=es||'--';
@@ -3064,12 +3124,12 @@ document.querySelectorAll('.cue-btn').forEach(b=>{
   });
 });
 mixer.masterKnob=makeKnob({
-  label:'master',min:0,max:1,value:0.8,
+  label:'master',min:0,max:1,value:0.5,
   format:v=>Math.round(v*100)+'%',
   onChange:v=>mixer.setMaster(v)
 });
 mixer.hpKnob=makeKnob({
-  label:'phones',min:0,max:1,value:0.7,
+  label:'phones',min:0,max:1,value:0.5,
   format:v=>Math.round(v*100)+'%',
   onChange:v=>mixer.setHp(v)
 });
@@ -3082,10 +3142,12 @@ mixer.meterB=$('#cBMeter');
 mixer.xfFader=makeFader({vertical:false,min:0,max:1,value:0.5,cls:'xf',onChange:v=>mixer.setXfade(v,true)});
 $('#xfBox').appendChild(mixer.xfFader.el);
 mixer.setXfade(0.5);
-mixer.setMaster(0.8);
-mixer.setHp(0.7);
+mixer.setMaster(0.5);
+mixer.setHp(0.5);
 $('#recBtn').addEventListener('click',()=>mixer.toggleRecord());
 const quantBtn=$('#quantBtn');
+quantBtn.classList.toggle('on',QZ.on);
+quantBtn.setAttribute('aria-checked',String(QZ.on));
 quantBtn.addEventListener('click',()=>{
   QZ.on=!QZ.on;
   quantBtn.classList.toggle('on',QZ.on);
@@ -3517,7 +3579,6 @@ $('#libBtn').title='Library: '+keyLabel(SHORTCUT_CONFIG.global.library);
 buildHelpTable();
 const MIDI_CONFIG={
   device:["DDJ-FLX4","FLX4"],
-  tempoRange:16,
   jogScale:1,
   leds:{on:127,off:0,dim:32},
   channels:{deckA:0,deckB:1,fxA:4,fxB:5,mixer:6,padA:7,padB:9,shiftPadA:8,shiftPadB:10},
@@ -3545,7 +3606,7 @@ const MIDI_JUMP=[-16,-8,-4,-1,1,4,8,16];
 const FLX={
   cfg:MIDI_CONFIG,midi:null,input:null,output:null,want:false,sink:'',wasBound:false,
   shift:{A:false,B:false},touch:{A:false,B:false},mode:{A:'hotcue',B:'hotcue'},fx:{A:0,B:0},fxTarget:'A',jogT:{A:null,B:null},
-  hpMix:0.7,hpLevel:1,last:'',lastT:0,
+  hpMix:0.5,hpLevel:1,last:'',lastT:0,
   dk(L){return L==='A'?deckA:deckB;},
   chan(L){return L==='A'?chanA:chanB;},
   dcfg(L){
@@ -3864,7 +3925,7 @@ const FLX={
       const dk=this.dk(L),cn=this.chan(L),cfg=this.dcfg(L);
       const is=k=>n===this.num(cfg[k]);
       if(is('tempo')){
-        const p=((v/127)*2-1)*this.num(this.cfg.tempoRange);
+        const p=((v/127)*2-1)*dk.pitchRange;
         dk.setPitch(p);
         dk.pitchFader.set(p,false);
         return;
@@ -4337,9 +4398,29 @@ const SV={
     g.fillStyle='#ff3b3b';
     g.fillRect(W/2-1.5,y0+2,3,h-2);
   },
+  sig(){
+    const d=deckA,e=deckB,cv=this.cv,g1=d.peakGains(),g2=e.peakGains();
+    let h=2166136261;
+    const A=v=>{h=Math.imul(h^((v*1000)|0),16777619)>>>0;};
+    A(cv._W||0);A(cv._H||0);A(this.viewSec);
+    for(let i=0;i<2;i++){
+      const dk=i?e:d,g=i?g2:g1;
+      A(dk.pNow*1000);A(dk.bpm||0);
+      const bl=dk.beats?dk.beats.length:0;
+      A(bl);if(bl){A(dk.beats[0]);A(dk.beats[bl-1]);}
+      A((dk.buffer&&dk.buffer.duration)||0);A(dk.peaks?1:0);
+      A(dk.loop.in);A(dk.loop.out);A(dk.cueSet?1:0);A(dk.cuePoint);
+      for(let j=0;j<8;j++){const c=dk.hotcues[j];A(c===null||c===undefined?-1:c);}
+      if(g){A(g.lo*100);A(g.mid*100);A(g.hi*100);}else{A(-7);}
+    }
+    return h;
+  },
   draw(){
     const cv=this.cv;
-    const pr=prep(cv);
+    const sg=this.sig();
+    if(sg===this._sig)return;
+    this._sig=sg;
+    const pr=prep(cv,true);
     const g=pr.g,W=pr.W,H=pr.H;
     if(W<4||H<8)return;
     g.clearRect(0,0,W,H);
