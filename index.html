@@ -329,19 +329,19 @@ transform:translateX(-50%);opacity:0;transition:opacity .1s;max-width:280px;whit
 #brSearch{background:#0d1015;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:5px 9px;
 font-size:11px;min-width:250px}
 #brSearch:focus{outline:none;border-color:var(--accent)}
-.flx-row{display:flex;align-items:center;gap:8px;margin:7px 0;flex-wrap:wrap}
-.flx-row label{font-size:10px;letter-spacing:.1em;color:var(--dim);font-weight:800;text-transform:uppercase}
-#flxStatus{margin:0 0 8px}
-#flxOut{background:#0d1015;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:5px 9px;
+.midi-row{display:flex;align-items:center;gap:8px;margin:7px 0;flex-wrap:wrap}
+.midi-row label{font-size:10px;letter-spacing:.1em;color:var(--dim);font-weight:800;text-transform:uppercase}
+#midiStatus{margin:0 0 8px}
+#midiOut{background:#0d1015;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:5px 9px;
 font-size:11px;min-width:230px;max-width:100%}
-#flxMap{width:100%;min-height:220px;background:#0a0c10;border:1px solid var(--line);border-radius:9px;color:var(--text);
+#midiMap{width:100%;min-height:220px;background:#0a0c10;border:1px solid var(--line);border-radius:9px;color:var(--text);
 font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-space:pre;tab-size:2}
 #keyMapJson{width:100%;min-height:180px;background:#0a0c10;border:1px solid var(--line);border-radius:9px;color:var(--text);
 font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-space:pre;tab-size:2}
 #keyMapMsg{margin:6px 0 0;font-size:11.5px}
 #keyMapMsg.err{color:#f87171}
 #keyMapMsg.ok{color:#4ade80}
-.btn.on.flx{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
+.btn.on.midi{background:linear-gradient(#0e7490,#155e75);border-color:var(--accent);color:#e6fbff;box-shadow:0 0 12px #22d3ee3d}
 </style>
 </head>
 <body>
@@ -357,7 +357,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <button class="btn rec" id="recBtn"><span class="dot"></span>RECORD</button>
 <span class="rec-time" id="recTime"></span>
 <button class="btn" id="libBtn">LIBRARY</button>
-<button class="btn flx" id="flxBtn" title="Connect a Pioneer DDJ-FLX4 controller">DDJ-FLX4</button>
+<button class="btn midi" id="midiBtn" title="Connect a MIDI controller">MIDI</button>
 <button class="btn" id="helpBtn">HELP</button>
 <button class="btn" id="infoBtn">ABOUT</button>
 </div>
@@ -418,7 +418,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
 <li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a Linkwitz-Riley band split with dynamic centre and transient masks, not AI source separation)</li>
-<li><b>Pioneer DDJ-FLX4</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the FLX4 dialog</li>
+<li><b>MIDI</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the MIDI dialog</li>
 <li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (the list shows only the playable audio files sitting directly in the selected folder — subfolders are not listed — and REFRESH re-reads them). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
 <li><b>Custom key map</b>: the keyboard layout is a JSON map you can edit right here (section <b>Custom key map</b> below) — remap any key, press APPLY and it is stored in this browser and reloaded on every start. A key can only drive one action, so APPLY refuses a map with conflicts and tells you which ones clash</li>
 <li>SYNC: automatically aligns the other deck's tempo and phase</li>
@@ -432,7 +432,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <h3>Custom key map</h3>
 <p class="note">Remap the keyboard by editing this JSON and pressing APPLY. It has the same shape as the built-in map (groups <b>deckA</b>, <b>deckB</b>, <b>mixer</b>, <b>global</b>); omit anything you want to keep at the default, or use <b>RESET</b> to restore the whole built-in map. A key cannot be assigned to two actions at once (case matters: <b>z</b> and <b>Z</b> are different keys), and <b>???</b> means unassigned. The map is stored in this browser and loaded on every start.</p>
 <textarea id="keyMapJson" spellcheck="false" aria-label="Custom keyboard mapping JSON"></textarea>
-<div class="flx-row">
+<div class="midi-row">
 <button class="btn sm" id="keyMapApply">APPLY</button>
 <button class="btn sm" id="keyMapReset">RESET</button>
 <button class="btn sm" id="keyMapDefaults">LOAD DEFAULT</button>
@@ -474,24 +474,24 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 </div>
 </div>
 
-<div class="modal" id="flxModal" hidden>
+<div class="modal" id="midiModal" hidden>
 <div class="modal-card">
-<div class="modal-head"><h2>Pioneer DDJ-FLX4</h2><button class="btn" id="flxClose">CLOSE</button></div>
+<div class="modal-head"><h2>MIDI controller</h2><button class="btn" id="midiClose">CLOSE</button></div>
 <div class="modal-body">
-<p class="note" id="flxStatus">Not connected. Press DDJ-FLX4 in the top bar to enable the controller.</p>
-<div class="flx-row">
-<label for="flxOut">Audio output</label>
-<select id="flxOut"></select>
-<button class="btn sm" id="flxOutRefresh">REFRESH</button>
-<button class="btn sm" id="flxOutPick">CHOOSE…</button>
+<p class="note" id="midiStatus">Not connected. Press MIDI in the top bar to enable the controller.</p>
+<div class="midi-row">
+<label for="midiOut">Audio output</label>
+<select id="midiOut"></select>
+<button class="btn sm" id="midiOutRefresh">REFRESH</button>
+<button class="btn sm" id="midiOutPick">CHOOSE…</button>
 </div>
 <p class="note">The master + PFL mix is routed to the controller's USB audio interface. A browser can only send one stereo stream to one output, so the headphone jack carries the same mix (use HEADPHONE MIX / LEVEL to blend PFL).</p>
 <h3>MIDI mapping</h3>
 <p class="note">A single editable JSON object. All numbers are decimal MIDI values and channels are 0-based (0 = MIDI channel 1). Changes are stored in this browser; RESET restores the built-in map. Close rekordbox before connecting so the controller exposes its MIDI surface.</p>
-<textarea id="flxMap" spellcheck="false" aria-label="FLX4 MIDI mapping JSON"></textarea>
-<div class="flx-row">
-<button class="btn sm" id="flxApply">APPLY</button>
-<button class="btn sm" id="flxReset">RESET</button>
+<textarea id="midiMap" spellcheck="false" aria-label="MIDI mapping JSON"></textarea>
+<div class="midi-row">
+<button class="btn sm" id="midiApply">APPLY</button>
+<button class="btn sm" id="midiReset">RESET</button>
 </div>
 <h3>Mapped controls</h3>
 <p class="note">Transport PLAY / CUE / SYNC, jog (outer = pitch bend, touched platter = scratch, otherwise bend, SHIFT = fast seek), TEMPO fader, loops (IN / OUT / 4 BEAT / CUE LOOP CALL), pads (HOT CUE sets/jumps, SHIFT clears; PAD FX toggles effects; BEAT JUMP and BEAT LOOP; SAMPLER pads 1-4 = the four stems in the same left-to-right order as the on-screen STEMS row (VOCAL, INST, BASS, DRUMS), 5-8 = effects), TRIM, EQ, CFX = filter, channel fader, CH CUE, CROSSFADER, MASTER, MASTER CUE, headphone mix/level (both blend the PFL bus), FX CH1/CH2 (target deck) / SELECT / ON / LEVEL, BEAT ◁ / ▷ = beat jump, SMART CFX = quantize, SMART FADER = unmute all stems, BROWSE rotary = scroll the Library selection (highlighted only while the controller is connected), LOAD ◁ / ▷ = load the selected track onto deck A / B, BROWSE press = open or close the Library.</p>
@@ -3464,7 +3464,7 @@ $('#zoomOut').addEventListener('click',()=>SV.zoom(1.35));
 $('#helpBtn').title='Help: '+keyLabel(SHORTCUT_CONFIG.global.help);
 $('#libBtn').title='Library: '+keyLabel(SHORTCUT_CONFIG.global.library);
 buildHelpTable();
-const FLX_MIDI_CONFIG={
+const MIDI_CONFIG={
   device:["DDJ-FLX4","FLX4"],
   tempoRange:16,
   jogScale:1,
@@ -3488,11 +3488,11 @@ const FLX_MIDI_CONFIG={
   fx:{selectBack:99,selectFwd:100,selectA:16,selectB:17,on:71,onShift:67,depth:2,beatBack:74,beatBackShift:102,beatFwd:75,beatFwdShift:107},
   mixer:{crossfader:31,master:8,masterCue:99,hpMix:12,hpLevel:13,cfxA:23,cfxB:24,smartCfx:0,smartFader:1,browse:64,browsePress:65,loadA:70,loadB:71}
 };
-const FLX_FX=['delay','echo','flanger','reverb','phaser','bitcrush'];
-const FLX_LOOPS=[0.25,0.5,1,2,4,8,16,32];
-const FLX_JUMP=[-16,-8,-4,-1,1,4,8,16];
+const MIDI_FX=['delay','echo','flanger','reverb','phaser','bitcrush'];
+const MIDI_LOOPS=[0.25,0.5,1,2,4,8,16,32];
+const MIDI_JUMP=[-16,-8,-4,-1,1,4,8,16];
 const FLX={
-  cfg:FLX_MIDI_CONFIG,midi:null,input:null,output:null,want:false,sink:'',wasBound:false,
+  cfg:MIDI_CONFIG,midi:null,input:null,output:null,want:false,sink:'',wasBound:false,
   shift:{A:false,B:false},touch:{A:false,B:false},mode:{A:'hotcue',B:'hotcue'},fx:{A:0,B:0},fxTarget:'A',jogT:{A:null,B:null},
   hpMix:0.7,hpLevel:1,last:'',lastT:0,
   dk(L){return L==='A'?deckA:deckB;},
@@ -3521,28 +3521,28 @@ const FLX={
   },
   init(){
     try{
-      const s=JSON.parse(localStorage.getItem('vibedj-flx4-map')||'null');
-      if(s&&typeof s==='object')this.cfg=this.merge(FLX_MIDI_CONFIG,s);
+      const s=JSON.parse(localStorage.getItem('vibedj-midi-map')||'null');
+      if(s&&typeof s==='object')this.cfg=this.merge(midi_MIDI_CONFIG,s);
     }catch(e){}
-    try{this.sink=localStorage.getItem('vibedj-flx4-sink')||'';}catch(e){}
-    $('#flxBtn').addEventListener('click',()=>this.toggle());
-    $('#flxClose').addEventListener('click',()=>this.close());
-    $('#flxModal').addEventListener('click',e=>{if(e.target===$('#flxModal'))this.close();});
-    $('#flxOut').addEventListener('change',e=>this.setSink(e.target.value));
-    $('#flxOutRefresh').addEventListener('click',()=>this.refreshOutputs());
-    $('#flxOutPick').addEventListener('click',()=>this.pickOutput());
-    $('#flxApply').addEventListener('click',()=>this.applyMap());
-    $('#flxReset').addEventListener('click',()=>this.resetMap());
-    $('#flxMap').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();this.close();}});
+    try{this.sink=localStorage.getItem('vibedj-midi-sink')||'';}catch(e){}
+    $('#midiBtn').addEventListener('click',()=>this.toggle());
+    $('#midiClose').addEventListener('click',()=>this.close());
+    $('#midiModal').addEventListener('click',e=>{if(e.target===$('#midiModal'))this.close();});
+    $('#midiOut').addEventListener('change',e=>this.setSink(e.target.value));
+    $('#midiOutRefresh').addEventListener('click',()=>this.refreshOutputs());
+    $('#midiOutPick').addEventListener('click',()=>this.pickOutput());
+    $('#midiApply').addEventListener('click',()=>this.applyMap());
+    $('#midiReset').addEventListener('click',()=>this.resetMap());
+    $('#midiMap').addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();this.close();}});
     this.paintMap();
     this.updateStatus();
   },
   open(){
-    $('#flxModal').hidden=false;
+    $('#midiModal').hidden=false;
     this.refreshOutputs();
-    $('#flxOut').focus();
+    $('#midiOut').focus();
   },
-  close(){$('#flxModal').hidden=true;},
+  close(){$('#midiModal').hidden=true;},
   toggle(){
     if(this.want){this.disable();this.close();return;}
     this.enable();
@@ -3565,19 +3565,19 @@ const FLX={
     if(!this.input){
       this.want=false;
       this.midi=null;
-      toast('DDJ-FLX4 not found — connect it and press DDJ-FLX4 again');
+      toast('MIDI controller not found — connect it and press MIDI again');
       this.updateStatus();
       return;
     }
-    const b=$('#flxBtn');
+    const b=$('#midiBtn');
     b.classList.add('on');
-    b.title='DDJ-FLX4 connected';
+    b.title='MIDI connected';
     this.sysex();
     await this.audio();
     this.last='';
     this.repaint(true);
     this.updateStatus();
-    toast('DDJ-FLX4 connected');
+    toast('MIDI connected');
   },
   disable(){
     this.want=false;
@@ -3592,13 +3592,13 @@ const FLX={
     this.midi=null;
     this.wasBound=false;
     this.last='';
-    const b=$('#flxBtn');
+    const b=$('#midiBtn');
     b.classList.remove('on');
-    b.title='Connect a Pioneer DDJ-FLX4 controller';
+    b.title='Connect a MIDI controller';
     this.restoreSink();
     this.updateStatus();
     if(window.BR)BR.reapply();
-    toast('DDJ-FLX4 disconnected');
+    toast('MIDI disconnected');
   },
   bind(){
     if(!this.want||!this.midi)return;
@@ -3626,7 +3626,7 @@ const FLX={
     this.updateStatus();
     if(window.BR)BR.reapply();
     if(re){
-      $('#flxBtn').classList.add('on');
+      $('#midiBtn').classList.add('on');
       this.audio();
     }
   },
@@ -3635,7 +3635,7 @@ const FLX={
     try{this.output.send([0xF0,0x00,0x40,0x05,0x00,0x00,0x04,0x05,0x00,0x50,0x02,0xF7]);}catch(e){}
   },
   async refreshOutputs(){
-    const sel=$('#flxOut');
+    const sel=$('#midiOut');
     if(!sel)return;
     let list=[];
     try{
@@ -3659,13 +3659,13 @@ const FLX={
   },
   labelOf(id){
     if(!id)return '';
-    const o=[...$('#flxOut').options].find(x=>x.value===id);
+    const o=[...$('#midiOut').options].find(x=>x.value===id);
     return o?o.textContent:'';
   },
   async audio(){
     await this.refreshOutputs();
     let id=this.sink;
-    const opts=[...$('#flxOut').options];
+    const opts=[...$('#midiOut').options];
     if(id&&!opts.some(o=>o.value===id))id='';
     if(!id){
       const o=opts.find(o=>o.value&&this.match(o.textContent));
@@ -3680,9 +3680,9 @@ const FLX={
     try{
       await AC.setSinkId(id||'');
       this.sink=id||'';
-      const sel=$('#flxOut');
+      const sel=$('#midiOut');
       if(sel)sel.value=this.sink;
-      try{localStorage.setItem('vibedj-flx4-sink',this.sink);}catch(e){}
+      try{localStorage.setItem('vibedj-midi-sink',this.sink);}catch(e){}
       toast(id?('Audio routed to '+(this.labelOf(id)||'the selected output')):'Audio routed to the system default');
     }catch(e){
       toast('Cannot route audio to this output');
@@ -3710,10 +3710,10 @@ const FLX={
     }catch(e){}
   },
   updateStatus(){
-    const el=$('#flxStatus');
+    const el=$('#midiStatus');
     if(!el)return;
-    if(!this.want){el.textContent='Not connected. Press DDJ-FLX4 in the top bar to enable the controller.';return;}
-    if(!this.input){el.textContent='Waiting for a DDJ-FLX4… connect it over USB.';return;}
+    if(!this.want){el.textContent='Not connected. Press MIDI in the top bar to enable the controller.';return;}
+    if(!this.input){el.textContent='Waiting for a MIDI controller… connect it over USB.';return;}
     const out=this.labelOf(this.sink)||(this.sink?'selected output':'system default');
     el.textContent='Connected · MIDI in/out ready · audio: '+out+(AC.setSinkId?'':' (audio routing not supported by this browser)');
   },
@@ -3773,13 +3773,13 @@ const FLX={
       if(ch===this.num(C.fxA)){
         if(n===this.num(F.selectBack)){
           const t=this.fxTarget;
-          this.fx[t]=(this.fx[t]+FLX_FX.length-1)%FLX_FX.length;
+          this.fx[t]=(this.fx[t]+MIDI_FX.length-1)%MIDI_FX.length;
           this.repaint(true);
           return;
         }
         if(n===this.num(F.selectFwd)){
           const t=this.fxTarget;
-          this.fx[t]=(this.fx[t]+1)%FLX_FX.length;
+          this.fx[t]=(this.fx[t]+1)%MIDI_FX.length;
           this.repaint(true);
           return;
         }
@@ -3837,8 +3837,8 @@ const FLX={
     }
     if(ch===this.num(C.fxA)||ch===this.num(C.fxB)){
       if(n===this.num(F.depth)){
-        deckA.setEffectAmount(FLX_FX[this.fx.A],v/127);
-        deckB.setEffectAmount(FLX_FX[this.fx.B],v/127);
+        deckA.setEffectAmount(MIDI_FX[this.fx.A],v/127);
+        deckB.setEffectAmount(MIDI_FX[this.fx.B],v/127);
       }
       return;
     }
@@ -3890,14 +3890,14 @@ const FLX={
   },
   toggleFx(L){
     ensureAudio();
-    const dk=this.dk(L),name=FLX_FX[this.fx[L]];
+    const dk=this.dk(L),name=MIDI_FX[this.fx[L]];
     const on=dk.toggleEffect(name);
     const b=dk.root.querySelector('.fx[data-fx="'+name+'"]');
     if(b)b.classList.toggle('on',on);
     this.repaint(true);
   },
   toggleFxIndex(L,i){
-    if(!FLX_FX[i])return;
+    if(!MIDI_FX[i])return;
     this.fx[L]=i;
     this.toggleFx(L);
   },
@@ -3941,12 +3941,12 @@ const FLX={
     const dk=this.dk(L),D=this.dcfg(L);
     if(n>=0&&n<=7){if(shifted)dk.clearHot(n);else dk.hotcue(n);this.repaint(true);return;}
     if(n>=16&&n<=23){this.toggleFxIndex(L,n-16);return;}
-    if(n>=32&&n<=39){dk.beatJump(FLX_JUMP[n-32]);return;}
+    if(n>=32&&n<=39){dk.beatJump(MIDI_JUMP[n-32]);return;}
     const si=D.padsStem.indexOf(n);
     if(si>=0&&STEM_NAMES[si]){this.toggleStem(L,STEM_NAMES[si]);return;}
     const fi=D.padsSampler.indexOf(n);
     if(fi>=0){this.toggleFxIndex(L,fi);return;}
-    if(n>=96&&n<=103){dk.setLoopLen(FLX_LOOPS[n-96]);this.repaint(true);return;}
+    if(n>=96&&n<=103){dk.setLoopLen(MIDI_LOOPS[n-96]);this.repaint(true);return;}
   },
   synced(dk){
     const o=dk===deckA?deckB:deckA;
@@ -3966,7 +3966,7 @@ const FLX={
       s+=dk.pfl?1:0;
       s+=this.mode[L];
       s+=this.fx[L];
-      s+=FLX_FX.map(n=>dk.fx[n].isEnabled()?1:0).join('');
+      s+=MIDI_FX.map(n=>dk.fx[n].isEnabled()?1:0).join('');
       s+=dk.hotcues.map(c=>c!==null?'1':'0').join('');
       s+=STEM_NAMES.map(n=>dk.stems.isActive(n)?'1':'0').join('');
       s+=dk.loop.len;
@@ -3994,11 +3994,11 @@ const FLX={
       for(let i=0;i<8;i++)set(D.padsHot[i],dk.hotcues[i]!==null);
     }else if(mode==='sampler'){
       STEM_NAMES.forEach((n,i)=>set(D.padsStem[i],dk.stems.isActive(n)));
-      for(let i=0;i<4;i++)set(D.padsSampler[i],dk.fx[FLX_FX[i]].isEnabled());
+      for(let i=0;i<4;i++)set(D.padsSampler[i],dk.fx[MIDI_FX[i]].isEnabled());
     }else if(mode==='padfx1'||mode==='padfx2'){
-      for(let i=0;i<6;i++)set(D.padsFx[i],dk.fx[FLX_FX[i]].isEnabled());
+      for(let i=0;i<6;i++)set(D.padsFx[i],dk.fx[MIDI_FX[i]].isEnabled());
     }else if(mode==='beatloop'){
-      const idx=dk.loop.on?FLX_LOOPS.indexOf(dk.loop.len):-1;
+      const idx=dk.loop.on?MIDI_LOOPS.indexOf(dk.loop.len):-1;
       for(let i=0;i<8;i++)set(D.padsLoop[i],i===idx);
     }else if(mode==='beatjump'){
       for(let i=0;i<8;i++)dim(D.padsJump[i]);
@@ -4023,7 +4023,7 @@ const FLX={
       led(cfg.pfl,dk.pfl);
       for(const k in cfg.padMode)led(cfg.padMode[k],k===this.mode[L]);
       const fxCh=L==='A'?this.num(C.fxA):this.num(C.fxB);
-      this.sendNote(fxCh,this.num(this.cfg.fx.on),dk.fx[FLX_FX[this.fx[L]]].isEnabled()?Ls.on:Ls.off);
+      this.sendNote(fxCh,this.num(this.cfg.fx.on),dk.fx[MIDI_FX[this.fx[L]]].isEnabled()?Ls.on:Ls.off);
       if(force)this.clearPads(pad);
       this.paintPads(pad,this.mode[L],dk);
     });
@@ -4050,31 +4050,31 @@ const FLX={
     this.repaint(false);
   },
   paintMap(){
-    const t=$('#flxMap');
+    const t=$('#midiMap');
     if(t)t.value=JSON.stringify(this.cfg,null,2);
   },
   applyMap(){
     try{
-      const o=JSON.parse($('#flxMap').value||'{}');
+      const o=JSON.parse($('#midiMap').value||'{}');
       if(!o||typeof o!=='object'||Array.isArray(o))throw new Error('bad');
-      this.cfg=this.merge(FLX_MIDI_CONFIG,o);
-      try{localStorage.setItem('vibedj-flx4-map',JSON.stringify(this.cfg));}catch(e){}
+      this.cfg=this.merge(MIDI_CONFIG,o);
+      try{localStorage.setItem('vibedj-midi-map',JSON.stringify(this.cfg));}catch(e){}
       this.paintMap();
       this.refreshOutputs();
       this.last='';
       this.repaint(true);
-      toast('FLX4 mapping saved');
+      toast('MIDI mapping saved');
     }catch(e){
-      toast('Invalid FLX4 mapping JSON');
+      toast('Invalid MIDI mapping JSON');
     }
   },
   resetMap(){
-    this.cfg=FLX_MIDI_CONFIG;
-    try{localStorage.removeItem('vibedj-flx4-map');}catch(e){}
+    this.cfg=MIDI_CONFIG;
+    try{localStorage.removeItem('vibedj-midi-map');}catch(e){}
     this.paintMap();
     this.last='';
     this.repaint(true);
-    toast('FLX4 mapping reset');
+    toast('MIDI mapping reset');
   }
 };
 FLX.init();
@@ -4082,7 +4082,7 @@ function activeModalEl(){
   if(!helpModal.hidden)return helpModal;
   if(!libModal.hidden)return libModal;
   if(!infoModal.hidden)return infoModal;
-  if(!$('#flxModal').hidden)return $('#flxModal');
+  if(!$('#midiModal').hidden)return $('#midiModal');
   return null;
 }
 function trapTab(container,e){
@@ -4104,12 +4104,12 @@ window.addEventListener('keydown',e=>{
     if(!helpModal.hidden){closeHelp();e.preventDefault();return;}
     if(!libModal.hidden){closeLib();e.preventDefault();return;}
     if(!infoModal.hidden){closeInfo();e.preventDefault();return;}
-    if(!$('#flxModal').hidden){FLX.close();e.preventDefault();return;}
+    if(!$('#midiModal').hidden){FLX.close();e.preventDefault();return;}
     selectAnalog(null);return;
   }
   if(k===SHORTCUT_CONFIG.global.help){helpModal.hidden?openHelp():closeHelp();e.preventDefault();return;}
   if(k===SHORTCUT_CONFIG.global.library){libModal.hidden?openLib():closeLib();e.preventDefault();return;}
-  const modalOpen=!helpModal.hidden||!libModal.hidden||!infoModal.hidden||!$('#flxModal').hidden;
+  const modalOpen=!helpModal.hidden||!libModal.hidden||!infoModal.hidden||!$('#midiModal').hidden;
   if(k===SHORTCUT_CONFIG.global.selectUp||k===SHORTCUT_CONFIG.global.crossfaderRight||k===SHORTCUT_CONFIG.global.selectDown||k===SHORTCUT_CONFIG.global.crossfaderLeft){
     e.preventDefault();
     if(SHORTCUTS.sel)adjustSelected((k===SHORTCUT_CONFIG.global.selectUp||k===SHORTCUT_CONFIG.global.crossfaderRight)?1:-1);
