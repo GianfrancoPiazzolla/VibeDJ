@@ -50,7 +50,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | :---: | :--- |
 | 🎵 | Two independent decks with full transport control |
 | 🌀 | Scratch / scrub via a draggable jog wheel |
-| ⚡ | One-tap **SYNC** (tempo + beat phase alignment) |
+| ⚡ | One-tap **SYNC** (tempo + beat phase alignment, tempo range widened to ±16% when needed) |
 | 🌊 | Shared overlaid waveform with zoomable time axis, coloured by frequency band and following the stem mutes |
 | 🥁 | Automatic **beatgrid** with downbeats |
 | 🧠 | **BPM**, **harmonic key (Camelot)** & **energy** detection |
@@ -108,7 +108,7 @@ The top bar is **sticky** and always reachable. 🧭
 | ❓ **HELP** (`F2`) | Opens **How to use**: feature list, shortcut table and key-map editor |
 | ℹ️ **ABOUT** | Credits, synopsis and repository links |
 
-**🔍 UI zoom** applies a single CSS `zoom` to the whole app: decks, mixer, waveform strip, **modals, toasts and tooltips** scale together, so nothing is clipped. When the effective width or height gets small the layout reflows (the decks stack vertically and the jog wheels shrink). The percentage shown in the top bar is stored in `localStorage` and restored at the next start. It is **independent** of the beat-locked waveform zoom described [below](#-overlaid-waveform--beatgrid).
+**🔍 UI zoom** applies a single CSS `zoom` to the whole app: decks, mixer, waveform strip, **modals, toasts and tooltips** scale together, so nothing is clipped. The canvases are re-measured and repainted at their new pixel size after every step — in or out — so the shared strip and the deck overviews keep their full waveform at any level. When the effective width or height gets small the layout reflows (the decks stack vertically and the jog wheels shrink). The percentage shown in the top bar is stored in `localStorage` and restored at the next start. It is **independent** of the beat-locked waveform zoom described [below](#-overlaid-waveform--beatgrid).
 
 **🪟 Modals** (Library, Help, MIDI, About) close with their **CLOSE** button, a click on the dark backdrop or `Esc`; focus moves inside the dialog and `Tab` cycles only through its controls. Pressing `Esc` with no modal open drops the analog control currently bound to the arrow keys.
 
@@ -193,15 +193,15 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 | ⏮️ **START** | Jump back to the beginning |
 | ▶️ **PLAY / ⏸️ PAUSE** | Start / stop playback (the label follows the state; while the deck is stopped the **PLAY** label is green, and it lights up the whole button only during playback) |
 | 🔴 **CUE** | Set the cue point; **hold** to preview from cue; press to snap back; **right-click** to clear the stored cue point — the button shows its amber colour only while a cue is stored, standard grey otherwise; the CUE text blinks while paused away from the cue point, like a real console |
-| ⚡ **SYNC** | Match the other deck's tempo **and** beat phase (both decks need a detected BPM). The BPMs are matched **even when the target needs more pitch than the current range allows**: the fader cursor simply saturates at its own limit, the `pitch` readout shows the real value and the **`Out of TEMPO fader range (±8% / ±16%)`** toast still warns you |
+| ⚡ **SYNC** | Match the other deck's tempo **and** beat phase (both decks need a detected BPM). When the required pitch does not fit the current range the fader range **widens to ±16% on its own** (switch and cursor follow) and the match goes ahead; when even **±16%** is not enough the sync is **blocked** — the deck keeps its tempo, position and range — and a toast reports the pitch it would have needed |
 | 🎚️ **TEMPO** fader | Change the tempo inside the selected range (also changes pitch — **no key lock**); oriented like the hardware, so sliding up slows down and sliding down speeds up |
-| ↔️ **Range switch** (under the `TEMPO` label) | Shows the fader's current maximum travel (`±8%` / `±16%`): click it to jump between **±8%** (default, knob left) and **±16%** (knob right, highlighted); switching back to ±8% pulls any larger pitch into range and the tempo follows immediately. **SYNC** is the only thing allowed to go past it |
+| ↔️ **Range switch** (under the `TEMPO` label) | Shows the fader's current maximum travel (`±8%` / `±16%`): click it to jump between **±8%** (default, knob left) and **±16%** (knob right, highlighted); switching back to ±8% pulls any larger pitch into range and the tempo follows immediately. **SYNC** raises it to ±16% by itself when the other deck needs more than 8%, and refuses to sync when the target is beyond ±16% |
 | ↘️↗️ **BEND − / +** | **Hold** for a temporary pitch bend (∓5%) that springs back to the fader value on release |
 | ❌ **EJECT** | Unload the track (`✕` in the deck header) and clear its cue, loops and hot cues |
 
 ### ⏭️ Beat jump & 🎚️ BPM/grid tools
-- ⏭️ **Beat jump** — buttons `−16 · −8 · −4 · +4 · +8 · +16` jump whole beats (uses the detected BPM, defaults to 120 if none); with **QUANTIZE** on, the landing position snaps to the beatgrid.
-- 🎚️ **Grid tools** — `÷2` / `×2` halve or double the BPM (recalculated from the first downbeat), `◀` / `▶` nudge the grid by **1 ms** per click, **SET** lets you type a BPM (40–240), and **TAP** tap-tempo averages up to the last **9** taps (the series restarts after a 2.5 s pause).
+- ⏭️ **Beat jump** — buttons `−16 · −8 · −4 · +4 · +8 · +16` jump whole beats (uses the detected BPM, defaults to 120 if none). The jump always moves by **exactly N beats** and keeps the **phase inside the beat** the deck is playing at, so two decks whose downbeats are synced stay locked beat for beat; with **QUANTIZE** on the landing point is still snapped to the beatgrid, but *relative to that phase*, so the jump cleans up the position without ever shifting the beat alignment (the BPM was already matched and stays matched).
+- 🎚️ **Grid tools** — `÷2` / `×2` halve or double the BPM (recalculated from the first downbeat), `◀` / `▶` nudge the grid by **1 ms** per click (the grid shifts rigidly, so its spacing and bar numbering stay intact at the track edges too, where beats that fall outside the track are simply not drawn), **SET** lets you type a BPM (40–240), and **TAP** tap-tempo averages up to the last **9** taps (the series restarts after a 2.5 s pause).
 - ⌨️ Every button in both rows has a **keyboard shortcut** — hover it or check the [shortcuts table](#️-keyboard-shortcuts); triggering one from the keyboard or the controller **flashes the button**.
 
 ### 📟 Deck readouts (above the jog)
@@ -224,13 +224,13 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 - 🎤 The strip follows the **stem mutes** (see [Stems](#-stems)): muting a stem attenuates the bands it belongs to, so the contour shows what you actually hear. The per-deck overview above the jog wheel always keeps the full mix.
 - 💫 **No shimmer while playing**: the envelope is built from the peaks once and then **sampled with linear interpolation** at every column centre, so the three contours are continuous functions of the playhead instead of being re-quantised for each frame, and the whole waveform simply slides with the track.
 - 📊 **Track progress**: a thin strip along the top of each half shows the elapsed time over the whole track in the deck colour, with a bright cursor on the leading edge; it follows the real playback position (so it rewinds with a loop) and is display-only — seeking stays on the waveform below.
-- 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the thick bar is the **downbeat**, every **4 beats** (one bar), and the active deck's grid prints its `bar.beat` number next to each line.
+- 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the thick bar is the **downbeat**, every **4 beats** (one bar), and the active deck's grid prints its `bar.beat` number next to each line. The grid is built only from the beats that actually fall **inside the track**, so every line keeps the spacing of its BPM and the closing bars are never drawn as a phantom beat squeezed onto the end of the file. 🎯
 - 🚩 A thin **red playhead** runs down the centre of each half, where the waveform scrolls past.
 - 🎯 **Markers** — the active loop range is shaded in green with solid edges, the cue point is a white flag marked `C` and every stored hot cue is a coloured flag with its number, drawn on both the shared strip and the deck overview.
 - 📏 Each half displays the **phase offset in ms** against the beat — nudge the **TEMPO** fader until both grids stay locked. 🔒
 - 🧭 A small **graphical phase meter** compares both decks' phase (amber while they drift, deck colour once they are within ±8% of half a beat). 🎯
 
-Each deck additionally has its own **overview waveform** canvas you can click (or drag) to seek. 📊 On long tracks the contour heights come from the **average** band energy (not the per-column peak) and every band keeps its **own colour and its own shape** (🔴 lows, 🟢 mids, 🔵 highs), stacked from the loudest down to the quietest so the weak components stay in front even when the whole track is squeezed into a few hundred pixels. The envelope is smoothed across neighbouring columns and drawn with generous headroom, so the overview keeps a readable shape and never clips to white.
+Each deck additionally has its own **overview waveform** canvas you can click (or drag) to seek. 📊 On long tracks the contour heights come from the **average** band energy (not the per-column peak) and every band keeps its **own colour and its own shape** (🔴 lows, 🟢 mids, 🔵 highs), stacked from the loudest down to the quietest so the weak components stay in front even when the whole track is squeezed into a few hundred pixels. The envelope is smoothed across neighbouring columns and drawn with generous headroom, so the overview keeps a readable shape and never clips to white. The contour is built symmetrically around its centre line and is repainted from the cached peaks whenever the canvas changes size, so **both halves stay complete at every interface zoom level**, enlarging or shrinking.
 
 ---
 
@@ -291,7 +291,7 @@ With all four stems on, the strip shows the full mix exactly as before. The per-
 - ⏳ While the loop is **playing** the new width is **armed, not immediate**: the pass in progress runs to the OUT it had when you pressed — shorter *or* longer — and the following pass starts with the new width. The playhead is never yanked back to IN in the middle of a cycle, and nothing restarts mid-audio. Only when the deck is paused does the new length apply at once.
 - 🛡️ **OUT** needs a valid **IN** first and a position after it, otherwise a toast tells you what is missing.
 
-> 🎯 **QUANTIZE** (switch next to the PHONES knob in the mixer) is **on by default** and snaps cue points, loops, hot cues and beat jumps to the nearest beat; switch it off when you want the raw positions. ✨
+> 🎯 **QUANTIZE** (switch next to the PHONES knob in the mixer) is **on by default** and snaps cue points, loops and hot cues to the nearest beat, while beat jumps land on the grid without changing the phase they started from; switch it off when you want the raw positions. ✨
 
 ### 🎨 Hot cues
 - 🔢 **8 hot cues** per deck, each with its own **color**.
