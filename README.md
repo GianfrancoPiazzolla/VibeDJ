@@ -329,7 +329,7 @@ The central mixer is a classic 2-channel strip. 🎛️
 
 - 🔴 Hit **RECORD** to start capturing the **master output** (a `MediaRecorder` taps the master bus).
 - ⏱️ A live **timer** shows the elapsed time.
-- ⏹️ Press **RECORD** again to **stop** → the mix is downloaded automatically as `mix_YYYYMMDD_HHMMSS.webm` 📥 (or `.ogg` / `.m4a`, depending on the best codec your browser supports). 🎧
+- ⏹️ Press **RECORD** again to **stop** → the mix is downloaded automatically as `vibedj_YYYYMMDD_HHMMSS.webm` 📥 (or `.ogg` / `.m4a`, depending on the best codec your browser supports). 🎧
 
 ---
 
