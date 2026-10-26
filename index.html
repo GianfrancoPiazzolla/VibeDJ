@@ -417,16 +417,16 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear) — changing the length of a loop that already exists keeps its <b>IN</b> point and only moves the <b>OUT</b>: the loop expands or contracts around its own start instead of jumping to the current position — and while the loop is playing the change is <b>armed for the next pass</b>, so the cycle in progress always finishes at the OUT it had when you pressed</li>
-<li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues, loops and beat jumps to the nearest beat when a beatgrid is available</li>
+<li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues and loops to the nearest beat when a beatgrid is available, and keeps beat jumps on that grid without moving the beat phase they started from</li>
 <li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the decks and mixer shrink while the waveform strip stretches vertically to fill all the remaining page space, leaving no empty gap at the bottom — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
-<li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck</li>
+<li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck, always by exactly that many beats and keeping the current beat phase — with QUANTIZE on the landing is still snapped to the grid, but relative to that phase, so a synced pair never drifts apart</li>
 <li><b>BPM/grid tools</b> per deck: &times;2 and &divide;2 rescale the beatgrid, the arrows nudge it, SET lets you type a BPM manually and TAP sets it by tapping the beat</li>
 <li>Per-deck <b>Effects</b>: delay, echo, flanger, reverb, phaser and bitcrush — toggle each one with the buttons in the FX row of the deck</li>
 <li>Per-deck <b>Stems</b>: vocal, instrumental, bass and drums — every part plays by default and each button in the STEMS row mutes / unmutes its part, like rekordbox (a Linkwitz-Riley band split with dynamic centre and transient masks, not AI source separation)</li>
 <li><b>MIDI</b> (button in the top bar): connect the controller over USB for full bidirectional MIDI control — transport, jog, tempo, loops, hot cues, pads (effects, beat jump, stems, beat loops), trim, EQ, filter, faders, crossfader, effects, quantize, library and LEDs. The master + PFL mix can be routed to the controller's USB audio output (Chrome/Edge) and the mapping is editable in the MIDI dialog</li>
 <li><b>Library</b> (button in the top bar, shortcut <b>F3</b>): opens a modal where you can pick a local folder and list its audio files. Each row shows the estimated BPM, the harmonic key (Camelot, e.g. 1A) and an Energy tag (1-5); tracks already loaded onto a deck are highlighted in amber. Double-click = load the first free deck, A / B buttons = load a chosen deck, or drag a row onto a deck (the list shows only the playable audio files sitting directly in the selected folder — subfolders are not listed — and REFRESH re-reads them). With a DDJ-FLX4 connected you can scroll the selection with the BROWSE rotary, load it with the LOAD ◁ / ▷ buttons and open or close the Library by pressing the rotary</li>
 <li><b>Custom key map</b>: the keyboard layout is a JSON map you can edit right here (section <b>Custom key map</b> below) — remap any key, press APPLY and it is stored in this browser and reloaded on every start. A key can only drive one action, so APPLY refuses a map with conflicts and tells you which ones clash</li>
-<li>SYNC: automatically aligns the other deck's tempo and phase</li>
+<li>SYNC: automatically aligns the other deck's tempo and phase — when 8% of pitch is not enough it switches the TEMPO range to &plusmn;16% on its own, and when even that is not enough the sync is blocked and a notification explains why</li>
 <li>3-band EQ with kill, LP/HP filters, trim, channel faders and a constant-power crossfader</li>
 <li>Jog wheel: drag to scratch (while playing) or scrub (while paused)</li>
 <li>Headphone monitoring (PFL) and mix recording</li>
@@ -597,9 +597,9 @@ function analyze(x,sr,peakRate){
             while(inter<0)inter+=slope;
             while(inter>=slope)inter-=slope;
             var per=slope/fps,first=inter/fps;
-            var nb=Math.floor(dur/per)+2;
+            var nb=Math.max(1,Math.floor((dur-first)/per)+1);
             beats=new Float32Array(nb);
-            for(i=0;i<nb;i++){ var tb=first+i*per; beats[i]=tb<=dur?tb:dur; }
+            for(i=0;i<nb;i++)beats[i]=Math.min(dur,first+i*per);
             var mxOn=0; for(f=0;f<nf;f++)if(on[f]>mxOn)mxOn=on[f];
             conf=Math.max(0,Math.min(1,bestS/(mxOn+1e-9)*1.6));
           }
@@ -1503,7 +1503,7 @@ class Mixer{
         a.href=URL.createObjectURL(blob);
         const d=new Date();
         const p=n=>String(n).padStart(2,'0');
-        a.download='mix_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds())+'.'+ext;
+        a.download='vibedj_'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+p(d.getSeconds())+'.'+ext;
         document.body.appendChild(a);
         a.click();
         setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},8000);
@@ -2310,7 +2310,11 @@ class Deck{
     if(!this.bpm||!o.bpm){toast('BPM not available on one of the decks');return;}
     const target=o.bpm*(1+o.pitch/100);
     const np=(target/this.bpm-1)*100;
-    if(np<-this.pitchRange||np>this.pitchRange)toast('Out of TEMPO fader range (±'+this.pitchRange+'%)');
+    if(np<-16||np>16){
+      toast('Sync blocked — deck '+this.L+' needs '+(np>0?'+':'')+np.toFixed(1)+'% TEMPO (max ±16%)');
+      return;
+    }
+    if(this.pitchRange!==16&&(np<-this.pitchRange||np>this.pitchRange))this.setPitchRange(16);
     this.setPitch(np,true);
     this.pitchFader.set(np,false);
     if(this.beats&&o.beats){
@@ -2426,13 +2430,17 @@ class Deck{
   nearestBeat(t){
     const bs=this.beats;
     if(!bs||!bs.length)return t;
-    if(t<=bs[0])return bs[0];
-    const last=bs[bs.length-1];
-    if(t>=last)return last;
-    let lo=0,hi=bs.length-1;
-    while(lo<hi){const m=(lo+hi)>>1;if(bs[m]<t)lo=m+1;else hi=m;}
-    const a=bs[lo-1],b=bs[lo];
-    return (t-a)<=(b-t)?a:b;
+    const dur=this.buffer?this.buffer.duration:Infinity;
+    let r=t;
+    if(t<=bs[0])r=bs[0];
+    else if(t>=bs[bs.length-1])r=bs[bs.length-1];
+    else{
+      let lo=0,hi=bs.length-1;
+      while(lo<hi){const m=(lo+hi)>>1;if(bs[m]<t)lo=m+1;else hi=m;}
+      const a=bs[lo-1],b=bs[lo];
+      r=(t-a)<=(b-t)?a:b;
+    }
+    return r<0?0:(r>dur?dur:r);
   }
   quant(t){
     if(!QZ.on||!this.bpm||!this.beats||!this.beats.length)return t;
@@ -2443,16 +2451,22 @@ class Deck{
     if(!this.buffer)return;
     if(n<0&&this.pos()<=0)return;
     const per=60/(this.bpm||120);
-    this.seek(this.quant(this.pos()+n*per));
+    const p=this.pos();
+    let t=p+n*per;
+    if(QZ.on&&this.bpm&&this.beats&&this.beats.length){
+      const ph=this.beatPhase(p);
+      t=this.nearestBeat(t-ph)+ph;
+    }
+    this.seek(t);
   }
   scaleBpm(f){
     if(!this.buffer||!this.bpm||!this.beats||!this.beats.length)return;
     const t0=this.beats[0];
     const newBpm=clamp(this.bpm*f,40,240);
     const per=60/newBpm,dur=this.buffer.duration;
-    const nb=Math.max(1,Math.floor((dur-t0)/per)+2);
+    const nb=Math.max(1,Math.floor((dur-t0)/per)+1);
     const arr=new Float32Array(nb);
-    for(let i=0;i<nb;i++){const t=t0+i*per;arr[i]=t<=dur?t:dur;}
+    for(let i=0;i<nb;i++)arr[i]=Math.min(dur,t0+i*per);
     this.beats=arr;
     this.bpm=newBpm;
     this.ovDirty=true;
@@ -2461,8 +2475,10 @@ class Deck{
   }
   nudgeGrid(sec){
     if(!this.buffer||!this.beats||!this.beats.length)return;
-    const bs=this.beats,dur=this.buffer.duration;
-    for(let i=0;i<bs.length;i++){let t=bs[i]+sec;bs[i]=t<0?0:(t>dur?dur:t);}
+    const bs=this.beats;
+    const per=this.bpm?60/this.bpm:(bs.length>1?bs[1]-bs[0]:0.5);
+    const first=bs[0]+sec;
+    for(let i=0;i<bs.length;i++)bs[i]=first+i*per;
     this.ovDirty=true;
   }
   setBpm(v){
@@ -2471,9 +2487,9 @@ class Deck{
     if(!isFinite(v)||v<40||v>240){toast('BPM must be between 40 and 240');return;}
     const t0=this.beats&&this.beats.length?this.beats[0]:0;
     const per=60/v,dur=this.buffer.duration;
-    const nb=Math.max(1,Math.floor((dur-t0)/per)+2);
+    const nb=Math.max(1,Math.floor((dur-t0)/per)+1);
     const arr=new Float32Array(nb);
-    for(let i=0;i<nb;i++){const t=t0+i*per;arr[i]=t<=dur?t:dur;}
+    for(let i=0;i<nb;i++)arr[i]=Math.min(dur,t0+i*per);
     this.beats=arr;
     this.bpm=v;
     this.conf=1;
@@ -2740,7 +2756,7 @@ class Deck{
       }
     }
     const hh=H/2-Math.max(4,H*0.09);
-    const k0=Math.max(0,Math.floor(off)-2),k1=Math.min(n-1,Math.ceil(off+W)+2);
+    const k0=Math.max(0,Math.floor(off)-2),k1=Math.min(Math.floor(n-1),Math.ceil(off+W)+2);
     if(k1<=k0)return;
     if(ref!==1){
       const ir=1/ref;
@@ -4286,7 +4302,7 @@ const SV={
   },
   drawGrid(g,dk,pos,y0,h,W,other){
     if(!dk.buffer||!dk.beats)return;
-    const vs=this.viewSec*(120/(dk.bpm||120)),spx=vs/W,t0=pos-vs/2,bs=dk.beats;
+    const vs=this.viewSec*(120/(dk.bpm||120)),spx=vs/W,t0=pos-vs/2,bs=dk.beats,tdur=dk.buffer.duration;
     let lo=0,hi=bs.length-1;
     while(lo<hi){const m=(lo+hi)>>1;if(bs[m]<t0)lo=m+1;else hi=m;}
     g.save();
@@ -4294,7 +4310,7 @@ const SV={
     for(let i=lo;i<bs.length;i++){
       const t=bs[i];
       if(t>t0+vs)break;
-      if(t<t0)continue;
+      if(t<t0||t<0||t>tdur)continue;
       const x=(t-t0)/spx;
       const bar=(i%4)===0;
       g.fillStyle=dk.accent+(other?(bar?'99':'55'):(bar?'e6':'80'));
@@ -4308,7 +4324,7 @@ const SV={
       for(let i=lo;i<bs.length;i++){
         const t=bs[i];
         if(t>t0+vs)break;
-        if(t<t0)continue;
+        if(t<t0||t<0||t>tdur)continue;
         const x=(t-t0)/spx;
         const bar=(i%4)===0;
         g.fillStyle=bar?dk.accent:'rgba(215,220,229,.72)';
@@ -4829,7 +4845,7 @@ setTimeout(()=>toast('Load two tracks (LOAD TRACK or drop files) and start mixin
   });
   document.addEventListener('mouseout',e=>{
     const el=e.target&&e.target.closest?e.target.closest('[title],[data-tt]'):null;
-    if(el===cur){const to=e.relatedTarget;if(!to||!el.contains(to))hide();}
+    if(el&&el===cur){const to=e.relatedTarget;if(!to||!el.contains(to))hide();}
   });
   document.addEventListener('pointerdown',hide,true);
   window.addEventListener('scroll',hide,true);
