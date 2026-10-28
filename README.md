@@ -57,7 +57,7 @@ Load two tracks, let VibeDJ detect **BPM**, **beatgrid** and **harmonic key**, t
 | 🎚️ | 3-band EQ + kill, LP/HP filter, trim, faders, crossfader |
 | 🔊 | Per-deck **delay**, **echo**, **flanger**, **reverb**, **phaser**, **bitcrush** |
 | 🎤 | Per-deck **stems** (rekordbox-style): mute / unmute vocal, instrumental, bass and drums |
-| 🎯 | Beat loops (1/4 → 8) and **8 hot cues** per deck |
+| 🎯 | Beat loops (1/4 → 8) and **8 hot cues** per deck, auto-filled with intro / buildup / drop / outro on load |
 | 🥁 | **Quantize**, **beat jump** and **BPM/grid tools** |
 | 🛡️ | Master **limiter** with a clip indicator |
 | 📂 | Local **folder browser** with sorting, filtering & drag & drop |
@@ -295,6 +295,11 @@ With all four stems on, the strip shows the full mix exactly as before. The per-
 
 ### 🎨 Hot cues
 - 🔢 **8 hot cues** per deck, each with its own **color**.
+- 🤖 **Automatic cues on load** — as soon as the track analysis finishes, **pad 1** holds the **Intro** and **pad 8** the final **Outro**; every other section the analysis recognises (buildup, drop, a second buildup or drop, a breakdown) fills pads **2 → 7** in **chronological order**, up to **eight** cues in total. The positions follow the **band-energy envelope** of the track and land on the **exact onset**, so they are not snapped to the beatgrid (QUANTIZE does not move them).
+- 🧩 The pads in between are filled **sequentially** from left to right, in the order the sections happen; if a track has fewer than six sections between intro and outro, the last pads stay free and the **Outro stays on pad 8**.
+- 🪜 When a section cannot be recognised, its cue falls back to a percentage of the track length (62% for the drop, 10% of the duration — at most 16 bars — before it for the buildup, 85% for the outro), so the four essentials are always available.
+- 🙅 Automatic cues never overwrite one you **set or cleared** yourself: if you touch a pad while the analysis is still running, no cue is filled in at all.
+- 💬 Hover a pad to read the section name and its time (`Buildup · 1:12`); a cue you set by hand has no label.
 - ➕ Press an empty pad → **set** the cue.
 - 🔁 Press a set pad → **jump** to the cue (with a glowing pad).
 - 🧹 **Shift + click** (or **right-click** on a pad) → **clear** the cue.
