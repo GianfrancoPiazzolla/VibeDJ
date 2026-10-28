@@ -210,11 +210,15 @@ font-weight:800;font-size:11px;cursor:pointer}
 display:flex;flex-direction:column;align-items:center;gap:3px}
 .chan-head{font-size:9px;letter-spacing:.14em;color:#8b95a7;font-weight:800}
 .knobs{display:flex;flex-direction:column;gap:2px;align-items:center}
-.krow{display:flex;align-items:flex-start;gap:4px;justify-content:flex-start;width:64px}
-.krow .kill{width:17px;height:17px;padding:0;font-size:9px;margin-top:5px;border-radius:5px;flex:none;margin-left:auto}
+.krow{display:flex;align-items:flex-start;gap:4px;width:64px}
+.krow .kk{margin-left:auto;flex:none}
+.krow .kill{width:17px;height:17px;padding:0;font-size:9px;margin-top:5px;border-radius:5px;flex:none}
 .kill.on{background:#b91c1c;border-color:#ef4444;color:#fff;box-shadow:0 0 9px #ef444459}
 .chan-bottom{display:flex;gap:6px;align-items:stretch;justify-content:center;margin-top:0}
-.chan-body{display:flex;flex-direction:row-reverse;gap:8px;align-items:stretch;justify-content:center;width:100%;flex:1 0 auto}
+.chan-body{display:flex;flex-direction:row;gap:8px;align-items:stretch;justify-content:center;width:100%;flex:1 0 auto}
+.chan.mirror .chan-body,.chan.mirror .chan-bottom{flex-direction:row-reverse}
+.chan.mirror .krow{flex-direction:row-reverse}
+.chan.mirror .krow .kk{margin-left:0;margin-right:auto}
 .chan-bottom .mw{position:relative;width:14px;flex:none}
 .chan-bottom .meter{position:absolute;left:0;top:0;width:100%;height:100%}
 .chan-bottom .fb{display:flex;align-items:stretch}
@@ -3242,15 +3246,16 @@ class Deck{
 }
 function chanHTML(L){
   const id='c'+L;
+  const kill=(band,title)=>'<button class="btn kill" data-band="'+band+'" title="'+title+'">K</button>';
   return ''+
-  '<div class="chan">'+
+  '<div class="chan'+(L==='B'?' mirror':'')+'">'+
     '<div class="chan-head">CHANNEL '+L+'</div>'+
     '<div class="chan-body">'+
       '<div class="knobs">'+
         '<div class="krow"><div class="kk" id="'+id+'Trim"></div></div>'+
-        '<div class="krow"><div class="kk" id="'+id+'Hi"></div><button class="btn kill" data-band="high" title="Kill highs">K</button></div>'+
-        '<div class="krow"><div class="kk" id="'+id+'Mid"></div><button class="btn kill" data-band="mid" title="Kill mids">K</button></div>'+
-        '<div class="krow"><div class="kk" id="'+id+'Low"></div><button class="btn kill" data-band="low" title="Kill lows">K</button></div>'+
+        '<div class="krow">'+kill('high','Kill highs')+'<div class="kk" id="'+id+'Hi"></div></div>'+
+        '<div class="krow">'+kill('mid','Kill mids')+'<div class="kk" id="'+id+'Mid"></div></div>'+
+        '<div class="krow">'+kill('low','Kill lows')+'<div class="kk" id="'+id+'Low"></div></div>'+
         '<div class="krow"><div class="kk" id="'+id+'Fil"></div></div>'+
       '</div>'+
       '<div class="chan-bottom">'+
