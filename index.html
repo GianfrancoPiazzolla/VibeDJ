@@ -151,6 +151,7 @@ background:linear-gradient(#1c222d,#11151c);border:1px solid var(--line);box-sha
 .ji-l{font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:700;white-space:nowrap}
 .ji-v.key{color:var(--accent)}
 .ji-v.warn{color:#ff5252;animation:blink .6s infinite}
+.ji-v.warn.done{animation:none}
 .jog{width:100%;height:auto;aspect-ratio:1;border-radius:50%;display:block;
 touch-action:none;cursor:grab;background:transparent}
 .jog:active{cursor:grabbing}
@@ -414,6 +415,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <h3>Features</h3>
 <ul>
 <li>Overlaid waveforms in a single strip with a shared time axis and zoom: deck A on top, deck B on the bottom, so the two tracks can really be compared</li>
+<li>Each overview waveform marks every minute of the track along its top edge (1', 2', …); in the last 30 seconds of a track both the overview waveforms and the progress strips at the top of the shared waveform blink once per second, and once a track has been played to its end the overviews stop blinking and turn grey until you seek back inside the track</li>
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear) — changing the length of a loop that already exists keeps its <b>IN</b> point and only moves the <b>OUT</b>: the loop expands or contracts around its own start instead of jumping to the current position — and while the loop is playing the change is <b>armed for the next pass</b>, so the cycle in progress always finishes at the OUT it had when you pressed</li>
@@ -620,6 +622,14 @@ function fmtTime(s){
   const m=Math.floor(s/60),ss=Math.floor(s%60);
   return m+':'+String(ss).padStart(2,'0');
 }
+const nearEnd=dk=>{const rem=dk.buffer?dk.buffer.duration-dk.pNow:0;return rem>0&&rem<=30;};
+const atEnd=dk=>!!dk.buffer&&dk.buffer.duration-dk.pNow<=0;
+const blinkOn=()=>Math.floor(performance.now()/500)%2===0;
+const jogRingR=(r,i)=>r*(5-i)/6;
+const brighten=(c,k)=>{
+  const n=parseInt(c.slice(1),16);
+  return 'rgb('+[(n>>16)&255,(n>>8)&255,n&255].map(v=>Math.min(255,Math.round(v*k))).join(',')+')';
+};
 function detectKey(buf){
   const sr=buf.sampleRate,n=buf.length;
   if(n<sr*2)return'';
@@ -1637,6 +1647,7 @@ class Deck{
     this.L=L;
     this.id=L.toLowerCase();
     this.accent=L==='A'?'#38bdf8':'#f472b6';
+    this.accentHi=brighten(this.accent,1.75);
     this.spinSec=1.8;
     this.buffer=null;
     this.fileName='';
@@ -2084,7 +2095,7 @@ class Deck{
       this.jiLeft.textContent='--:--';
       this.jiBpm.textContent='--';
       this.jiKey.textContent='--';
-      this._warn=false;this.jiLeft.classList.remove('warn');
+      this._warn=false;this._warnDone=false;this.jiLeft.classList.remove('warn','done');
       this.lenBtns.forEach(b=>b.classList.add('dis'));
       this.lensEl.classList.add('dis');
       return;
@@ -2099,7 +2110,7 @@ class Deck{
     this.jiKey.textContent=this.keyCamelot||'--';
     this._jiLeft=null;
     this._jiBpmEff='';
-    this._warn=false;this.jiLeft.classList.remove('warn');
+    this._warn=false;this._warnDone=false;this.jiLeft.classList.remove('warn','done');
     const dis=!this.bpm?'dis':'';
     this.lenBtns.forEach(x=>x.className='btn sm l-len'+(x.classList.contains('on')?' on':'')+(dis?' dis':''));
     this.lensEl.className='lab lens'+(dis?' dis':'');
@@ -2870,9 +2881,29 @@ class Deck{
     }
     g.setTransform(1,0,0,1,0,0);
     g.clearRect(0,0,cv.width,cv.height);
+    const played=atEnd(this);
+    if(played){g.filter='grayscale(1)';g.globalAlpha=.7;}
     g.drawImage(this.cache,0,0);
+    if(played){g.filter='none';g.globalAlpha=1;}
     g.setTransform(pr.dpr,0,0,pr.dpr,0,0);
     this.drawMarkers(g,W,H,0,dur/W,false);
+    if(dur>60){
+      g.font='bold 8px ui-monospace,Menlo,monospace';
+      g.textAlign='left';
+      g.textBaseline='top';
+      let lastX=-99;
+      for(let m=1;m*60<dur;m++){
+        const x=(m*60/dur)*W;
+        if(x<2||x>W-2)continue;
+        const tx=Math.round(x*pr.dpr)/pr.dpr;
+        g.fillStyle='rgba(215,220,229,.45)';
+        g.fillRect(tx,0,1,4);
+        if(x-lastX<15)continue;
+        lastX=x;
+        g.fillStyle='rgba(215,220,229,.6)';
+        g.fillText(m+"'",tx+2,2);
+      }
+    }
     const px=(this.pNow/dur)*W;
     g.fillStyle=this.accent;
     g.fillRect(px-1,0,2,H);
@@ -2880,6 +2911,12 @@ class Deck{
     g.fillRect(px-4,0,8,3);
     g.fillRect(px-4,H-3,8,3);
     g.globalAlpha=1;
+    if(nearEnd(this)&&!blinkOn()){
+      g.fillStyle='#0a0c10';
+      g.globalAlpha=.82;
+      g.fillRect(0,0,W,H);
+      g.globalAlpha=1;
+    }
   }
   beatFlash(){
     if(!this.playing||!this.buffer||!this.beats||this.beats.length===0)return 0;
@@ -2915,7 +2952,7 @@ class Deck{
       bg.lineWidth=1;
       bg.stroke();
       bg.strokeStyle='rgba(255,255,255,.05)';
-      for(let i=1;i<=5;i++){
+      for(let i=2;i<=5;i++){
         bg.beginPath();
         bg.arc(cx,cy,r*i/6,0,Math.PI*2);
         bg.stroke();
@@ -2930,6 +2967,19 @@ class Deck{
     }
     g.clearRect(0,0,W,H);
     g.drawImage(this._jogBG,0,0,W,H);
+    const bi=beatLedIndex(this);
+    if(bi>=0){
+      const down=bi===0;
+      g.save();
+      g.strokeStyle=down?this.accentHi:this.accent;
+      g.shadowColor=this.accent;
+      g.shadowBlur=down?14:9;
+      g.lineWidth=down?4:2.5;
+      g.beginPath();
+      g.arc(cx,cy,jogRingR(r,bi),0,Math.PI*2);
+      g.stroke();
+      g.restore();
+    }
     let ang=0;
     if(this.buffer){
       if(this.bpm&&this.beats&&this.beats.length){
@@ -3028,6 +3078,8 @@ class Deck{
     const rem=d-P;
     if(rem<=30){if(!this._warn){this._warn=true;this.jiLeft.classList.add('warn');}}
     else if(this._warn){this._warn=false;this.jiLeft.classList.remove('warn');}
+    const done=atEnd(this);
+    if(done!==this._warnDone){this._warnDone=done;this.jiLeft.classList.toggle('done',done);}
     const kt=this.keyCamelot||'--';
     if(kt!==this._jiKey){
       this._jiKey=kt;
@@ -4337,6 +4389,7 @@ const SV={
     g.fillRect(0,y0,W,bh);
     const dur=dk.buffer&&dk.buffer.duration;
     if(!dur||dur<=0)return;
+    if(nearEnd(dk)&&!blinkOn())return;
     const dpr=g.getTransform().a||1;
     const f=clamp((dk.pNow||0)/dur,0,1);
     const xe=Math.round(f*W*dpr)/dpr;
@@ -4425,6 +4478,7 @@ const SV={
       const bl=dk.beats?dk.beats.length:0;
       A(bl);if(bl){A(dk.beats[0]);A(dk.beats[bl-1]);}
       A((dk.buffer&&dk.buffer.duration)||0);A(dk.peaks?1:0);
+      if(nearEnd(dk))A(blinkOn()?1:0);
       A(dk.loop.in);A(dk.loop.out);A(dk.cueSet?1:0);A(dk.cuePoint);
       for(let j=0;j<8;j++){const c=dk.hotcues[j];A(c===null||c===undefined?-1:c);}
       if(g){A(g.lo*100);A(g.mid*100);A(g.hi*100);}else{A(-7);}
