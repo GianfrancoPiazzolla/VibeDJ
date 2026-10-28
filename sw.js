@@ -1,4 +1,4 @@
-const CACHE_NAME = 'vibedj-cache-v3.2.1';
+const CACHE_NAME = 'vibedj-cache-v3.2.2';
 const ASSETS_TO_CACHE = [
   '/',
   'index.html',
