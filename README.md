@@ -317,6 +317,7 @@ The central mixer is a classic 2-channel strip. 🎛️
 | **Kill** 🔇 | Per-band **K** buttons mute a band (−60 dB) |
 | **FILTER** 🌊 | Bipolar **LP / HP** filter (low-pass down to ~200 Hz, high-pass up to ~2 kHz); LP values of 1 kHz or more are shown compactly, e.g. `18.2k` |
 | **Channel faders** 📉 | Smooth `gain^1.6` curve per channel |
+| **Channel layout** 🔀 | Deck **A**: knobs (each **K** kill button on the **left** of its knob) → **meter** → **channel fader**. Deck **B** is the exact mirror image: fader → meter → knobs, with the kill buttons on their **right**. All five knobs of a channel share **one vertical column**, whether or not their row has a kill button |
 | **CROSSFADER** ↔️ | **Constant-power** curve (cosine/sine) between A and B |
 | **MASTER** 🔊 | Master output level (`gain^1.5`, **50% by default**) |
 | **Limiter** 🛡️ | Master limiter before the output/recording with a **clip LED** that stays lit for 1.5 s after an overload |
