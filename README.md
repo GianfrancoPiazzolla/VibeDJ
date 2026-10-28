@@ -205,7 +205,7 @@ Each deck (A ▶️ blue / B ◀️ pink) is a full player. 💿
 - ⌨️ Every button in both rows has a **keyboard shortcut** — hover it or check the [shortcuts table](#️-keyboard-shortcuts); triggering one from the keyboard or the controller **flashes the button**.
 
 ### 📟 Deck readouts (above the jog)
-`⏱️ total` · `⌛ left` (turns **red and blinks** under 30 s) · `🥁 BPM` · `🎼 key`
+`⏱️ total` · `⌛ left` (turns **red and blinks** under 30 s, and stays **red but steady** once the track has ended) · `🥁 BPM` · `🎼 key`
 
 The deck header carries the **BPM badge** (the track's base tempo); the **effective BPM** (base tempo adjusted by the tempo fader) is the `🥁 BPM` readout in the jog info above, so it is not repeated in the header. 🏷️
 
@@ -223,14 +223,14 @@ The top **`syncWave`** strip overlays **both decks in one shared time axis** �
 - 🧈 **Nothing heavy runs on the audio thread's tab**: canvas sizes are cached and refreshed by a `ResizeObserver` instead of being measured every frame (no forced layout inside the animation loop), the jog wheel's disc and grooves are rendered once per size and blitted, the level meters refresh at 30 Hz and the time / tempo / key labels at ~11 Hz — the frame body during playback stays around **1–2 ms** and allocates nothing.
 - 🎤 The strip follows the **stem mutes** (see [Stems](#-stems)): muting a stem attenuates the bands it belongs to, so the contour shows what you actually hear. The per-deck overview above the jog wheel always keeps the full mix.
 - 💫 **No shimmer while playing**: the envelope is built from the peaks once and then **sampled with linear interpolation** at every column centre, so the three contours are continuous functions of the playhead instead of being re-quantised for each frame, and the whole waveform simply slides with the track.
-- 📊 **Track progress**: a thin strip along the top of each half shows the elapsed time over the whole track in the deck colour, with a bright cursor on the leading edge; it follows the real playback position (so it rewinds with a loop) and is display-only — seeking stays on the waveform below.
+- 📊 **Track progress**: a thin strip along the top of each half shows the elapsed time over the whole track in the deck colour, with a bright cursor on the leading edge; it follows the real playback position (so it rewinds with a loop) and is display-only — seeking stays on the waveform below. ⏳ In the **last 30 seconds** of the track these two top bars **blink once per second**, so the end of the track is impossible to miss; once playback reaches the end the blinking stops and the bars go back to their steady display.
 - 🥁 **Beatgrid**: the grid of the deck you're listening to is **solid**, the other deck's is **dashed**; the thick bar is the **downbeat**, every **4 beats** (one bar), and the active deck's grid prints its `bar.beat` number next to each line. The grid is built only from the beats that actually fall **inside the track**, so every line keeps the spacing of its BPM and the closing bars are never drawn as a phantom beat squeezed onto the end of the file. 🎯
 - 🚩 A thin **red playhead** runs down the centre of each half, where the waveform scrolls past.
 - 🎯 **Markers** — the active loop range is shaded in green with solid edges, the cue point is a white flag marked `C` and every stored hot cue is a coloured flag with its number, drawn on both the shared strip and the deck overview.
 - 📏 Each half displays the **phase offset in ms** against the beat — nudge the **TEMPO** fader until both grids stay locked. 🔒
 - 🧭 A small **graphical phase meter** compares both decks' phase (amber while they drift, deck colour once they are within ±8% of half a beat). 🎯
 
-Each deck additionally has its own **overview waveform** canvas you can click (or drag) to seek. 📊 On long tracks the contour heights come from the **average** band energy (not the per-column peak) and every band keeps its **own colour and its own shape** (🔴 lows, 🟢 mids, 🔵 highs), stacked from the loudest down to the quietest so the weak components stay in front even when the whole track is squeezed into a few hundred pixels. The envelope is smoothed across neighbouring columns and drawn with generous headroom, so the overview keeps a readable shape and never clips to white. The contour is built symmetrically around its centre line and is repainted from the cached peaks whenever the canvas changes size, so **both halves stay complete at every interface zoom level**, enlarging or shrinking.
+Each deck additionally has its own **overview waveform** canvas you can click (or drag) to seek. 📊 On long tracks the contour heights come from the **average** band energy (not the per-column peak) and every band keeps its **own colour and its own shape** (🔴 lows, 🟢 mids, 🔵 highs), stacked from the loudest down to the quietest so the weak components stay in front even when the whole track is squeezed into a few hundred pixels. The envelope is smoothed across neighbouring columns and drawn with generous headroom, so the overview keeps a readable shape and never clips to white. The contour is built symmetrically around its centre line and is repainted from the cached peaks whenever the canvas changes size, so **both halves stay complete at every interface zoom level**, enlarging or shrinking. 🕒 Along its **top edge** a small tick marks **every 60 seconds** of the track with its minute number in short form — `1'`, `2'`, `3'`… — and ⏳ in the **last 30 seconds** of the track the whole overview **blinks once per second**, in step with the progress bars of the shared waveform. Once the track has been played to the end the blinking stops and the overview turns **grey**, so a fully played track is recognisable at a glance; ⏮️ seek back to any earlier point and the normal colours come back.
 
 ---
 
@@ -317,7 +317,7 @@ The central mixer is a classic 2-channel strip. 🎛️
 | **Limiter** 🛡️ | Master limiter before the output/recording with a **clip LED** that stays lit for 1.5 s after an overload |
 | **PHONES** 🎧 | Headphone / cue-bus level (**50% by default**) |
 | **Meters** 📊 | 14-segment per-channel + stereo master meters with **peak hold** |
-| **Beat LEDs** 🥁 | Two rows of 4 LEDs in the mixer header follow the beat position (1–4) of deck **A** and **B** in each deck's colour, with the first LED of the bar brighter |
+| **Beat LEDs** 🥁 | Two rows of 4 LEDs in the mixer header follow the beat position (1–4) of deck **A** and **B** in each deck's colour, with the first LED of the bar brighter. The **jog wheel's concentric rings** light up in the same succession at every beat, in the same deck colour, with the downbeat on the **outermost ring** |
 | **PFL** 🎧 | Exclusive headphone monitoring of one deck (pre-fader) |
 | **QUANTIZE** 🎯 | Toggle switch next to the PHONES knob, **on by default**: snaps cue points, hot cues, loops and beat jumps to the beatgrid |
 
