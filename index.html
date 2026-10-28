@@ -419,6 +419,7 @@ font:11px/1.5 ui-monospace,Menlo,monospace;padding:8px;resize:vertical;white-spa
 <li>Beatgrid visible on both halves: the grid of the deck you are listening to is solid, the other deck's is dashed; the marked bar is the downbeat (every 4 bars)</li>
 <li>Each half shows the phase offset in ms against the beat: move the TEMPO fader until both grids stay aligned</li>
 <li>Automatic BPM detection, beat loops (1/4, 1/2, 1, 2, 4, 8), 8 hot cues per deck (Shift+click to clear) — changing the length of a loop that already exists keeps its <b>IN</b> point and only moves the <b>OUT</b>: the loop expands or contracts around its own start instead of jumping to the current position — and while the loop is playing the change is <b>armed for the next pass</b>, so the cycle in progress always finishes at the OUT it had when you pressed</li>
+<li><b>Automatic hot cues</b>: when the analysis of a track ends, pad 1 holds the <b>Intro</b> and pad 8 the final <b>Outro</b>, while the other sections recognised (buildup, drop, a second buildup or drop, a breakdown) fill pads 2 to 7 in chronological order, for a maximum of 8 cues per deck. The positions come from the band-energy envelope of the track and sit on the exact onset, not on the beatgrid; a section that cannot be recognised falls back to a percentage of the track length, so the four essentials are always there. A cue you set or clear yourself is never overwritten, and hovering a pad shows the section name and time</li>
 <li><b>Quantize</b> (switch next to the PHONES knob in the mixer): snaps cue points, hot cues and loops to the nearest beat when a beatgrid is available, and keeps beat jumps on that grid without moving the beat phase they started from</li>
 <li><b>Interface zoom</b>: the &#8722; / + buttons in the centre of the top bar resize the whole interface from 30% to 120% (CSS zoom: every element scales uniformly, waveform strip included, so nothing is cut off; when zoomed out the decks and mixer shrink while the waveform strip stretches vertically to fill all the remaining page space, leaving no empty gap at the bottom — modals, toasts and tooltips zoom too, and the setting is remembered)</li>
 <li><b>Beat jump</b>: &minus;16 / &minus;8 / &minus;4 / +4 / +8 / +16 beats per deck, always by exactly that many beats and keeping the current beat phase — with QUANTIZE on the landing is still snapped to the grid, but relative to that phase, so a synced pair never drifts apart</li>
@@ -630,6 +631,126 @@ const brighten=(c,k)=>{
   const n=parseInt(c.slice(1),16);
   return 'rgb('+[(n>>16)&255,(n>>8)&255,n&255].map(v=>Math.min(255,Math.round(v*k))).join(',')+')';
 };
+function autoSections(P,pr,dur,bpm){
+  const n=Math.min(P.lo.length,P.mid.length,P.hi.length);
+  if(!n||!(dur>0))return[];
+  const st=Math.max(1,Math.round(pr/4)),fps=pr/st,nf=Math.floor(n/st);
+  if(nf<24)return[];
+  const raw=new Float32Array(nf);
+  for(let f=0;f<nf;f++){
+    const o=f*st;
+    let s=0;
+    for(let i=0;i<st;i++)s+=0.42*P.lo[o+i]+0.34*P.mid[o+i]+0.24*P.hi[o+i];
+    raw[f]=s/st;
+  }
+  const box=(src,r)=>{
+    const out=new Float32Array(src.length),pre=new Float64Array(src.length+1);
+    for(let i=0;i<src.length;i++)pre[i+1]=pre[i]+src[i];
+    for(let i=0;i<src.length;i++){
+      const a=Math.max(0,i-r),b=Math.min(src.length,i+r+1);
+      out[i]=(pre[b]-pre[a])/(b-a);
+    }
+    return out;
+  };
+  const aR=12;
+  const S=box(raw,2),E=box(raw,3),A=box(raw,aR);
+  const sorted=Array.from(E).sort((a,b)=>a-b);
+  const pct=p=>sorted[clamp(Math.round(p*(sorted.length-1)),0,sorted.length-1)];
+  const q10=pct(.1),q91=pct(.91),sp=Math.max(1e-6,q91-q10);
+  const midT=q10+0.5*sp,hiT=q10+0.6*sp,startT=Math.max(q10*0.35,q91*0.05);
+  const structured=q91>1e-3&&sp>0.10*q91;
+  const binE=i=>0.42*P.lo[i]+0.34*P.mid[i]+0.24*P.hi[i];
+  const onset=(t,spn)=>{
+    const c=clamp(Math.round(t*pr),1,n-2),w=Math.max(2,Math.round(pr*(spn||0.35))),kw=Math.max(1,Math.round(pr*0.03));
+    let best=c,bv=-1;
+    for(let i=Math.max(1,c-w);i<=Math.min(n-2,c+w);i++){
+      let a=0,b=0;
+      for(let k=0;k<kw;k++){a+=binE(Math.max(0,i-k));b+=binE(Math.min(n-1,i+1+k));}
+      if(b-a>bv){bv=b-a;best=i;}
+    }
+    return clamp(best/pr,0,dur);
+  };
+  let fi=-1;
+  if(structured){
+    for(let f=0;f<nf-4;f++){
+      if(S[f]>startT&&S[f+1]>startT*0.85&&S[f+2]>startT*0.85){fi=f;break;}
+    }
+  }
+  let introT=fi>0?onset(fi/fps):0;
+  if(introT<1.2)introT=0;
+  const jw=Math.max(1,Math.round(0.75*fps));
+  const drops=[],minJump=Math.max(0.12*sp,0.05*q91);
+  for(let f=jw+1;f<nf-jw-5&&structured;f++){
+    let pre=0,post=0;
+    for(let k=1;k<=jw;k++){pre+=E[f-k];post+=E[f+k];}
+    pre/=jw;post/=jw;
+    if(post<hiT)continue;
+    const j=post-pre;
+    if(j<minJump)continue;
+    let ok=true;
+    const sust=Math.round(1.5*fps);
+    for(let k=1;k<=sust;k++)if(E[f+k]<q10+0.45*sp){ok=false;break;}
+    if(!ok)continue;
+    drops.push({t:onset(f/fps+0.6,1.2),cf:f/fps,sc:j});
+    f+=Math.round(3*fps);
+  }
+  let bestSc=0;
+  drops.forEach(d=>{if(d.sc>bestSc)bestSc=d.sc;});
+  const dropsK=bestSc?drops.filter(d=>d.sc>=bestSc*0.45).sort((a,b)=>b.sc-a.sc).slice(0,3).sort((a,b)=>a.t-b.t):[];
+  let f=nf-1;
+  while(f>0&&raw[f]<midT)f--;
+  let outroT=dur*0.85;
+  if(structured&&f>0&&(nf-1-f)/fps>=3&&f>nf*0.45)outroT=clamp((f+1)/fps,0,dur);
+  const beat=60/(bpm>0?bpm:120),bar=beat*4;
+  const dropT=dropsK.length?dropsK[0].t:dur*0.62;
+  const buildOf=t=>{
+    const df=Math.max(2,Math.round(t*fps));
+    const w0=Math.max(0,df-Math.round(24*fps)),w1=Math.max(w0+1,df-Math.round(1.5*fps));
+    const lag=Math.max(1,Math.round(fps*0.5));
+    let g=w1;
+    while(g>w0&&A[g]-A[g-lag]>0.0015*sp)g--;
+    const start=g+aR;
+    if(start>=df||start<=w0+4||A[df]-A[g]<0.15*sp)return -1;
+    return clamp(start/fps,0,t-0.5);
+  };
+  let buildT=dropsK.length?buildOf(dropsK[0].t):-1;
+  if(!(buildT>introT))buildT=dropT-Math.min(16*bar,Math.max(4,dur*0.1));
+  if(!(buildT>introT))buildT=introT+Math.min(bar,Math.max(0,dropT-introT)*0.5);
+  if(buildT>=dropT)buildT=Math.max(introT,dropT-bar);
+  if(!(outroT>dropT))outroT=Math.min(dur,Math.max(dropT+bar,dur*0.9));
+  const extras=[];
+  for(let k=1;k<dropsK.length;k++){
+    const d1=dropsK[k-1],d2=dropsK[k];
+    const f0=Math.round(d1.t*fps)+2,f1=Math.max(f0,Math.round(d2.t*fps)-2);
+    let bp=-1,bv=Infinity;
+    for(let g=f0;g<=f1;g++)if(S[g]<bv){bv=S[g];bp=g;}
+    if(bp>0&&bv<midT){
+      let s=bp;
+      const lim=Math.max(f0,Math.round((d2.t-24)*fps));
+      while(s>lim&&S[s-1]<midT)s--;
+      if(d2.t-s/fps>=4)extras.push({t:s/fps,n:'Break'});
+    }
+    const b2=buildOf(d2.t);
+    if(b2>=0)extras.push({t:b2,n:'Buildup '+(k+1)});
+    extras.push({t:d2.t,n:'Drop '+(k+1)});
+  }
+  extras.sort((a,b)=>a.t-b.t);
+  const slots=[null,null,null,null,null,null,null,null];
+  if(introT>=0&&introT<=dur)slots[0]={t:introT,n:'Intro'};
+  if(outroT>=0&&outroT<=dur)slots[7]={t:outroT,n:'Outro'};
+  const mid=[{t:buildT,n:'Buildup'},{t:dropT,n:'Drop'}].concat(extras).sort((a,b)=>a.t-b.t);
+  let slot=1;
+  for(const e of mid){
+    if(slot>6)break;
+    if(e.t<1||e.t<=introT||e.t>=outroT||e.t>dur-0.5)continue;
+    let dup=false;
+    for(let i=0;i<8;i++)if(slots[i]&&Math.abs(slots[i].t-e.t)<1.5){dup=true;break;}
+    if(dup)continue;
+    slots[slot]=e;
+    slot++;
+  }
+  return slots;
+}
 function detectKey(buf){
   const sr=buf.sampleRate,n=buf.length;
   if(n<sr*2)return'';
@@ -1669,6 +1790,8 @@ class Deck{
     this.cuePreview=false;
     this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.hotcues=[null,null,null,null,null,null,null,null];
+    this.hotLabels=[null,null,null,null,null,null,null,null];
+    this.cueDirty=false;
     this.bpm=0;
     this.beats=null;
     this.conf=0;
@@ -1971,6 +2094,8 @@ class Deck{
     this.cuePoint=0;
     this.cuePreview=false;
     this.hotcues=[null,null,null,null,null,null,null,null];
+    this.hotLabels=[null,null,null,null,null,null,null,null];
+    this.cueDirty=false;
     this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.pitch=0;
     this.bend=1;
@@ -2009,6 +2134,7 @@ class Deck{
       this.beats=d.beats;
       this.conf=d.conf;
       this.ovDirty=true;
+      this.autoHotcues();
       this.updateInfo();
       toast(this.L+': '+(this.bpm?this.bpm.toFixed(1)+' BPM · beatgrid ready':'BPM not detected'));
     };
@@ -2075,6 +2201,8 @@ class Deck{
     this.cueSet=false;
     this.cuePoint=0;
     this.hotcues=[null,null,null,null,null,null,null,null];
+    this.hotLabels=[null,null,null,null,null,null,null,null];
+    this.cueDirty=false;
     this.loop={in:-1,out:-1,on:false,len:0,nextOut:0};
     this.pitch=0;
     this.bend=1;
@@ -2123,11 +2251,13 @@ class Deck{
         p.style.background='';
         p.style.borderColor='';
         p.style.boxShadow='';
+        p.title='';
       }else{
         p.className='pad set';
         p.style.background=HC[i];
         p.style.borderColor=HC[i];
         p.style.boxShadow='0 0 10px '+HC[i]+'66';
+        p.title=this.hotLabels[i]?this.hotLabels[i]+' \u00b7 '+fmtTime(c):'';
       }
     });
   }
@@ -2424,10 +2554,29 @@ class Deck{
     this.setLoopActive();
     if(this.playing&&!defer&&this.pos()<inP)this.seek(inP);
   }
+  autoHotcues(){
+    if(!this.buffer||!this.peaks||this.cueDirty)return;
+    const list=autoSections(this.peaks,this.peakRate,this.buffer.duration,this.bpm);
+    if(!list.length)return;
+    const dur=this.buffer.duration;
+    let ch=false;
+    for(let i=0;i<8;i++){
+      const c=list[i];
+      if(!c||this.hotcues[i]!==null)continue;
+      this.hotcues[i]=clamp(c.t,0,dur);
+      this.hotLabels[i]=c.n;
+      ch=true;
+    }
+    if(!ch)return;
+    this.updatePads();
+    this.ovDirty=true;
+  }
   hotcue(i){
     if(!this.buffer)return;
     if(this.hotcues[i]===null){
       this.hotcues[i]=this.quant(this.pos());
+      this.hotLabels[i]=null;
+      this.cueDirty=true;
       this.updatePads();
     }else{
       this.seek(this.hotcues[i]);
@@ -2436,6 +2585,8 @@ class Deck{
   clearHot(i){
     if(this.hotcues[i]===null)return;
     this.hotcues[i]=null;
+    this.hotLabels[i]=null;
+    this.cueDirty=true;
     this.updatePads();
   }
   nearestBeat(t){
