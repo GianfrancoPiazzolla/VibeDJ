@@ -323,7 +323,7 @@ The central mixer is a classic 2-channel strip. 🎛️
 | **Limiter** 🛡️ | Master limiter before the output/recording with a **clip LED** that stays lit for 1.5 s after an overload |
 | **PHONES** 🎧 | Headphone / cue-bus level (**50% by default**) |
 | **Meters** 📊 | 14-segment per-channel + stereo master meters with **peak hold** |
-| **Beat LEDs** 🥁 | Two rows of 4 LEDs in the mixer header follow the beat position (1–4) of deck **A** and **B** in each deck's colour, with the first LED of the bar brighter. The **jog wheel's concentric rings** light up in the same succession at every beat, in the same deck colour, with the downbeat on the **outermost ring** |
+| **Beat LEDs** 🥁 | Two rows of 4 LEDs in the mixer header follow the beat position (1–4) of deck **A** and **B** in each deck's colour, with the first LED of the bar brighter. The **jog wheel's concentric rings** light up in the same succession at every beat, in the same deck colour, with the downbeat on the **outermost ring**. The bar position is read by a **32-tick gauge** around the centre hub (one tick every eighth of a beat): ticks light up clockwise in the deck colour, the one in progress is **white** and slightly larger in both width and length, brightening as the beat advances, while the rest stay faint; it sits just inside the innermost beat ring, so it never overlaps the beat display |
 | **PFL** 🎧 | Exclusive headphone monitoring of one deck (pre-fader) |
 | **QUANTIZE** 🎯 | Toggle switch next to the PHONES knob, **on by default**: snaps cue points, hot cues, loops and beat jumps to the beatgrid |
 
